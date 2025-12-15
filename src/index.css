@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .auth-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #fef9e7;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .auth-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #14b8a6;
+    border-color: transparent;
+  }
+
+  .auth-button {
+    width: 100%;
+    background-color: #14b8a6;
+    color: white;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .auth-button:hover {
+    background-color: #0d9488;
+  }
+
+  .auth-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #14b8a6, 0 0 0 4px rgba(20, 184, 166, 0.2);
+  }
+
+  .auth-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 100%;
+    max-width: 28rem;
+  }
+
+  .auth-link {
+    color: #0d9488;
+    font-weight: 500;
+    transition: color 0.2s;
+    text-decoration: none;
+  }
+
+  .auth-link:hover {
+    color: #0f766e;
+  }
+
+  /* Leaflet Map Customization */
+  .custom-marker {
+    background: transparent;
+    border: none;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .leaflet-popup-tip {
+    background-color: white;
+  }
+
+  .custom-popup .leaflet-popup-content {
+    margin: 0;
+  }
+}
