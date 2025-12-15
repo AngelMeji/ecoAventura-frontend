@@ -10,6 +10,7 @@ const Header: React.FC = () => {
     const [scrolled, setScrolled] = useState(false);
 
     // Rutas donde el header NO debe ser fixed (admin/partner panels)
+    // Se usa 'relative' para que ocupe espacio y no tape el contenido
     const isPanelRoute = ['/dashboard', '/bg-admin', '/places/create', '/places/edit'].some(path => location.pathname.startsWith(path)) || location.pathname.includes('/profile');
 
     useEffect(() => {
@@ -36,10 +37,12 @@ const Header: React.FC = () => {
 
     return (
         <header
-            className={`${isPanelRoute ? 'absolute' : 'fixed'} top-0 w-full z-[9999] transition-all duration-300 border-b ${!isPanelRoute && scrolled
+            className={`${isPanelRoute ? 'relative' : 'fixed'} top-0 w-full z-[9999] transition-all duration-300 border-b ${!isPanelRoute && scrolled
                     ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-3'
-                    : 'bg-white/50 backdrop-blur-sm border-transparent py-5'
-                } ${isPanelRoute ? 'bg-white border-b border-gray-100' : ''}`}
+                    : isPanelRoute
+                        ? 'bg-white border-gray-200 py-4 shadow-sm' // Estilo estático para panel
+                        : 'bg-white/50 backdrop-blur-sm border-transparent py-5'
+                }`}
         >
             <div className="container mx-auto px-4 flex items-center justify-between">
                 <Link
