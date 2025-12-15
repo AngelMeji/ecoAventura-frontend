@@ -88,30 +88,35 @@ const PlaceDetail: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-teal-500"></div>
+            <div className="min-h-screen flex items-center justify-center bg-eco-bg flex-col gap-4">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-eco-primary-600"></div>
+                <p className="text-xl font-display text-eco-primary-800 animate-pulse">Cargando...</p>
             </div>
         );
     }
 
     if (!place) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-                <div className="text-6xl mb-4">🏞️</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Lugar no encontrado</h2>
-                <p className="text-gray-600 mb-6 text-center max-w-md">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-eco-bg p-4 text-center">
+                <div className="text-6xl mb-4 opacity-50 text-eco-primary-300">
+                    <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h2 className="text-3xl font-display font-bold text-eco-primary-900 mb-2">Lugar no encontrado</h2>
+                <p className="text-eco-text-light mb-8 max-w-md mx-auto">
                     Es posible que el lugar que buscas haya sido eliminado o no esté disponible actualmente.
                 </p>
                 <div className="flex gap-4">
                     <button
                         onClick={() => navigate('/home')}
-                        className="bg-eco-teal-600 text-white px-6 py-2 rounded-lg hover:bg-eco-teal-700 font-bold"
+                        className="auth-button shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                     >
                         Ir al Mapa
                     </button>
                     <button
                         onClick={() => navigate(-1)}
-                        className="bg-white border text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 font-bold"
+                        className="px-6 py-3 rounded-full border-2 border-eco-primary-200 text-eco-primary-700 font-semibold hover:bg-eco-primary-50 transition-colors"
                     >
                         Volver Atrás
                     </button>
@@ -125,28 +130,45 @@ const PlaceDetail: React.FC = () => {
         : [{ id: 0, image_path: 'https://via.placeholder.com/800x600?text=No+Image' }];
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-eco-bg pb-12">
             <Header />
-            <main className="container mx-auto px-4 py-8">
-                <button onClick={() => navigate(-1)} className="mb-4 text-gray-600 hover:text-eco-teal-600 flex items-center">
-                    ← Volver
+            <main className="container mx-auto px-4 py-8 max-w-5xl">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="mb-6 text-eco-text-light hover:text-eco-primary-600 flex items-center gap-2 group transition-colors"
+                >
+                    <span className="group-hover:-translate-x-1 transition-transform">←</span>
+                    <span className="font-medium">Volver</span>
                 </button>
 
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                     {/* Header Image / Carousel */}
-                    <div className="relative h-64 md:h-96 bg-gray-200">
+                    <div className="relative h-[400px] md:h-[500px] bg-gray-200 group">
                         <img
                             src={getFullImageUrl(images[currentImageIndex].image_path)}
                             alt={place.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+
                         {images.length > 1 && (
-                            <div className="absolute inset-0 flex items-center justify-between p-4">
-                                <button onClick={() => setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1)} className="bg-white/50 p-2 rounded-full hover:bg-white text-gray-800">←</button>
-                                <button onClick={() => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1)} className="bg-white/50 p-2 rounded-full hover:bg-white text-gray-800">→</button>
+                            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1); }}
+                                    className="bg-white/20 hover:bg-white/40 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1); }}
+                                    className="bg-white/20 hover:bg-white/40 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </button>
                             </div>
                         )}
-                        <div className="absolute top-4 right-4 z-10">
+
+                        <div className="absolute top-6 right-6 z-10">
                             <button
                                 onClick={async (e) => {
                                     e.stopPropagation();
@@ -155,126 +177,183 @@ const PlaceDetail: React.FC = () => {
                                         if (place.is_favorite) {
                                             await placesService.removeFavorite(place.id);
                                             setPlace({ ...place, is_favorite: false });
-                                            alert('Eliminado de favoritos');
                                         } else {
                                             await placesService.addFavorite(place.id);
                                             setPlace({ ...place, is_favorite: true });
-                                            alert('Añadido a favoritos');
                                         }
                                     } catch (error) {
                                         console.error('Error toggling favorite', error);
-                                        alert('Error al actualizar favoritos');
                                     }
                                 }}
-                                className={`p-3 rounded-full shadow-lg transition-transform hover:scale-110 ${place.is_favorite ? 'bg-red-500 text-white' : 'bg-white text-gray-400'}`}
+                                className={`p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${place.is_favorite
+                                    ? 'bg-white text-red-500 shadow-red-500/30'
+                                    : 'bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-red-500'
+                                    }`}
                             >
                                 <svg className="w-6 h-6" fill={place.is_favorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent text-white">
-                            <h1 className="text-4xl font-bold">{place.name}</h1>
-                            <p className="mt-2 text-lg opacity-90">{place.category?.name} • {place.address}</p>
+
+                        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                            <div className="flex items-center gap-3 mb-3">
+                                <span className="px-3 py-1 bg-eco-primary-500/80 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider">
+                                    {place.category?.name}
+                                </span>
+                                {(place.average_rating || 0) > 0 && (
+                                    <div className="flex items-center gap-1 bg-yellow-400/90 backdrop-blur-sm text-black px-2 py-1 rounded-full text-xs font-bold">
+                                        <span>★</span>
+                                        <span>{place.average_rating}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-bold font-display leading-tight mb-2">
+                                {place.name}
+                            </h1>
+                            <div className="flex items-center gap-2 text-white/90 text-lg">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <p>{place.address}</p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="border-b border-gray-200 flex">
+                    {/* Tabs Navigation */}
+                    <div className="border-b border-gray-100 flex px-8 pt-4">
                         <button
-                            className={`flex-1 py-4 text-center font-medium ${activeTab === 'info' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`mr-8 pb-4 text-center font-medium transition-all relative ${activeTab === 'info'
+                                ? 'text-eco-primary-700'
+                                : 'text-gray-400 hover:text-gray-600'
+                                }`}
                             onClick={() => setActiveTab('info')}
                         >
                             Información
+                            {activeTab === 'info' && (
+                                <span className="absolute bottom-0 left-0 w-full h-1 bg-eco-primary-600 rounded-t-full" />
+                            )}
                         </button>
                         <button
-                            className={`flex-1 py-4 text-center font-medium ${activeTab === 'reviews' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`pb-4 text-center font-medium transition-all relative ${activeTab === 'reviews'
+                                ? 'text-eco-primary-700'
+                                : 'text-gray-400 hover:text-gray-600'
+                                }`}
                             onClick={() => setActiveTab('reviews')}
                         >
-                            Reseñas ({place.reviews?.length || 0})
+                            Reseñas <span className="ml-1 text-xs bg-gray-100 text-gray-500 py-0.5 px-2 rounded-full">{place.reviews?.length || 0}</span>
+                            {activeTab === 'reviews' && (
+                                <span className="absolute bottom-0 left-0 w-full h-1 bg-eco-primary-600 rounded-t-full" />
+                            )}
                         </button>
                     </div>
 
-                    <div className="p-8">
+                    {/* Content */}
+                    <div className="p-8 bg-white min-h-[300px]">
                         {activeTab === 'info' && (
-                            <div className="space-y-6">
-                                <p className="text-gray-700 text-lg leading-relaxed">{place.description}</p>
+                            <div className="animate-fade-in">
+                                <p className="text-gray-600 text-lg leading-relaxed mb-10 whitespace-pre-line">
+                                    {place.description}
+                                </p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                                        <h3 className="font-bold text-gray-900">Dificultad</h3>
-                                        <p className="text-teal-600 capitalize font-medium">{place.difficulty || 'No especificada'}</p>
+                                <h3 className="text-2xl font-display font-bold text-eco-primary-900 mb-6">Detalles de la Experiencia</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="p-6 bg-eco-primary-50/50 rounded-2xl border border-eco-primary-100 hover:shadow-md transition-shadow">
+                                        <div className="w-10 h-10 bg-eco-primary-100 rounded-full flex items-center justify-center text-eco-primary-600 mb-4">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                        </div>
+                                        <h3 className="font-bold text-gray-900 mb-1">Dificultad</h3>
+                                        <p className="text-eco-primary-700 capitalize font-medium">{place.difficulty || 'No especificada'}</p>
                                     </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                                        <h3 className="font-bold text-gray-900">Duración</h3>
-                                        <p className="text-teal-600 font-medium">{place.duration || 'No especificada'}</p>
+                                    <div className="p-6 bg-eco-primary-50/50 rounded-2xl border border-eco-primary-100 hover:shadow-md transition-shadow">
+                                        <div className="w-10 h-10 bg-eco-primary-100 rounded-full flex items-center justify-center text-eco-primary-600 mb-4">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        </div>
+                                        <h3 className="font-bold text-gray-900 mb-1">Duración</h3>
+                                        <p className="text-eco-primary-700 font-medium">{place.duration || 'No especificada'}</p>
                                     </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                                        <h3 className="font-bold text-gray-900">Mejor Temporada</h3>
-                                        <p className="text-teal-600 font-medium">{place.best_season || 'Todas'}</p>
+                                    <div className="p-6 bg-eco-primary-50/50 rounded-2xl border border-eco-primary-100 hover:shadow-md transition-shadow">
+                                        <div className="w-10 h-10 bg-eco-primary-100 rounded-full flex items-center justify-center text-eco-primary-600 mb-4">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        </div>
+                                        <h3 className="font-bold text-gray-900 mb-1">Mejor Temporada</h3>
+                                        <p className="text-eco-primary-700 font-medium">{place.best_season || 'Todas'}</p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'reviews' && (
-                            <div>
-                                {user ? (
-                                    <form onSubmit={handleSubmitReview} className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                                        <h3 className="font-bold mb-4 text-gray-800">Escribe tu reseña</h3>
-                                        <div className="flex items-center gap-2 mb-4">
-                                            {[1, 2, 3, 4, 5].map(star => (
-                                                <button type="button" key={star} onClick={() => setRating(star)} className={`text-2xl transition-transform hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
-                                            ))}
-                                        </div>
-                                        <textarea
-                                            value={comment}
-                                            onChange={e => setComment(e.target.value)}
-                                            className="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-teal-500 outline-none"
-                                            placeholder="Tu opinión..."
-                                            required
-                                        ></textarea>
-                                        <button type="submit" disabled={rating === 0} className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 font-bold shadow-md">Publicar</button>
-                                    </form>
-                                ) : (
-                                    <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-yellow-800 border border-yellow-200">Inicia sesión para escribir una reseña.</div>
-                                )}
+                            <div className="animate-fade-in space-y-8">
+                                <div className="bg-gray-50 rounded-2xl p-6 md:p-8">
+                                    {user ? (
+                                        <form onSubmit={handleSubmitReview} className="space-y-4">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+                                                <h3 className="text-lg font-bold text-gray-900">Escribe tu opinión</h3>
+                                                <div className="flex items-center gap-1 bg-white px-4 py-2 rounded-full border border-gray-200">
+                                                    <span className="text-sm text-gray-500 mr-2">Calificación:</span>
+                                                    {[1, 2, 3, 4, 5].map(star => (
+                                                        <button
+                                                            type="button"
+                                                            key={star}
+                                                            onClick={() => setRating(star)}
+                                                            className={`text-2xl transition-transform hover:scale-125 focus:outline-none ${star <= rating ? 'text-yellow-400' : 'text-gray-200 hover:text-yellow-200'}`}
+                                                        >
+                                                            ★
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
 
-                                <div className="space-y-4">
+                                            <textarea
+                                                value={comment}
+                                                onChange={e => setComment(e.target.value)}
+                                                className="w-full p-4 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-eco-primary-400 focus:border-eco-primary-400 outline-none transition-all resize-y min-h-[100px]"
+                                                placeholder="¿Qué te pareció este lugar? Comparte tu experiencia..."
+                                                required
+                                            ></textarea>
+                                            <div className="flex justify-end">
+                                                <button
+                                                    type="submit"
+                                                    disabled={rating === 0}
+                                                    className="auth-button w-auto px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    Publicar Reseña
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <div className="flex items-center gap-4 bg-yellow-50 p-6 rounded-xl border border-yellow-100 text-yellow-800">
+                                            <div className="bg-yellow-100 p-2 rounded-full flex-shrink-0">
+                                                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            </div>
+                                            <p className="font-medium">Inicia sesión para compartir tu experiencia con otros viajeros.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-display font-bold text-gray-900 border-b border-gray-100 pb-4">
+                                        Comentarios ({place.reviews?.length || 0})
+                                    </h3>
+
                                     {place.reviews && place.reviews.length > 0 ? (
                                         place.reviews.map((rev: any, idx: number) => (
-                                            <div key={idx} className="border-b border-gray-100 pb-4 last:border-0 relative">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="font-bold text-gray-800">{rev.user?.name || 'Usuario'}</span>
-                                                    <div className="flex text-yellow-400">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
-                                                        ))}
+                                            <div key={idx} className="group bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-eco-primary-100 to-eco-primary-200 flex items-center justify-center text-eco-primary-700 font-bold text-lg">
+                                                            {(rev.user?.name || 'U')[0].toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-gray-900">{rev.user?.name || 'Viajero'}</div>
+                                                            <div className="flex text-yellow-400 text-sm">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <p className="text-gray-600">{rev.comment}</p>
-                                                <div className="flex gap-2 mt-2">
                                                     {(user?.role === 'admin' || user?.id === rev.user_id) && (
-                                                        <>
-                                                            <button
-                                                                onClick={async () => {
-                                                                    if (confirm('¿Eliminar esta reseña?')) {
-                                                                        try {
-                                                                            await placesService.deleteReview(rev.id);
-                                                                            setPlace(prev => prev ? {
-                                                                                ...prev,
-                                                                                reviews: prev.reviews?.filter(r => r.id !== rev.id)
-                                                                            } : null);
-                                                                            alert('Reseña eliminada');
-                                                                        } catch (e) {
-                                                                            alert('Error eliminando reseña');
-                                                                        }
-                                                                    }
-                                                                }}
-                                                                className="text-xs text-red-500 hover:text-red-700 font-bold"
-                                                            >
-                                                                Eliminar
-                                                            </button>
+                                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             {user?.id === rev.user_id && (
                                                                 <button
                                                                     onClick={() => {
@@ -286,21 +365,45 @@ const PlaceDetail: React.FC = () => {
                                                                                     alert('Reseña actualizada');
                                                                                     loadPlace(place.id.toString());
                                                                                 })
-                                                                                .catch(() => alert('Error actualizando (Backend support required)'));
+                                                                                .catch(() => alert('Error actualizando'));
                                                                         }
                                                                     }}
-                                                                    className="text-xs text-blue-500 hover:text-blue-700 font-bold"
+                                                                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                                                                    title="Editar"
                                                                 >
-                                                                    Editar
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                                 </button>
                                                             )}
-                                                        </>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (confirm('¿Eliminar esta reseña?')) {
+                                                                        try {
+                                                                            await placesService.deleteReview(rev.id);
+                                                                            setPlace(prev => prev ? {
+                                                                                ...prev,
+                                                                                reviews: prev.reviews?.filter(r => r.id !== rev.id)
+                                                                            } : null);
+                                                                        } catch (e) {
+                                                                            alert('Error eliminando reseña');
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                                title="Eliminar"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
+                                                <p className="text-gray-600 leading-relaxed text-sm">{rev.comment}</p>
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-gray-500 italic">Aún no hay reseñas. ¡Sé el primero!</p>
+                                        <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                            <p className="text-gray-500 italic">Aún no hay reseñas para este lugar.</p>
+                                            <p className="text-eco-primary-600 font-medium mt-2">¡Sé el primero en compartir tu aventura!</p>
+                                        </div>
                                     )}
                                 </div>
                             </div>
