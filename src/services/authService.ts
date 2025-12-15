@@ -105,20 +105,25 @@ export const authService = {
 
     // Actualizar perfil
     async updateProfile(data: Partial<User> | FormData): Promise<User> {
+        // Separar lógica si es multipart (avatar) o JSON (datos)
         if (data instanceof FormData) {
-            data.append('_method', 'PUT');
+            // Endpoint específico para avatar
+            const response = await api.post<User>('/profile/avatar', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            localStorage.setItem('user', JSON.stringify(response.data));
+            return response.data;
+        } else {
+            // Endpoint para datos básicos
+            const response = await api.put<User>('/profile', data);
+            localStorage.setItem('user', JSON.stringify(response.data));
+            return response.data;
         }
-
-        const response = await api.post<User>('/me/profile', data, {
-            headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
-        });
-        localStorage.setItem('user', JSON.stringify(response.data));
-        return response.data;
     },
 
     // Actualizar contraseña
     async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<void> {
-        await api.put('/me/password', data);
+        await api.put('/profile/password', data);
     },
 
     // Métodos auxiliares locales
