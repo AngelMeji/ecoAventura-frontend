@@ -89,7 +89,7 @@ const PlaceDetail: React.FC = () => {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-teal-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-primary-600"></div>
             </div>
         );
     }
@@ -97,7 +97,9 @@ const PlaceDetail: React.FC = () => {
     if (!place) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-                <div className="text-6xl mb-4">🏞️</div>
+                <div className="text-6xl mb-4 text-eco-primary-200">
+                    <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Lugar no encontrado</h2>
                 <p className="text-gray-600 mb-6 text-center max-w-md">
                     Es posible que el lugar que buscas haya sido eliminado o no esté disponible actualmente.
@@ -105,7 +107,7 @@ const PlaceDetail: React.FC = () => {
                 <div className="flex gap-4">
                     <button
                         onClick={() => navigate('/home')}
-                        className="bg-eco-teal-600 text-white px-6 py-2 rounded-lg hover:bg-eco-teal-700 font-bold"
+                        className="bg-eco-primary-600 text-white px-6 py-2 rounded-lg hover:bg-eco-primary-700 font-bold"
                     >
                         Ir al Mapa
                     </button>
@@ -127,9 +129,12 @@ const PlaceDetail: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <main className="container mx-auto px-4 py-8">
-                <button onClick={() => navigate(-1)} className="mb-4 text-gray-600 hover:text-eco-teal-600 flex items-center">
-                    ← Volver
+            <main className="container mx-auto px-4 py-8 animate-fade-in-up">
+                <button onClick={() => navigate(-1)} className="mb-4 text-gray-600 hover:text-eco-primary-600 flex items-center group transition-colors">
+                    <div className="bg-white p-2 rounded-full shadow-sm mr-2 group-hover:bg-eco-primary-50 transition-colors">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    </div>
+                    Volver
                 </button>
 
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -182,13 +187,13 @@ const PlaceDetail: React.FC = () => {
                     {/* Tabs */}
                     <div className="border-b border-gray-200 flex">
                         <button
-                            className={`flex-1 py-4 text-center font-medium ${activeTab === 'info' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`flex-1 py-4 text-center font-medium ${activeTab === 'info' ? 'text-eco-primary-600 border-b-2 border-eco-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
                             onClick={() => setActiveTab('info')}
                         >
                             Información
                         </button>
                         <button
-                            className={`flex-1 py-4 text-center font-medium ${activeTab === 'reviews' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`flex-1 py-4 text-center font-medium ${activeTab === 'reviews' ? 'text-eco-primary-600 border-b-2 border-eco-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
                             onClick={() => setActiveTab('reviews')}
                         >
                             Reseñas ({place.reviews?.length || 0})
@@ -203,15 +208,15 @@ const PlaceDetail: React.FC = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
                                         <h3 className="font-bold text-gray-900">Dificultad</h3>
-                                        <p className="text-teal-600 capitalize font-medium">{place.difficulty || 'No especificada'}</p>
+                                        <p className="text-eco-primary-600 capitalize font-medium">{place.difficulty || 'No especificada'}</p>
                                     </div>
                                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
                                         <h3 className="font-bold text-gray-900">Duración</h3>
-                                        <p className="text-teal-600 font-medium">{place.duration || 'No especificada'}</p>
+                                        <p className="text-eco-primary-600 font-medium">{place.duration || 'No especificada'}</p>
                                     </div>
                                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
                                         <h3 className="font-bold text-gray-900">Mejor Temporada</h3>
-                                        <p className="text-teal-600 font-medium">{place.best_season || 'Todas'}</p>
+                                        <p className="text-eco-primary-600 font-medium">{place.best_season || 'Todas'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -224,17 +229,19 @@ const PlaceDetail: React.FC = () => {
                                         <h3 className="font-bold mb-4 text-gray-800">Escribe tu reseña</h3>
                                         <div className="flex items-center gap-2 mb-4">
                                             {[1, 2, 3, 4, 5].map(star => (
-                                                <button type="button" key={star} onClick={() => setRating(star)} className={`text-2xl transition-transform hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
+                                                <button type="button" key={star} onClick={() => setRating(star)} className={`transition-transform hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}>
+                                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                                </button>
                                             ))}
                                         </div>
                                         <textarea
                                             value={comment}
                                             onChange={e => setComment(e.target.value)}
-                                            className="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-teal-500 outline-none"
+                                            className="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-eco-primary-500 outline-none"
                                             placeholder="Tu opinión..."
                                             required
                                         ></textarea>
-                                        <button type="submit" disabled={rating === 0} className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 font-bold shadow-md">Publicar</button>
+                                        <button type="submit" disabled={rating === 0} className="bg-eco-primary-600 text-white px-6 py-2 rounded-lg hover:bg-eco-primary-700 disabled:opacity-50 font-bold shadow-md">Publicar</button>
                                     </form>
                                 ) : (
                                     <div className="bg-yellow-50 p-4 rounded-lg mb-8 text-yellow-800 border border-yellow-200">Inicia sesión para escribir una reseña.</div>
@@ -248,7 +255,7 @@ const PlaceDetail: React.FC = () => {
                                                     <span className="font-bold text-gray-800">{rev.user?.name || 'Usuario'}</span>
                                                     <div className="flex text-yellow-400">
                                                         {[...Array(5)].map((_, i) => (
-                                                            <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
+                                                            <svg key={i} className={`w-4 h-4 ${i < rev.rating ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                                                         ))}
                                                     </div>
                                                 </div>

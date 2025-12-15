@@ -7,13 +7,23 @@ interface AuthLayoutProps {
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
     return (
-        <div className="min-h-screen bg-eco-bg">
+        <div className="min-h-screen relative bg-eco-light flex flex-col">
+            {/* Background Image with Overlay */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1591187428867-0744654974f0?q=80&w=2070&auto=format&fit=crop')" }}></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-eco-primary-900/40 to-eco-primary-800/60 backdrop-blur-[2px]"></div>
+            </div>
+
             {/* Header */}
-            <Header />
+            <div className="relative z-10 w-full">
+                <Header />
+            </div>
 
             {/* Main Content */}
-            <main className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-80px)]">
-                {children}
+            <main className="relative z-10 container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+                <div className="w-full max-w-md">
+                    {children}
+                </div>
             </main>
         </div>
     );

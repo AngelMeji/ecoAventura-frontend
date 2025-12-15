@@ -44,31 +44,32 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="auth-card">
+        <div className="auth-card backdrop-blur-xl bg-white/90">
             <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-eco-teal-500 rounded-full flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-gradient-to-br from-eco-primary-500 to-eco-primary-700 rounded-2xl shadow-lg flex items-center justify-center transform -rotate-3 transition-transform hover:rotate-0 duration-300">
+                    <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
                 </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-                Iniciar Sesión
+            <h2 className="text-3xl font-display font-bold text-center text-gray-800 mb-2">
+                ¡Bienvenido de nuevo!
             </h2>
-            <p className="text-center text-gray-600 mb-6">
-                Accede a tu cuenta de EcoTurismo
+            <p className="text-center text-gray-500 mb-8 font-light">
+                Accede a tu cuenta y continúa tu aventura
             </p>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-r shadow-sm mb-6 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     {error}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2 pl-1">
                         Correo Electrónico
                     </label>
                     <input
@@ -79,12 +80,12 @@ const Login: React.FC = () => {
                         onChange={handleChange}
                         placeholder="tu@email.com"
                         required
-                        className="auth-input"
+                        className="auth-input ring-offset-2 focus:ring-2 focus:ring-eco-primary-500/20"
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2 pl-1">
                         Contraseña
                     </label>
                     <input
@@ -95,29 +96,37 @@ const Login: React.FC = () => {
                         onChange={handleChange}
                         placeholder="••••••••"
                         required
-                        className="auth-input"
+                        className="auth-input ring-offset-2 focus:ring-2 focus:ring-eco-primary-500/20"
                     />
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                    <label className="flex items-center">
-                        <input type="checkbox" className="w-4 h-4 text-eco-teal-500 border-gray-300 rounded focus:ring-eco-teal-500" />
-                        <span className="ml-2 text-gray-600">Recordarme</span>
+                <div className="flex items-center justify-between text-sm pt-2">
+                    <label className="flex items-center cursor-pointer group">
+                        <input type="checkbox" className="w-4 h-4 text-eco-primary-600 border-gray-300 rounded focus:ring-eco-primary-500 transition-colors cursor-pointer" />
+                        <span className="ml-2 text-gray-600 group-hover:text-eco-primary-700 transition-colors">Recordarme</span>
                     </label>
-                    <a href="#" className="auth-link text-sm">
+                    <a href="#" className="auth-link text-sm hover:underline">
                         ¿Olvidaste tu contraseña?
                     </a>
                 </div>
 
-                <button type="submit" disabled={loading} className="auth-button disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                <button type="submit" disabled={loading} className="auth-button disabled:opacity-70 disabled:cursor-not-allowed mt-6 transform active:scale-95 duration-200">
+                    {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Iniciando...
+                        </span>
+                    ) : 'Iniciar Sesión'}
                 </button>
             </form>
 
-            <p className="text-center text-gray-600 mt-6">
-                ¿No tienes cuenta?{' '}
-                <Link to="/register" className="auth-link">
-                    Regístrate
+            <p className="text-center text-gray-600 mt-8 text-sm">
+                ¿Aún no tienes cuenta?{' '}
+                <Link to="/register" className="auth-link font-bold hover:underline">
+                    Regístrate gratis
                 </Link>
             </p>
         </div>

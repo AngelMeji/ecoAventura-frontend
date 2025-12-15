@@ -218,8 +218,8 @@ const PlaceForm: React.FC = () => {
                                 file:mr-4 file:py-2 file:px-4
                                 file:rounded-full file:border-0
                                 file:text-sm file:font-semibold
-                                file:bg-eco-teal-50 file:text-eco-teal-700
-                                hover:file:bg-eco-teal-100"
+                                file:bg-eco-primary-50 file:text-eco-primary-700
+                                hover:file:bg-eco-primary-100"
                             />
                             <p className="text-xs text-gray-500 mt-1">Puedes seleccionar múltiples archivos.</p>
                         </div>
@@ -235,7 +235,7 @@ const PlaceForm: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="bg-eco-teal-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-eco-teal-700 shadow-lg disabled:opacity-50"
+                                className="bg-eco-primary-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-eco-primary-700 shadow-lg disabled:opacity-50"
                             >
                                 {loading ? 'Guardando...' : (isEditing ? 'Actualizar Lugar' : 'Publicar Lugar')}
                             </button>
