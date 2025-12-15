@@ -45,11 +45,11 @@ const Dashboard: React.FC = () => {
                     setPendingPlaces(Array.isArray(pendingResponse) ? pendingResponse : []);
                 } catch (e) { console.warn('Failed to load pending places', e); }
 
-                // 3. All Places
+                // 3. All Places - El servicio ahora devuelve array directamente
                 try {
-                    const allResponse: any = await placesService.getAdminAllPlaces();
-                    const allList = Array.isArray(allResponse) ? allResponse : allResponse.data || [];
+                    const allList = await placesService.getAdminAllPlaces();
                     setAllPlaces(allList);
+                    console.log('Loaded all places:', allList.length);
                 } catch (e) { console.warn('Failed to load all places', e); }
 
             } else if (user.role === 'partner') {
@@ -62,10 +62,10 @@ const Dashboard: React.FC = () => {
 
                     // Client-side stats calculation
                     const total = pPlaces.length;
-                    const approved = pPlaces.filter(p => p.status === 'approved').length;
-                    const pending = pPlaces.filter(p => p.status === 'pending').length;
-                    const rejected = pPlaces.filter(p => p.status === 'rejected').length;
-                    const needs_fix = pPlaces.filter(p => p.status === 'needs_fix').length;
+                    const approved = pPlaces.filter((p: Place) => p.status === 'approved').length;
+                    const pending = pPlaces.filter((p: Place) => p.status === 'pending').length;
+                    const rejected = pPlaces.filter((p: Place) => p.status === 'rejected').length;
+                    const needs_fix = pPlaces.filter((p: Place) => p.status === 'needs_fix').length;
 
                     setStats({
                         total_places: total,

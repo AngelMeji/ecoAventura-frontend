@@ -95,9 +95,15 @@ export const placesService = {
     },
 
     // Todos los Lugares (Cualquier estado)
-    async getAdminAllPlaces(): Promise<PaginatedResponse<Place> | Place[]> {
+    // Backend devuelve: { data: [...], total: X }
+    async getAdminAllPlaces(): Promise<Place[]> {
         const response = await api.get('/admin/places');
-        return response.data;
+        // Manejar respuesta envuelta en { data: [...] }
+        if (response.data && Array.isArray(response.data.data)) {
+            return response.data.data;
+        }
+        // Fallback si devuelve array directo
+        return Array.isArray(response.data) ? response.data : [];
     },
 
     // Lugares Pendientes
