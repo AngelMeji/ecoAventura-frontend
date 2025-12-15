@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { placesService } from '../services/placesService';
-import type { Category } from '../models/Place.model';
-import Header from '../components/layout/Header';
-import { authService } from '../services/authService';
+import { placesService } from '../../services/placesService';
+import type { Category } from '../../models/Place.model';
+import Header from '../../components/layout/Header';
+import { authService } from '../../services/authService';
 
 const PlaceForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();

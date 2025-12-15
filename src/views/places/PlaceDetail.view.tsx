@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { placesService } from '../services/placesService';
-import type { Place } from '../models/Place.model';
-import Header from '../components/layout/Header';
-import { authService } from '../services/authService';
+import { placesService } from '../../services/placesService';
+import type { Place } from '../../models/Place.model';
+import Header from '../../components/layout/Header';
+import { authService } from '../../services/authService';
 
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
 

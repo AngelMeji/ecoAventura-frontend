@@ -20,11 +20,11 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     onCategoryChange
 }) => {
     return (
-        <div className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+        <div className="mb-12">
+            <h2 className="text-3xl font-bold text-eco-primary-900 mb-2 font-display">
                 Explorar por Categorías
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-eco-text-light mb-8 font-medium">
                 Descubre destinos organizados por tipo de experiencia
             </p>
 
@@ -34,38 +34,37 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         key={category.slug}
                         onClick={() => onCategoryChange(category.slug)}
                         className={`
-                            relative p-4 rounded-xl border-2 transition-all duration-300 text-left group
+                            relative p-5 rounded-2xl border transition-all duration-300 text-left group
                             ${activeCategory === category.slug
-                                ? 'border-eco-teal-500 bg-eco-teal-50'
-                                : 'border-gray-100 bg-white hover:border-eco-teal-200 hover:shadow-lg'
+                                ? 'border-eco-primary-500 bg-eco-primary-50 shadow-md ring-1 ring-eco-primary-500'
+                                : 'border-gray-100 bg-white hover:border-eco-primary-200 hover:shadow-lg hover:-translate-y-1'
                             }
                         `}
                     >
                         <div className={`
-                            w-12 h-12 rounded-full flex items-center justify-center text-2xl mb-3
+                            w-14 h-14 rounded-full flex items-center justify-center text-2xl mb-4 transition-colors duration-300
                             ${activeCategory === category.slug
-                                ? 'bg-eco-teal-500 text-white'
-                                : 'bg-eco-teal-100 text-eco-teal-600 group-hover:bg-eco-teal-500 group-hover:text-white transition-colors'
+                                ? 'bg-eco-primary-600 text-white shadow-inner'
+                                : 'bg-eco-primary-50 text-eco-primary-600 group-hover:bg-eco-primary-600 group-hover:text-white'
                             }
                         `}>
                             {category.icon}
                         </div>
 
-                        <h3 className="font-bold text-gray-800 mb-1 group-hover:text-eco-teal-700">
+                        <h3 className={`font-bold text-lg mb-1 transition-colors ${activeCategory === category.slug ? 'text-eco-primary-900' : 'text-gray-800 group-hover:text-eco-primary-700'}`}>
                             {category.name}
                         </h3>
 
-                        <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center justify-between text-xs text-eco-text-light font-medium">
                             <span>{category.count} {category.count === 1 ? 'lugar' : 'lugares'}</span>
-                            <div className="flex items-center">
-                                <span className="text-yellow-400 mr-1">★</span>
-                                <span>{category.avgRating}</span>
+                            <div className="flex items-center bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100">
+                                <span className="text-yellow-700">{category.avgRating}</span>
                             </div>
                         </div>
                     </button>
                 ))}
             </div>
-        </div>
+        </div >
     );
 };
 

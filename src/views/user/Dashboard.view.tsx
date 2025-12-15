@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import { placesService } from '../services/placesService';
-import Header from '../components/layout/Header';
-import type { Place } from '../models/Place.model';
-import AdminUsersTable from '../components/dashboard/AdminUsersTable';
+import { authService } from '../../services/authService';
+import { placesService } from '../../services/placesService';
+import Header from '../../components/layout/Header';
+import type { Place } from '../../models/Place.model';
+import AdminUsersTable from '../../components/dashboard/AdminUsersTable';
 
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
@@ -326,9 +326,9 @@ const Dashboard: React.FC = () => {
                                                                 }
                                                             }}
                                                             className={`px-2 py-1 rounded-full text-xs font-bold border-none cursor-pointer focus:ring-2 focus:ring-opacity-50 ${place.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                                    place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                                        place.status === 'needs_fix' ? 'bg-orange-100 text-orange-700' :
-                                                                            'bg-red-100 text-red-700'
+                                                                place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                    place.status === 'needs_fix' ? 'bg-orange-100 text-orange-700' :
+                                                                        'bg-red-100 text-red-700'
                                                                 }`}
                                                         >
                                                             <option value="pending">Pendiente</option>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { authService } from '../services/authService';
-import type { LoginCredentials } from '../models/User.model';
+import { authService } from '../../services/authService';
+import type { LoginCredentials } from '../../models/User.model';
 
 /**
  * Vista de Login

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import InteractiveMap from '../components/map/InteractiveMap';
-import DestinationCard from '../components/destination/DestinationCard';
-import FilterBar from '../components/home/FilterBar';
-import Header from '../components/layout/Header';
-import CategorySection from '../components/home/CategorySection';
-import FeaturedSection from '../components/home/FeaturedSection';
-import { DestinationController } from '../controllers/Destination.controller';
-import type { Place } from '../models/Place.model'; // Usamos el nuevo modelo Place
-import DestinationModal from '../components/destination/DestinationModal';
+import InteractiveMap from '../../components/map/InteractiveMap';
+import DestinationCard from '../../components/destination/DestinationCard';
+import FilterBar from '../../components/home/FilterBar';
+import Header from '../../components/layout/Header';
+import CategorySection from '../../components/home/CategorySection';
+import FeaturedSection from '../../components/home/FeaturedSection';
+import { DestinationController } from '../../controllers/Destination.controller';
+import type { Place } from '../../models/Place.model'; // Usamos el nuevo modelo Place
+import DestinationModal from '../../components/destination/DestinationModal';
 
 /**
  * Vista principal - Home
@@ -117,80 +117,90 @@ const Home: React.FC = () => {
 
     if (loading && destinations.length === 0) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-eco-bg">
-                <p className="text-xl text-eco-teal-700 animate-pulse">Cargando la magia de Risaralda...</p>
+            <div className="min-h-screen flex items-center justify-center bg-eco-bg flex-col gap-4">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-eco-primary-600"></div>
+                <p className="text-xl font-display text-eco-primary-800 animate-pulse">Cargando la magia de Risaralda...</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-eco-bg">
+        <div className="min-h-screen bg-eco-bg text-eco-text selection:bg-eco-primary-100 selection:text-eco-primary-900">
             <Header />
 
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Hero Section */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-3">
+                <div className="mb-12 text-center py-12 px-4 bg-gradient-to-b from-eco-primary-50/50 to-transparent rounded-3xl animate-fade-in-up">
+                    <h1 className="text-4xl md:text-5xl font-bold text-eco-primary-900 mb-4 font-display">
                         Explora Destinos Ecoturísticos
                     </h1>
-                    <p className="text-lg text-gray-600 mb-2">
-                        Descubre los lugares más hermosos y sostenibles para tu próxima aventura
+                    <p className="text-lg md:text-xl text-eco-text-light max-w-2xl mx-auto font-medium leading-relaxed">
+                        Descubre los lugares más hermosos y sostenibles para tu próxima aventura en Colombia
                     </p>
                 </div>
 
-                <FilterBar
-                    onSearchChange={handleSearchChange}
-                    activeCategory={activeCategory}
-                />
+                <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                    <FilterBar
+                        onSearchChange={handleSearchChange}
+                        activeCategory={activeCategory}
+                    />
+                </div>
 
                 {!searchQuery && (
-                    <CategorySection
-                        categories={categoryStats}
-                        activeCategory={activeCategory}
-                        onCategoryChange={handleCategoryChange}
-                    />
+                    <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                        <CategorySection
+                            categories={categoryStats}
+                            activeCategory={activeCategory}
+                            onCategoryChange={handleCategoryChange}
+                        />
+                    </div>
                 )}
 
                 {/* Sólo mostramos destacado si estamos en la vista por defecto */}
                 {!searchQuery && activeCategory === 'Todos' && featuredDestinations.length > 0 && (
-                    <FeaturedSection
-                        featuredDestinations={featuredDestinations} // Corrección: pasar array de Place, FeaturedSection debe ser compatible
-                        popularDestinations={popularDestinations}
-                        onDestinationClick={handleCardClick}
-                    />
+                    <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                        <FeaturedSection
+                            featuredDestinations={featuredDestinations} // Corrección: pasar array de Place, FeaturedSection debe ser compatible
+                            popularDestinations={popularDestinations}
+                            onDestinationClick={handleCardClick}
+                        />
+                    </div>
                 )}
 
                 {/* Map Section - Necesita ser compatible con Place */}
-                <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                        Mapa de Destinos
-                    </h2>
+                <div className="mb-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                    <div className="flex items-center gap-2 mb-6">
+                        <h2 className="text-3xl font-bold text-eco-primary-900 font-display">
+                            Mapa de Destinos
+                        </h2>
+                    </div>
                     {/* Nota: InteractiveMap necesita ser actualizado para aceptar Place[] si no lo es ya */}
-                    <InteractiveMap
-                        destinations={destinations as any[]}
-                        onMarkerClick={handleMarkerClick}
-                        highlightedDestination={highlightedDestination}
-                    />
+                    <div className="rounded-2xl overflow-hidden shadow-lg border border-eco-primary-100">
+                        <InteractiveMap
+                            destinations={destinations as any[]}
+                            onMarkerClick={handleMarkerClick}
+                            highlightedDestination={highlightedDestination}
+                        />
+                    </div>
                 </div>
 
                 {/* Destinations Grid */}
-                <div id="destinations-grid" className="mb-6">
-                    <div className="flex items-center gap-2 mb-6">
-                        <span className="text-eco-teal-500 text-xl">📍</span>
-                        <h2 className="text-2xl font-bold text-gray-800">
+                <div id="destinations-grid" className="mb-12 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+                    <div className="flex items-center gap-3 mb-8">
+                        <h2 className="text-3xl font-bold text-eco-primary-900 font-display flex items-baseline gap-3">
                             Todos los Destinos
-                            <span className="ml-3 text-lg font-normal text-gray-500">
-                                ({destinations.length} {destinations.length === 1 ? 'destino' : 'destinos'})
+                            <span className="text-lg font-normal text-eco-text-light font-sans bg-eco-primary-50 px-3 py-1 rounded-full">
+                                {destinations.length} {destinations.length === 1 ? 'destino' : 'destinos'}
                             </span>
                         </h2>
                     </div>
 
                     {destinations.length === 0 ? (
-                        <div className="text-center py-12">
-                            <p className="text-gray-600 text-lg">No se encontraron destinos</p>
+                        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <p className="text-eco-text-light text-xl">No se encontraron destinos que coincidan con tu búsqueda.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {destinations.map((destination) => (
                                 <div
                                     key={destination.id}
@@ -216,8 +226,8 @@ const Home: React.FC = () => {
                 />
             )}
 
-            <footer className="bg-white border-t border-gray-200 mt-12">
-                <div className="container mx-auto px-4 py-6 text-center text-gray-600 text-sm">
+            <footer className="bg-white border-t border-eco-primary-100 mt-12 bg-gradient-to-t from-eco-primary-50/30">
+                <div className="container mx-auto px-4 py-8 text-center text-eco-text-light text-sm font-medium">
                     <p>© 2025 EcoTurismo Risaralda. Todos los derechos reservados.</p>
                 </div>
             </footer>

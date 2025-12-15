@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import Header from '../components/layout/Header';
+import { authService } from '../../services/authService';
+import Header from '../../components/layout/Header';
 
 const Profile: React.FC = () => {
     const user = authService.getCurrentUser();
