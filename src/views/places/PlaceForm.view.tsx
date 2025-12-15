@@ -1,15 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { placesService } from '../../services/placesService';
-import type { Category } from '../../models/Place.model';
+import type { Category, PlaceImage } from '../../models/Place.model';
 import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
+
+interface ImagePreview {
+    id?: number; // Solo para imágenes existentes
+    file?: File; // Solo para nuevas imágenes
+    url: string;
+    isPrimary: boolean;
+    isExisting: boolean;
+}
 
 const PlaceForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditing = !!id;
     const user = authService.getCurrentUser();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -25,14 +34,16 @@ const PlaceForm: React.FC = () => {
     const [difficulty, setDifficulty] = useState<string>('baja');
     const [duration, setDuration] = useState('');
     const [bestSeason, setBestSeason] = useState('');
-    const [images, setImages] = useState<FileList | null>(null);
+
+    // Images State
+    const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
+    const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
 
     useEffect(() => {
         if (!user || (user.role !== 'partner' && user.role !== 'admin')) {
-            navigate('/dashboard'); // Only partners/admin can create
+            navigate('/dashboard');
             return;
         }
-
         loadCategories();
         if (isEditing) {
             loadPlace(id!);
@@ -62,6 +73,17 @@ const PlaceForm: React.FC = () => {
             setDifficulty(place.difficulty || 'baja');
             setDuration(place.duration || '');
             setBestSeason(place.best_season || '');
+
+            // Cargar imágenes existentes
+            if (place.images && place.images.length > 0) {
+                const existingImages: ImagePreview[] = place.images.map((img: PlaceImage) => ({
+                    id: img.id,
+                    url: img.image_path.startsWith('http') ? img.image_path : `http://localhost:8000/storage/${img.image_path}`,
+                    isPrimary: img.is_primary || false,
+                    isExisting: true
+                }));
+                setImagePreviews(existingImages);
+            }
         } catch (error) {
             console.error('Error loading place', error);
             alert('Error cargando lugar');
@@ -69,6 +91,69 @@ const PlaceForm: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+
+        const newPreviews: ImagePreview[] = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            // Validar tipo y tamaño
+            if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
+                alert(`Archivo ${file.name} no es una imagen válida`);
+                continue;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`Archivo ${file.name} excede el límite de 5MB`);
+                continue;
+            }
+
+            newPreviews.push({
+                file,
+                url: URL.createObjectURL(file),
+                isPrimary: imagePreviews.length === 0 && newPreviews.length === 0, // Primera imagen es primaria por defecto
+                isExisting: false
+            });
+        }
+
+        // Máximo 10 imágenes
+        const total = imagePreviews.length + newPreviews.length;
+        if (total > 10) {
+            alert('Máximo 10 imágenes por lugar');
+            setImagePreviews(prev => [...prev, ...newPreviews.slice(0, 10 - prev.length)]);
+        } else {
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
+
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleRemoveImage = (index: number) => {
+        const img = imagePreviews[index];
+        if (img.isExisting && img.id) {
+            setImagesToDelete(prev => [...prev, img.id!]);
+        }
+        // Limpiar URL si es un blob
+        if (!img.isExisting) {
+            URL.revokeObjectURL(img.url);
+        }
+
+        const updated = imagePreviews.filter((_, i) => i !== index);
+        // Si se elimina la imagen primaria, hacer la primera la nueva primaria
+        if (img.isPrimary && updated.length > 0) {
+            updated[0].isPrimary = true;
+        }
+        setImagePreviews(updated);
+    };
+
+    const handleSetPrimary = (index: number) => {
+        setImagePreviews(prev => prev.map((img, i) => ({
+            ...img,
+            isPrimary: i === index
+        })));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -87,13 +172,24 @@ const PlaceForm: React.FC = () => {
         if (duration) formData.append('duration', duration);
         if (bestSeason) formData.append('best_season', bestSeason);
 
-        // Explicitly handle images
-        if (images && images.length > 0) {
-            for (let i = 0; i < images.length; i++) {
-                const file = images[i];
-                // Append with filename to ensure correct processing
-                formData.append('images[]', file, file.name);
+        // Agregar nuevas imágenes
+        const newImages = imagePreviews.filter(img => !img.isExisting && img.file);
+        newImages.forEach((img, index) => {
+            formData.append('images[]', img.file!, img.file!.name);
+            if (img.isPrimary) {
+                formData.append('primary_image_index', index.toString());
             }
+        });
+
+        // Indicar imagen primaria existente (si aplica)
+        const primaryExisting = imagePreviews.find(img => img.isExisting && img.isPrimary);
+        if (primaryExisting && primaryExisting.id) {
+            formData.append('primary_image_id', primaryExisting.id.toString());
+        }
+
+        // Imágenes a eliminar
+        if (imagesToDelete.length > 0) {
+            formData.append('delete_images', JSON.stringify(imagesToDelete));
         }
 
         try {
@@ -184,10 +280,10 @@ const PlaceForm: React.FC = () => {
                                         onChange={e => setDifficulty(e.target.value)}
                                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all bg-gray-50 focus:bg-white appearance-none cursor-pointer"
                                     >
-                                        <option value="baja">🟢 Baja</option>
-                                        <option value="media">🟡 Media</option>
-                                        <option value="alta">🟠 Alta</option>
-                                        <option value="experto">🔴 Experto</option>
+                                        <option value="baja">Baja</option>
+                                        <option value="media">Media</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="experto">Experto</option>
                                     </select>
                                     <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -298,40 +394,91 @@ const PlaceForm: React.FC = () => {
 
                         {/* Images */}
                         <div className="border-t border-gray-100 pt-8">
-                            <h3 className="text-xl font-bold text-gray-800 mb-6 font-display flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-gray-800 mb-2 font-display flex items-center gap-2">
                                 <svg className="w-6 h-6 text-eco-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 Imágenes
                             </h3>
-                            <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer relative">
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={e => setImages(e.target.files)}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                />
-                                <div className="space-y-1 text-center">
-                                    <div className="mx-auto h-12 w-12 text-gray-400 group-hover:text-eco-primary-500 transition-colors">
-                                        <svg className="w-12 h-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <div className="flex text-sm text-gray-600">
-                                        <span className="relative cursor-pointer bg-white rounded-md font-medium text-eco-primary-600 hover:text-eco-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-eco-primary-500">
-                                            <span>Sube imágenes</span>
-                                        </span>
-                                        <p className="pl-1">o arrastra y suelta</p>
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        PNG, JPG, WEBP hasta 5MB
-                                    </p>
-                                    {images && images.length > 0 && (
-                                        <div className="mt-4 p-2 bg-green-50 text-green-700 rounded-lg text-sm font-bold">
-                                            {images.length} archivos seleccionados
+                            <p className="text-sm text-gray-500 mb-6">Máximo 10 imágenes. La imagen marcada como principal se mostrará en las tarjetas.</p>
+
+                            {/* Image Previews Grid */}
+                            {imagePreviews.length > 0 && (
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                    {imagePreviews.map((img, index) => (
+                                        <div key={index} className={`relative group rounded-xl overflow-hidden border-2 ${img.isPrimary ? 'border-eco-primary-500 ring-2 ring-eco-primary-200' : 'border-gray-200'}`}>
+                                            <img src={img.url} alt={`Preview ${index + 1}`} className="w-full h-32 object-cover" />
+
+                                            {/* Primary Badge */}
+                                            {img.isPrimary && (
+                                                <div className="absolute top-2 left-2 bg-eco-primary-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                    Principal
+                                                </div>
+                                            )}
+
+                                            {/* Existing Badge */}
+                                            {img.isExisting && (
+                                                <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                    Guardada
+                                                </div>
+                                            )}
+
+                                            {/* Action Overlay */}
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                {!img.isPrimary && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSetPrimary(index)}
+                                                        className="p-2 bg-white rounded-full text-eco-primary-600 hover:bg-eco-primary-50"
+                                                        title="Marcar como principal"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveImage(index)}
+                                                    className="p-2 bg-white rounded-full text-red-600 hover:bg-red-50"
+                                                    title="Eliminar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </div>
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
-                            </div>
+                            )}
+
+                            {/* Upload Area */}
+                            {imagePreviews.length < 10 && (
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer"
+                                >
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        multiple
+                                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+                                    <div className="space-y-1 text-center">
+                                        <div className="mx-auto h-12 w-12 text-gray-400 group-hover:text-eco-primary-500 transition-colors">
+                                            <svg className="w-12 h-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex text-sm text-gray-600">
+                                            <span className="relative cursor-pointer bg-white rounded-md font-medium text-eco-primary-600 hover:text-eco-primary-500">
+                                                Sube imágenes
+                                            </span>
+                                            <p className="pl-1">o arrastra y suelta</p>
+                                        </div>
+                                        <p className="text-xs text-gray-500">
+                                            PNG, JPG, WEBP hasta 5MB ({10 - imagePreviews.length} restantes)
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex justify-end pt-8 gap-4 border-t border-gray-100 mt-8">

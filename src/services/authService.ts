@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Interceptor para manejar errores globales (ej. 401 Unauthorized)
+// Interceptor para manejar errores globales (401 Unauthorized, 403 Forbidden)
 api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
@@ -30,6 +30,11 @@ api.interceptors.response.use(
             // Si el token expiró o no es válido, cerrar sesión
             authService.logout();
             window.location.href = '/login';
+        }
+        if (error.response?.status === 403) {
+            // Sin permisos para esta acción
+            console.warn('Acceso denegado: No tienes permisos para realizar esta acción');
+            // Opcional: redirigir al dashboard o mostrar mensaje
         }
         return Promise.reject(error);
     }

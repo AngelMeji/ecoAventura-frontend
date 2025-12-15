@@ -29,8 +29,22 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
         return colors[categoryName] || 'bg-gray-50 text-gray-700 border border-gray-200';
     };
 
-    // Helper para obtener URL de imagen
+    // Helper para obtener URL de imagen (prioriza primary_image_url del backend)
     const getImageUrl = () => {
+        // 1. Priorizar primary_image_url si existe (ya viene completa del backend)
+        if (destination.primary_image_url) {
+            return destination.primary_image_url;
+        }
+
+        // 2. Buscar imagen marcada como primaria en el array
+        const primaryImage = destination.images?.find((img: any) => img.is_primary);
+        if (primaryImage) {
+            const path = primaryImage.image_path;
+            if (path.startsWith('http')) return path;
+            return `${STORAGE_URL}/${path}`;
+        }
+
+        // 3. Fallback a la primera imagen
         if (destination.images && destination.images.length > 0 && destination.images[0]) {
             const path = destination.images[0].image_path;
             if (path.startsWith('http')) return path;

@@ -13,7 +13,8 @@ export interface Category {
 export interface PlaceImage {
     id: number;
     place_id?: number;
-    image_path: string; // Ruta relativa en storage
+    image_path: string; // Ruta relativa en storage o URL completa
+    is_primary?: boolean; // Indica si es la imagen principal
 }
 
 // Interfaz para Reseñas
@@ -56,6 +57,7 @@ export interface Place {
     // Atributos calculados
     average_rating?: number;
     is_favorite?: boolean;
+    primary_image_url?: string; // URL completa de la imagen principal
 
     created_at?: string;
     updated_at?: string;
