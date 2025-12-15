@@ -1,126 +1,115 @@
-# 🌿 EcoAventura - Frontend
+# 🌿 EcoTurismo Risaralda - Proyecto Formativo
 
-Plataforma premium de gestión y promoción ecoturística. Una aplicación web moderna, responsiva y de alto rendimiento diseñada para conectar viajeros con destinos naturales únicos en Risaralda, Colombia.
+Plataforma web interactiva dedicada a la promoción y gestión de destinos ecoturísticos en el departamento de Risaralda, Colombia. Este proyecto busca conectar a los turistas con la riqueza natural de la región a través de una experiencia de usuario moderna y fluida.
 
-![EcoAventura Dashboard Preview](https://via.placeholder.com/800x400?text=EcoAventura+Premium+UI)
+## 🚀 Tecnologías Utilizadas
 
-## 🚀 Tecnologías y Stack
+El proyecto está construido con un stack moderno enfocado en rendimiento y mantenibilidad:
 
-El proyecto utiliza un stack de vanguardia para garantizar escalabilidad, mantenibilidad y una experiencia de usuario superior:
+*   **Core:** React 18 + TypeScript
+*   **Build Tool:** Vite
+*   **Estilos:** Tailwind CSS
+*   **Mapas:** Leaflet + React-Leaflet
+*   **Enrutamiento:** React Router DOM v6
+*   **Iconos:** Heroicons / Emojis nativos
 
-*   **Core:** React 18 + TypeScript (Tipado estricto)
-*   **Build System:** Vite (High performance dev server)
-*   **Estilos:** Tailwind CSS v4 (Compilación JIT, Configuración via `@theme`)
-*   **Mapas:** React-Leaflet + OpenStreetMap
-*   **Estado & API:** Axios (Interceptores, Manejo de errores global)
-*   **Enrutamiento:** React Router DOM v6 (Rutas protegidas, Layouts, Lazy loading)
-*   **Diseño:** Glassmorphism, Micro-interacciones, Tipografía Premium (`Playfair Display` + `Inter`)
+## 🏗️ Arquitectura del Proyecto (MVC)
 
-## 🏗️ Arquitectura del Proyecto
+Hemos reestructurado la aplicación siguiendo un patrón **Modelo-Vista-Controlador (MVC)** adaptado al desarrollo frontend para mejorar la escalabilidad y separación de responsabilidades:
 
-El proyecto sigue una arquitectura modular escalable, separando claramente vistas, lógica de negocio y presentación:
+### 1. Models (`src/models/`)
+Define la estructura de los datos y contiene la información estática (Mock Data).
+*   `Destination.model.ts`: Interfaces para Destinos, Reseñas, Coordenadas.
+*   `User.model.ts`: Interfaces para Usuarios y Autenticación.
+*   `destinations.data.ts`: Datos de prueba con lugares reales de Risaralda (Termales, Otún Quimbaya, etc.).
+
+### 2. Views (`src/views/`)
+Componentes de alto nivel que representan las páginas completas. Se encargan de la estructura visual y conectan los controladores con los componentes de UI.
+*   `Home.view.tsx`: Página principal con mapa, filtros y listados.
+*   `Login.view.tsx`: Vista de inicio de sesión.
+*   `Register.view.tsx`: Vista de registro de usuarios.
+
+### 3. Controllers (`src/controllers/`)
+Contienen la lógica de negocio pura, separada de la interfaz gráfica.
+*   `Destination.controller.ts`: Lógica para filtrar, buscar y obtener estadísticas de destinos.
+*   `Auth.controller.ts`: Gestión de sesión (simulada), login y registro.
+
+### 4. Components (`src/components/`)
+Elementos de UI reutilizables y "tontos" (presentacionales).
+*   `map/`: Componentes relacionados con Leaflet (`InteractiveMap`).
+*   `destination/`: Tarjetas (`DestinationCard`) y Modales (`DestinationModal`).
+*   `home/`: Secciones específicas del home (`CategorySection`, `FeaturedSection`, `FilterBar`).
+*   `layout/`: Elementos estructurales (`Header`, `AuthLayout`).
+
+## ✨ Funcionalidades Implementadas
+
+### 🗺️ Mapa Interactivo
+*   Visualización de destinos geolocalizados en Risaralda.
+*   Marcadores personalizados interactivos.
+*   Popups con información rápida.
+*   Sincronización entre mapa y tarjetas (scroll automático al hacer clic en un marcador).
+
+### 🏠 Página de Inicio (Home)
+*   **Búsqueda Inteligente:** Barra de búsqueda en tiempo real.
+*   **Exploración por Categorías:** Sección visual con estadísticas (cantidad de lugares y calificación promedio) por categoría (Cascadas, Senderismo, Fauna, etc.).
+*   **Secciones Destacadas:**
+    *   🌟 *Recomendados Especialmente*: Destinos marcados como destacados.
+    *   ⚡ *Mejor Valorados*: Top destinos ordenados por popularidad/vistas.
+
+### 📱 Detalle de Destino (Modal)
+Ventana modal completa que se abre al seleccionar un destino:
+*   **Galería de Imágenes:** Carrusel interactivo de fotos.
+*   **Información Completa:** Descripción, ubicación, dificultad, duración, mejor época.
+*   **Recomendaciones:** Tips para el viajero.
+*   **Sistema de Reseñas:**
+    *   Visualización de calificación (estrellas).
+    *   Listado de comentarios de usuarios.
+    *   Formulario para agregar nuevas reseñas.
+
+### 🔐 Autenticación
+*   Interfaz de Login y Registro responsive.
+*   Validación de formularios.
+*   Simulación de autenticación mediante `AuthController`.
+
+## 📂 Estructura de Directorios
 
 ```
 src/
-├── components/          # Componentes reutilizables (UI Kit)
-│   ├── dashboard/       # Tablas, Stats, Widgets de administración
-│   ├── destination/     # Cards, Modales, Carruseles de lugares
-│   ├── home/            # Secciones Landing (Hero, Filtros, Destacados)
-│   ├── layout/          # Estructura (Header Responsivo, Footer)
-│   └── map/             # Componentes de mapa interactivo
-├── services/            # Capa de Comunicación con Backend (API)
-│   ├── authService.ts   # Autenticación (Login, Register, JWT, Interceptores)
-│   └── placesService.ts # Gestión de Datos (Lugares, Reseñas, Usuarios)
-├── controllers/         # Lógica de transformación de datos (Business Logic)
-├── models/              # Interfaces TypeScript estrictas (Place, User, Review)
-├── routes/              # Configuración de Rutas y Navegación
-└── views/               # Páginas Completas (Pages)
-    ├── auth/            # Login, Registro
-    ├── home/            # Landing Page
-    ├── places/          # Detalles de Lugar, Formulario (Crear/Editar)
-    └── user/            # Dashboard por Roles, Perfil de Usuario
+├── components/      # Componentes UI reutilizables
+│   ├── auth/
+│   ├── destination/
+│   ├── home/
+│   ├── layout/
+│   └── map/
+├── controllers/     # Lógica de negocio
+├── models/          # Tipos de datos y mock data
+├── routes/          # Configuración de rutas
+├── views/           # Páginas principales
+├── App.tsx          # Componente raíz
+└── main.tsx         # Punto de entrada
 ```
 
-## ✨ Características Principales
+## 🛠️ Instalación y Ejecución
 
-### 🔐 Autenticación y Seguridad
-*   **Sistema de Roles:** Acceso diferenciado para `Admin`, `Partner` (Socio) y `User` (Turista).
-*   **JWT Handling:** Gestión automática de tokens con almacenamiento seguro en `localStorage`.
-*   **Interceptores Axios:** 
-    *   Inyección automática de `Bearer Token`.
-    *   Manejo global de errores 401 (Auto-logout) y 403 (Forbidden).
-*   **Protección de Rutas:** Guards para vistas privadas.
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone <url-del-repo>
+    ```
 
-### 🗺️ Experiencia de Usuario (User)
-*   **Mapa Interactivo:** Exploración visual de destinos con popups informativos.
-*   **Búsqueda Avanzada:** Filtros por categoría, texto y destacados.
-*   **Destinos Premium:** Visualización detallada con carrusel de imágenes, reseñas, clima y dificultad.
-*   **Favoritos:** Sistema para guardar y gestionar destinos preferidos.
-*   **Reseñas:** Posibilidad de calificar y comentar lugares visitados.
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
 
-### 💼 Panel de Gestión (Partner & Admin)
-*   **Dashboard Inteligente:** Estadísticas en tiempo real (visitas, valoraciones, estado de publicaciones).
-*   **Gestión de Lugares (CRUD):** 
-    *   Creación y edición con soporte para múltiples imágenes.
-    *   Validación de formularios y subida de archivos segura.
-    *   Selección de imagen principal (Cover).
-*   **Moderación (Solo Admin):** Flujo de aprobación para nuevos lugares creados por socios.
-*   **Gestión de Usuarios (Solo Admin):** Tabla administrativa con búsqueda y edición de roles.
+3.  **Ejecutar servidor de desarrollo:**
+    ```bash
+    npm run dev
+    ```
 
-## 🎨 Sistema de Diseño "Eco-Premium"
-
-Hemos implementado un Design System propio basado en tokens de diseño dentro de CSS nativo (Tailwind v4):
-
-*   **Paleta de Colores:** Verdes profundos (`eco-primary`), tierras cálidos (`eco-sand`) y acentos dorados (`eco-accent`).
-*   **Tipografía:** `Playfair Display` para encabezados elegantes y `Inter` para legibilidad.
-*   **Efectos:** Uso extensivo de `backdrop-blur` (Glassmorphism), sombras suaves (`shadow-xl`) y transiciones fluidas.
-*   **Iconografía:** Iconos SVG limpios y consistentes (adiós a los emojis antiguos).
-
-## 🛠️ Instalación y Configuración
-
-### Prerrequisitos
-*   Node.js (v16 o superior)
-*   Backend Laravel corriendo en `http://localhost:8000` (Requerido para funcionalidad completa)
-
-### 1. Clonar e Instalar
-```bash
-git clone <tu-repositorio>
-cd ecoAventura-frontend
-npm install
-```
-
-### 2. Configurar Entorno
-Crear un archivo `.env` en la raíz basado en el ejemplo:
-```env
-VITE_API_URL=http://localhost:8000/api
-```
-
-### 3. Ejecutar
-```bash
-npm run dev
-```
-La aplicación estará disponible en `http://localhost:5173`.
-
-## 🧪 Credenciales de Prueba (Entorno Desarrollo)
-
-Para probar los diferentes roles y funcionalidades:
-
-| Rol     | Email                     | Contraseña | Acceso |
-|---------|---------------------------|------------|--------|
-| **Admin**   | `admin@ecoaventura.com`     | `password`   | Panel total, Moderación, Usuarios |
-| **Partner** | `partner@ecoaventura.com`   | `password`   | Dashboard, Publicar Destinos |
-| **User**    | `user@ecoaventura.com`      | `password`   | Home, Favoritos, Explorar |
+4.  **Construir para producción:**
+    ```bash
+    npm run build
+    ```
 
 ---
-
-## 📄 Notas de Versión
-
-### Última Actualización: **Premium UI & Backend Integration**
-*   Migración completa a Tailwind CSS v4 con `@theme`.
-*   Integración total con API REST Laravel (Servicios `authService` y `placesService`).
-*   Implementación de subida de imágenes múltiple con preview y selección de portada.
-*   Rediseño completo de Dashboard y Perfil de Usuario.
-*   Eliminación de dependencias legacy y limpieza de código.
-
----
-Desarrollado con 💚 por el equipo de EcoAventura.
+Desarrollado para el Proyecto Formativo EcoTurismo 🌿

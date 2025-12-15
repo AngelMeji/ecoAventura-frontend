@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Interceptor para manejar errores globales (401 Unauthorized, 403 Forbidden)
+// Interceptor para manejar errores globales (ej. 401 Unauthorized)
 api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
@@ -30,11 +30,6 @@ api.interceptors.response.use(
             // Si el token expiró o no es válido, cerrar sesión
             authService.logout();
             window.location.href = '/login';
-        }
-        if (error.response?.status === 403) {
-            // Sin permisos para esta acción
-            console.warn('Acceso denegado: No tienes permisos para realizar esta acción');
-            // Opcional: redirigir al dashboard o mostrar mensaje
         }
         return Promise.reject(error);
     }
@@ -105,25 +100,20 @@ export const authService = {
 
     // Actualizar perfil
     async updateProfile(data: Partial<User> | FormData): Promise<User> {
-        // Separar lógica si es multipart (avatar) o JSON (datos)
         if (data instanceof FormData) {
-            // Endpoint específico para avatar
-            const response = await api.post<User>('/profile/avatar', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            localStorage.setItem('user', JSON.stringify(response.data));
-            return response.data;
-        } else {
-            // Endpoint para datos básicos
-            const response = await api.put<User>('/profile', data);
-            localStorage.setItem('user', JSON.stringify(response.data));
-            return response.data;
+            data.append('_method', 'PUT');
         }
+
+        const response = await api.post<User>('/me/profile', data, {
+            headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+        });
+        localStorage.setItem('user', JSON.stringify(response.data));
+        return response.data;
     },
 
     // Actualizar contraseña
     async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<void> {
-        await api.put('/profile/password', data);
+        await api.put('/me/password', data);
     },
 
     // Métodos auxiliares locales

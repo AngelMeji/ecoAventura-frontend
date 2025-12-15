@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { placesService } from '../../services/placesService';
 
-// Premium Modal Component
+// Simple Modal Component
 const Modal = ({ isOpen, onClose, title, children }: any) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10000] p-4 transition-all">
-            <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-gray-100 transform transition-all scale-100 opacity-100">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-bold text-gray-800 font-display">{title}</h3>
-                    <button
-                        onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
                 </div>
                 {children}
             </div>
@@ -85,27 +80,21 @@ const AdminUsersTable: React.FC = () => {
         }
     };
 
-    if (loading) return (
-        <div className="p-12 text-center text-gray-400 flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-eco-primary-600"></div>
-            <p>Cargando usuarios...</p>
-        </div>
-    );
+    if (loading) return <div className="p-8 text-center text-gray-400">Cargando usuarios...</div>;
 
     return (
         <div className="overflow-x-auto">
-            <div className="flex justify-end mb-6 px-4">
+            <div className="flex justify-end mb-4 px-4 bg-gray-50 py-2 border-b">
                 <button
                     onClick={() => setIsCreateOpen(true)}
-                    className="auth-button w-auto px-6 py-2.5 text-sm flex items-center gap-2 shadow-lg shadow-eco-primary-500/20"
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 shadow-sm flex items-center gap-2 text-sm"
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                    Crear Nuevo Usuario
+                    <span>➕</span> Crear Nuevo Usuario
                 </button>
             </div>
 
             <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wider font-semibold">
+                <thead className="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
                     <tr>
                         <th className="p-4 border-b">ID</th>
                         <th className="p-4 border-b">Usuario</th>
@@ -116,16 +105,15 @@ const AdminUsersTable: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                     {users.map(u => (
-                        <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="p-4 text-gray-400 font-mono text-xs">#{u.id}</td>
+                        <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="p-4 text-gray-500">#{u.id}</td>
                             <td className="p-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-eco-primary-50 flex items-center justify-center overflow-hidden border border-eco-primary-100">
+                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                                         {u.avatar ? (
                                             <img
                                                 src={u.avatar.startsWith('http') ? u.avatar : `/upload/${u.avatar.split('/').pop()}`}
                                                 className="w-full h-full object-cover"
-                                                alt={u.name}
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     if (!target.src.includes('storage')) {
@@ -133,38 +121,33 @@ const AdminUsersTable: React.FC = () => {
                                                     }
                                                 }}
                                             />
-                                        ) : <span className="text-eco-primary-600 font-bold">{u.name[0]}</span>}
+                                        ) : <span className="text-gray-500 font-bold">{u.name[0]}</span>}
                                     </div>
-                                    <span className="font-bold text-gray-800">{u.name}</span>
+                                    <span className="font-medium text-gray-900">{u.name}</span>
                                 </div>
                             </td>
-                            <td className="p-4 text-gray-600 text-sm">{u.email}</td>
+                            <td className="p-4 text-gray-600">{u.email}</td>
                             <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${u.role === 'admin' ? 'bg-purple-50 text-purple-700 border border-purple-100' :
-                                        u.role === 'partner' ? 'bg-eco-primary-50 text-eco-primary-700 border border-eco-primary-100' :
-                                            'bg-gray-50 text-gray-600 border border-gray-200'
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                    u.role === 'partner' ? 'bg-eco-teal-100 text-eco-teal-700' : 'bg-gray-100 text-gray-700'
                                     }`}>
-                                    {u.role === 'admin' && <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
-                                    {u.role === 'partner' && <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
-                                    {u.role === 'user' && <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
-
-                                    {u.role === 'admin' ? 'Admin' : u.role === 'partner' ? 'Socio' : 'Usuario'}
+                                    {u.role === 'admin' ? '👑 Admin' : u.role === 'partner' ? '🤝 Socio' : '👤 Usuario'}
                                 </span>
                             </td>
                             <td className="p-4 text-right space-x-2">
                                 <button
                                     onClick={() => handleEdit(u)}
-                                    className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                     title="Editar"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    ✏️
                                 </button>
                                 <button
                                     onClick={() => handleDelete(u.id)}
-                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Eliminar"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    🗑️
                                 </button>
                             </td>
                         </tr>
@@ -174,20 +157,20 @@ const AdminUsersTable: React.FC = () => {
 
             {/* Edit Modal */}
             <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Editar Usuario">
-                <form onSubmit={handleUpdate} className="space-y-5">
+                <form onSubmit={handleUpdate} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                         <input
-                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all"
+                            className="w-full p-2 border rounded-lg"
                             value={editingUser?.name || ''}
                             onChange={e => setEditingUser({ ...editingUser, name: e.target.value })}
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input
-                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all"
+                            className="w-full p-2 border rounded-lg"
                             type="email"
                             value={editingUser?.email || ''}
                             onChange={e => setEditingUser({ ...editingUser, email: e.target.value })}
@@ -195,36 +178,31 @@ const AdminUsersTable: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Rol</label>
-                        <div className="relative">
-                            <select
-                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all appearance-none cursor-pointer bg-white"
-                                value={editingUser?.role || 'user'}
-                                onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
-                            >
-                                <option value="user">Usuario</option>
-                                <option value="partner">Socio</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                        <select
+                            className="w-full p-2 border rounded-lg"
+                            value={editingUser?.role || 'user'}
+                            onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}
+                        >
+                            <option value="user">Usuario</option>
+                            <option value="partner">Socio</option>
+                            <option value="admin">Administrador</option>
+                        </select>
                     </div>
-                    <div className="flex justify-end gap-3 mt-8">
-                        <button type="button" onClick={() => setIsEditOpen(false)} className="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl font-medium transition-colors">Cancelar</button>
-                        <button type="submit" className="auth-button w-auto px-6 py-2.5 shadow-md">Guardar Cambios</button>
+                    <div className="flex justify-end gap-2 mt-6">
+                        <button type="button" onClick={() => setIsEditOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                        <button type="submit" className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold shadow-sm">Guardar Cambios</button>
                     </div>
                 </form>
             </Modal>
 
             {/* Create Modal */}
             <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Crear Nuevo Usuario">
-                <form onSubmit={handleCreate} className="space-y-5">
+                <form onSubmit={handleCreate} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
                         <input
-                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all"
+                            className="w-full p-2 border rounded-lg"
                             value={newUser.name}
                             onChange={e => setNewUser({ ...newUser, name: e.target.value })}
                             placeholder="Ej. Juan Pérez"
@@ -232,9 +210,9 @@ const AdminUsersTable: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                         <input
-                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all"
+                            className="w-full p-2 border rounded-lg"
                             type="email"
                             value={newUser.email}
                             onChange={e => setNewUser({ ...newUser, email: e.target.value })}
@@ -243,9 +221,9 @@ const AdminUsersTable: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Contraseña *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
                         <input
-                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all"
+                            className="w-full p-2 border rounded-lg"
                             type="password"
                             value={newUser.password}
                             onChange={e => setNewUser({ ...newUser, password: e.target.value })}
@@ -255,25 +233,20 @@ const AdminUsersTable: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Rol</label>
-                        <div className="relative">
-                            <select
-                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all appearance-none cursor-pointer bg-white"
-                                value={newUser.role}
-                                onChange={e => setNewUser({ ...newUser, role: e.target.value })}
-                            >
-                                <option value="user">Usuario</option>
-                                <option value="partner">Socio</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                        <select
+                            className="w-full p-2 border rounded-lg"
+                            value={newUser.role}
+                            onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                        >
+                            <option value="user">Usuario</option>
+                            <option value="partner">Socio</option>
+                            <option value="admin">Administrador</option>
+                        </select>
                     </div>
-                    <div className="flex justify-end gap-3 mt-8">
-                        <button type="button" onClick={() => setIsCreateOpen(false)} className="px-5 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl font-medium transition-colors">Cancelar</button>
-                        <button type="submit" className="auth-button w-auto px-6 py-2.5 shadow-md">Crear Usuario</button>
+                    <div className="flex justify-end gap-2 mt-6">
+                        <button type="button" onClick={() => setIsCreateOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                        <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow-sm">Crear Usuario</button>
                     </div>
                 </form>
             </Modal>

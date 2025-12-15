@@ -4,20 +4,14 @@ import { Navigate } from 'react-router-dom';
 // Layouts
 import AuthLayout from '../components/layout/AuthLayout';
 
-// Views - Auth
-import Login from '../views/auth/Login.view';
-import Register from '../views/auth/Register.view';
-
-// Views - Home
-import Home from '../views/home/Home.view';
-
-// Views - Places
-import PlaceDetail from '../views/places/PlaceDetail.view';
-import PlaceForm from '../views/places/PlaceForm.view';
-
-// Views - User
-import Dashboard from '../views/user/Dashboard.view';
-import Profile from '../views/user/Profile.view';
+// Views
+import Home from '../views/Home.view';
+import Login from '../views/Login.view';
+import Register from '../views/Register.view';
+import Dashboard from '../views/Dashboard.view';
+import Profile from '../views/Profile.view';
+import PlaceForm from '../views/PlaceForm.view';
+import PlaceDetail from '../views/PlaceDetail.view';
 
 /**
  * Configuración de rutas de la aplicación
@@ -68,4 +62,3 @@ export const appRoutes: RouteObject[] = [
         )
     }
 ];
-

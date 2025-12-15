@@ -19,12 +19,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm p-3 mb-8 border border-gray-100 ring-1 ring-gray-100 max-w-3xl mx-auto shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
             {/* Search Input */}
-            <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg
-                        className="h-5 w-5 text-gray-400 group-focus-within:text-eco-primary-500 transition-colors"
+                        className="h-5 w-5 text-gray-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -41,8 +41,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder={activeCategory === 'Todos' ? "Buscar destinos, aventuras..." : `Buscar en ${activeCategory}...`}
-                    className="w-full pl-11 pr-4 py-3 bg-transparent border border-transparent rounded-xl focus:outline-none focus:bg-eco-bg/50 focus:ring-2 focus:ring-eco-primary-100 transition-all font-medium text-gray-700 placeholder-gray-400"
+                    placeholder="Buscar destinos..."
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco-teal-500 focus:border-transparent transition-all"
                 />
             </div>
         </div>

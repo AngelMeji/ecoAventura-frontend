@@ -51,14 +51,14 @@ export class DestinationController {
             // Icon mapping helper
             const getIcon = (slug: string) => {
                 const icons: Record<string, string> = {
-                    'naturaleza': '',
-                    'aventura': '',
-                    'cascadas': '',
-                    'termal': '',
-                    'fauna': '',
-                    'senderismo': ''
+                    'naturaleza': '🌳',
+                    'aventura': '🧗',
+                    'cascadas': '⛲',
+                    'termal': '🧖',
+                    'fauna': '🐾',
+                    'senderismo': '🥾'
                 };
-                return icons[slug] || ''; // Default icon
+                return icons[slug] || '✨'; // Default icon
             };
 
             return categories.map((cat: any) => ({
