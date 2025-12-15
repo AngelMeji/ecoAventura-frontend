@@ -9,6 +9,9 @@ const Header: React.FC = () => {
     const isAuthenticated = !!user;
     const [scrolled, setScrolled] = useState(false);
 
+    // Rutas donde el header NO debe ser fixed (admin/partner panels)
+    const isPanelRoute = ['/dashboard', '/bg-admin', '/places/create', '/places/edit'].some(path => location.pathname.startsWith(path)) || location.pathname.includes('/profile');
+
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -33,10 +36,10 @@ const Header: React.FC = () => {
 
     return (
         <header
-            className={`fixed top-0 w-full z-[9999] transition-all duration-300 border-b ${scrolled
-                ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-3'
-                : 'bg-white/50 backdrop-blur-sm border-transparent py-5'
-                }`}
+            className={`${isPanelRoute ? 'absolute' : 'fixed'} top-0 w-full z-[9999] transition-all duration-300 border-b ${!isPanelRoute && scrolled
+                    ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-3'
+                    : 'bg-white/50 backdrop-blur-sm border-transparent py-5'
+                } ${isPanelRoute ? 'bg-white border-b border-gray-100' : ''}`}
         >
             <div className="container mx-auto px-4 flex items-center justify-between">
                 <Link
