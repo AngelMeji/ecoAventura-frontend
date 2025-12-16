@@ -59,21 +59,26 @@ const Dashboard: React.FC = () => {
                 }
                 setPartnerPlaces(pPlaces);
             } else {
-                // Lógica para el Dashboard de Usuario (Optimizado V2)
-                const data = await placesService.getUserDashboard();
-                setStats(data?.stats || {});
+                // Lógica para el Dashboard de Usuario (Optimizado V2) - Paralelizado
+                const [dashboardResult, favsResult] = await Promise.allSettled([
+                    placesService.getUserDashboard(),
+                    placesService.getFavorites()
+                ]);
 
-                // Obtener favoritos: El backend V2 ya devuelve objetos Place completos
-                try {
-                    const favsResponse = await placesService.getFavorites();
-                    // Normalizar respuesta (array directo o paginado en .data)
+                if (dashboardResult.status === 'fulfilled') {
+                    setStats(dashboardResult.value?.stats || {});
+                } else {
+                    setStats({});
+                }
+
+                if (favsResult.status === 'fulfilled') {
+                    const favsResponse = favsResult.value;
                     const favList = Array.isArray(favsResponse)
                         ? favsResponse
                         : (favsResponse?.data && Array.isArray(favsResponse.data) ? favsResponse.data : []);
-
                     setFavorites(favList);
-                } catch (error) {
-                    console.error('Error cargando favoritos:', error);
+                } else {
+                    console.error('Error cargando favoritos', favsResult.reason);
                     setFavorites([]);
                 }
             }
@@ -729,14 +734,19 @@ const Dashboard: React.FC = () => {
                             ) : (
                                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {favorites.map(place => (
-                                        <div key={place.id} className="group border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/place/${place.slug || place.id}`}>
+                                        <div
+                                            key={place.id}
+                                            className="group border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                                            onClick={() => navigate(`/place/${place.slug || place.id}`)}
+                                        >
                                             <div className="h-32 bg-gray-200 relative">
                                                 <img
-                                                    src={place.images && place.images.length > 0
+                                                    src={(place.images && place.images.length > 0 && place.images[0])
                                                         ? (place.images[0].full_url ||
                                                             (place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `/upload/${place.images[0].image_path.split('/').pop()}`))
                                                         : '/assets/images/placeholder.jpg'}
                                                     className="w-full h-full object-cover"
+                                                    alt={place.name}
                                                     onError={(e) => {
                                                         const target = e.target as HTMLImageElement;
                                                         if (!target.src.includes('placeholder')) {
@@ -744,13 +754,20 @@ const Dashboard: React.FC = () => {
                                                         }
                                                     }}
                                                 />
-                                                <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded text-xs font-bold text-gray-800">
-                                                    {place.category?.name}
+                                                <div className="absolute top-2 right-2 flex gap-1">
+                                                    {place.category?.name && (
+                                                        <div className="bg-white/90 px-2 py-1 rounded text-xs font-bold text-gray-800 shadow-sm">
+                                                            {place.category.name}
+                                                        </div>
+                                                    )}
+                                                    <div className="bg-white/90 p-1 rounded-full text-red-500 shadow-sm">
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="p-4">
-                                                <h3 className="font-bold text-gray-800 group-hover:text-eco-primary-600 transition-colors">{place.name}</h3>
-                                                <p className="text-sm text-gray-500 mb-2 truncate">{place.address}</p>
+                                                <h3 className="font-bold text-gray-800 group-hover:text-eco-primary-600 transition-colors">{place.name || 'Lugar sin nombre'}</h3>
+                                                <p className="text-sm text-gray-500 mb-2 truncate">{place.address || 'Sin dirección'}</p>
                                             </div>
                                         </div>
                                     ))}

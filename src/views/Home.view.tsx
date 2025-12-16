@@ -55,6 +55,7 @@ const Home: React.FC = () => {
     };
 
     const fetchDestinations = async () => {
+        setLoading(true);
         try {
             let result: Place[];
             if (searchQuery) {
@@ -67,6 +68,8 @@ const Home: React.FC = () => {
             console.error('Error buscando destinos:', error);
             // Fallback vacio o manejar error
             setDestinations([]);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -76,8 +79,10 @@ const Home: React.FC = () => {
     };
 
     const handleCategoryChange = (category: string) => {
+        setLoading(true); // Mostrar loader
         setActiveCategory(category);
         setSearchQuery('');
+
         // Scroll to grid
         const gridElement = document.getElementById('destinations-grid');
         if (gridElement) {
@@ -116,19 +121,8 @@ const Home: React.FC = () => {
         setSelectedDestination(null);
     };
 
-    if (loading && destinations.length === 0) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-                <div className="relative w-24 h-24 mb-4">
-                    <div className="absolute inset-0 bg-eco-primary-200 rounded-full animate-ping opacity-25"></div>
-                    <div className="relative bg-white p-4 rounded-full shadow-xl flex items-center justify-center">
-                        <svg className="w-12 h-12 text-eco-primary-600 animate-pulse-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </div>
-                </div>
-                <p className="text-xl font-display font-bold text-eco-primary-800 animate-pulse">Cargando...</p>
-            </div>
-        );
-    }
+    // Loading se manejará inline para no desmontar todo el layout
+    // if (loading) { return ... }  <-- REMOVED
 
     return (
         <div className="min-h-screen bg-eco-light">
@@ -213,37 +207,46 @@ const Home: React.FC = () => {
                         </div>
                         <div>
                             <h2 className="text-3xl font-display font-bold text-gray-800">
-                                Todos los Destinos
+                                {loading ? 'Buscando destinos...' : 'Todos los Destinos'}
                             </h2>
-                            <p className="text-gray-500">
-                                {destinations.length} {destinations.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
-                            </p>
+                            {!loading && (
+                                <p className="text-gray-500">
+                                    {destinations.length} {destinations.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
+                                </p>
+                            )}
                         </div>
                     </div>
 
-                    {destinations.length === 0 ? (
-                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-                            <div className="text-eco-primary-200 mb-4 flex justify-center">
-                                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">No encontramos destinos</h3>
-                            <p className="text-gray-500">Intenta con otra búsqueda o categoría</p>
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-primary-600 mb-4"></div>
+                            <p className="text-gray-500">Cargando experiencias...</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {destinations.map((destination) => (
-                                <div
-                                    key={destination.id}
-                                    id={`destination-${destination.id}`}
-                                >
-                                    <DestinationCard
-                                        destination={destination as any}
-                                        isHighlighted={highlightedDestination === destination.id}
-                                        onClick={() => handleCardClick(destination.id)}
-                                    />
+                        destinations.length === 0 ? (
+                            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
+                                <div className="text-eco-primary-200 mb-4 flex justify-center">
+                                    <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
-                            ))}
-                        </div>
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">No encontramos destinos</h3>
+                                <p className="text-gray-500">Intenta con otra búsqueda o categoría</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                {destinations.map((destination) => (
+                                    <div
+                                        key={destination.id}
+                                        id={`destination-${destination.id}`}
+                                    >
+                                        <DestinationCard
+                                            destination={destination as any}
+                                            isHighlighted={highlightedDestination === destination.id}
+                                            onClick={() => handleCardClick(destination.id)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )
                     )}
                 </div>
             </main>

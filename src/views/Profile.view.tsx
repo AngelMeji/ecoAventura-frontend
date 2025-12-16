@@ -46,10 +46,11 @@ const Profile: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         setMsg({ type: '', text: '' });
+
         try {
             let data: any = { name: profileData.name, bio: profileData.bio };
 
-            // If avatar file is selected, use FormData
+            // Si se seleccionó archivo, usar FormData
             if (profileData.avatarFile) {
                 const formData = new FormData();
                 formData.append('name', profileData.name);
@@ -58,10 +59,30 @@ const Profile: React.FC = () => {
                 data = formData;
             }
 
-            await authService.updateProfile(data);
-            setMsg({ type: 'success', text: 'Perfil actualizado correctamente' });
+            const response: any = await authService.updateProfile(data); // Asumimos que devuelve el objeto response completo o data
+
+            // Verificamos éxito basado en la respuesta estándar V2
+            if (response && (response.success || response.id)) { // response.id es fallback por si devuelve el user directo
+                setMsg({ type: 'success', text: 'Perfil actualizado con éxito. Redirigiendo...' });
+                // Redirigir al dashboard tras breve pausa
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+            } else {
+                setMsg({ type: 'error', text: 'No se pudo actualizar el perfil.' });
+            }
+
         } catch (error: any) {
-            setMsg({ type: 'error', text: error.message || 'Error al actualizar perfil' });
+            console.error('Update error:', error);
+            // Manejo de errores de validación (422)
+            if (error.response?.status === 422) {
+                const errors = error.response.data.errors;
+                const errorMsg = errors ? Object.values(errors).flat().join(', ') : 'Datos inválidos';
+                setMsg({ type: 'error', text: errorMsg });
+            } else {
+                setMsg({ type: 'error', text: error.response?.data?.message || 'Error al actualizar perfil' });
+            }
+            // NOTA: No limpiamos profileData aquí para persistencia
         } finally {
             setLoading(false);
         }

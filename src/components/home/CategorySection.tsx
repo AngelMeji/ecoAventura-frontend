@@ -55,10 +55,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
                         <div className="flex items-center justify-between text-xs text-gray-500">
                             <span>{category.count} {category.count === 1 ? 'lugar' : 'lugares'}</span>
-                            <div className="flex items-center">
-                                <span className="text-yellow-400 mr-1">★</span>
-                                <span>{category.avgRating}</span>
-                            </div>
                         </div>
                     </button>
                 ))}
