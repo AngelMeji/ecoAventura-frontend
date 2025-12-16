@@ -25,7 +25,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     // Obtener imágenes o usar placeholder si no hay
     const images = destination.images && destination.images.length > 0
         ? destination.images
-        : [{ id: 0, image_path: 'https://via.placeholder.com/800x600?text=No+Image' }];
+        : [{ id: 0, image_path: '/assets/images/placeholder.jpg' }]; // Usar placeholder local o ruta válida
 
     const getFullImageUrl = (path: string) => {
         if (path.startsWith('http')) return path;
@@ -48,13 +48,73 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         setRating(value);
     };
 
-    const handleSubmitReview = (e: React.FormEvent) => {
+    // Estado para manejar errores de validación específicos del backend
+    const [errors, setErrors] = useState<string[]>([]);
+
+    const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implementar envío de reseñas al backend
-        console.log({ rating, comment, place_id: destination.id });
-        setComment('');
-        setRating(0);
-        alert('¡Reseña enviada! (Funcionalidad completa pendiente de integración)');
+        setErrors([]); // Limpiar errores previos
+
+        // Validación básica en frontend
+        if (rating === 0) {
+            alert('Por favor selecciona una calificación');
+            return;
+        }
+
+        try {
+            // Importar el servicio dinámicamente
+            const { placesService } = await import('../../services/placesService');
+
+            // Llamada al servicio para crear la reseña
+            const newReview = await placesService.createReview(destination.id, { rating, comment });
+
+            // Éxito: Limpiar formulario y notificar
+            alert('¡Reseña enviada con éxito!');
+            setComment('');
+            setRating(0);
+
+            // INTENTO DE ACTUALIZAR LA UI:
+            // Como las props son inmutables, podemos intentar cerrar el modal para forzar refresco en la vista padre
+            // o (idealmente) usar una función de callback si existiera.
+            // Por ahora, notificamos al usuario.
+            // Si el backend devuelve la nueva reseña, podríamos mostrarla localmente, 
+            // pero la estructura de `destination.reviews` viene de props.
+
+            // Opcional: Recargar la página si estamos en una vista que depende de esto
+            console.log('Review created:', newReview);
+
+            // CERRAR MODAL para que el usuario vea el cambio si la vista padre se actualiza (o para que al reabrir cargue de nuevo)
+            // onClose(); 
+            // O podemos intentar recargar los datos del lugar
+
+            // FORCE RELOAD workaround (since we don't have a callback prop yet)
+            window.location.reload();
+
+        } catch (error: any) {
+            console.error('Error enviando reseña:', error);
+
+            // Manejo de errores 422 (Validación de Laravel)
+            if (error.response && error.response.status === 422) {
+                console.log('DATA 422:', error.response.data);
+                const data = error.response.data;
+                const validationErrors = data.errors;
+                const errorMessages: string[] = [];
+
+                // Extraer mensajes de error del objeto de respuesta
+                if (validationErrors) {
+                    Object.values(validationErrors).forEach((errArray: any) => {
+                        errorMessages.push(...errArray);
+                    });
+                } else if (data.message) {
+                    errorMessages.push(data.message);
+                }
+
+                setErrors(errorMessages.length > 0 ? errorMessages : ['Error de validación desconocido.']);
+            } else {
+                // Otros errores (500, red, etc.)
+                alert(error.message || 'Ocurrió un error al enviar la reseña. Inténtalo de nuevo.');
+            }
+        }
     };
 
     const categoryName = destination.category?.name || 'General';
@@ -209,6 +269,18 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                             rows={4}
                                         />
                                     </div>
+                                    {/* Mostrar errores de validación si existen */}
+                                    {errors.length > 0 && (
+                                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                            <p className="font-bold text-red-700 text-sm mb-1">No se pudo enviar la reseña:</p>
+                                            <ul className="list-disc list-inside text-sm text-red-600">
+                                                {errors.map((err, idx) => (
+                                                    <li key={idx}>{err}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
                                     <button
                                         type="submit"
                                         disabled={rating === 0 || !comment.trim()}

@@ -40,11 +40,35 @@ const PlaceDetail: React.FC = () => {
         try {
             setLoading(true);
             const data: any = await placesService.getOne(placeId);
-            // Handle Laravel Resource response wrapping
-            setPlace(data.data || data);
+            // Manejar respuesta envuelta de Laravel Resource (data.data)
+            const loadedPlace = data.data || data;
+
+            // VERIFICACIÓN MANUAL DE FAVORITO (Persistencia)
+            // Si el backend no devuelve 'is_favorite', verificamos contra la lista de favoritos del usuario
+            if (user && loadedPlace.is_favorite === undefined) {
+                try {
+                    const favsResponse: any = await placesService.getFavorites();
+                    const rawList = Array.isArray(favsResponse)
+                        ? favsResponse
+                        : (favsResponse?.data ? favsResponse.data : []);
+
+                    // Verificar si el ID del lugar está en la lista (como id directo o place_id)
+                    const isFav = rawList.some((f: any) =>
+                        (f.place_id && f.place_id === loadedPlace.id) ||
+                        (f.id === loadedPlace.id)
+                    );
+
+                    // Forzar el estado en el objeto local
+                    loadedPlace.is_favorite = isFav;
+                    console.log(`Verificación manual favorrito para ${loadedPlace.id}: ${isFav}`);
+                } catch (err) {
+                    console.warn('Falló verificación manual de favoritos', err);
+                }
+            }
+
+            setPlace(loadedPlace);
         } catch (error) {
-            console.error('Error loading place:', error);
-            // navigate('/home'); // Optional: redirect on error
+            console.error('Error cargando lugar:', error);
         } finally {
             setLoading(false);
         }
@@ -70,13 +94,30 @@ const PlaceDetail: React.FC = () => {
             setPlace(p);
             setActiveTab('reviews');
         } catch (error: any) {
-            console.error('Error sending review:', error);
-            alert(error.message || 'Error al enviar reseña. Verificaste backend?');
+            // Manejo específico para errores de validación (422)
+            if (error.response && error.response.status === 422) {
+                console.log('DATA 422:', error.response.data); // Para debugging
+                const data = error.response.data;
+                const validationErrors = data.errors;
+                let message = data.message || 'Error de validación'; // Fallback al mensaje general
+
+                if (validationErrors) {
+                    message += ':\n';
+                    // Concatenar todos los mensajes de error
+                    Object.values(validationErrors).forEach((msgs: any) => {
+                        message += `\n- ${msgs.join(', ')}`;
+                    });
+                }
+                alert(message);
+            } else {
+                // Mensaje genérico para otros errores
+                alert(error.message || 'Error al enviar reseña. Por favor intenta nuevamente.');
+            }
         }
     };
 
     const getFullImageUrl = (path: string) => {
-        if (!path) return 'https://via.placeholder.com/800x600?text=No+Image';
+        if (!path) return '/assets/images/placeholder.jpg'; // Placeholder local seguro
         if (path.startsWith('http')) return path;
         // Si la ruta comienza con 'assets/', asumimos que es un recurso local del frontend
         if (path.startsWith('assets/') || path.startsWith('/assets/')) {

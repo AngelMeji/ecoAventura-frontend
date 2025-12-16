@@ -59,10 +59,52 @@ const Dashboard: React.FC = () => {
                 }
                 setPartnerPlaces(pPlaces);
             } else {
+                // Lógica para el Dashboard de Usuario
                 const data = await placesService.getUserDashboard();
                 setStats(data?.stats || {});
-                const favs = await placesService.getFavorites();
-                setFavorites(favs.data || []);
+
+                // Obtener favoritos con manejo robusto de la respuesta
+                try {
+                    const favsResponse = await placesService.getFavorites();
+                    console.log('Respuesta Favoritos (Favorites Response):', favsResponse);
+
+                    // 1. Normalizar la respuesta (array directo vs objeto paginado)
+                    const rawList = Array.isArray(favsResponse)
+                        ? favsResponse
+                        : (favsResponse?.data && Array.isArray(favsResponse.data) ? favsResponse.data : (favsResponse as any)?.data || []);
+
+                    console.log('Favoritos Crudos (Raw):', rawList);
+
+                    let favList: Place[] = [];
+
+                    // 2. Detectar si son registros pivote sin datos del lugar (tienen place_id pero no name)
+                    // Esto pasa cuando el backend no hace Eager Loading de la relación 'place'
+                    if (rawList.length > 0 && rawList[0].place_id && !rawList[0].name && !rawList[0].place) {
+                        console.log('Detectada lista de pivotes sin datos de lugar. Cargando detalles individuales...');
+
+                        // Extraer IDs únicos filtrando nulos
+                        const placeIds = [...new Set(rawList.map((item: any) => item.place_id).filter((id: any) => id != null))];
+
+                        // Cargar detalles en paralelo
+                        const placesPromises = placeIds.map(id => placesService.getOne(String(id)));
+                        const placesDetails = await Promise.all(placesPromises);
+
+                        // Manejar respuestas envueltas (data.data)
+                        favList = placesDetails.map((p: any) => p.data || p);
+                    } else {
+                        // Flujo normal: ya son lugares o tienen el objeto 'place' anidado
+                        favList = rawList.map((item: any) => {
+                            if (item.place) return item.place;
+                            return item;
+                        });
+                    }
+
+                    console.log('Lista de Favoritos Final:', favList);
+                    setFavorites(favList);
+                } catch (error) {
+                    console.error('Error al cargar favoritos:', error);
+                    setFavorites([]);
+                }
             }
         } catch (error) {
             console.error('Error loading dashboard:', error);
@@ -551,9 +593,21 @@ const Dashboard: React.FC = () => {
                                     {favorites.map(place => (
                                         <div key={place.id} className="group border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/place/${place.slug || place.id}`}>
                                             <div className="h-32 bg-gray-200 relative">
-                                                {place.images && place.images[0] && (
-                                                    <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
-                                                )}
+                                                <img
+                                                    src={place.images && place.images.length > 0
+                                                        ? (place.images[0].image_path.startsWith('http')
+                                                            ? place.images[0].image_path
+                                                            : `/upload/${place.images[0].image_path.split('/').pop()}`)
+                                                        : '/assets/images/placeholder.jpg'}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        // Fallback final si falla la carga
+                                                        if (!target.src.includes('placeholder')) {
+                                                            target.src = '/assets/images/placeholder.jpg';
+                                                        }
+                                                    }}
+                                                />
                                                 <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded text-xs font-bold text-gray-800">
                                                     {place.category?.name}
                                                 </div>

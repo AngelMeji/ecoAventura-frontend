@@ -11,7 +11,7 @@ import Register from '../views/Register.view';
 import Dashboard from '../views/Dashboard.view';
 import Profile from '../views/Profile.view';
 import PlaceForm from '../views/PlaceForm.view';
-import PlaceDetail from '../views/PlaceDetail.view';
+import PlaceDetail from '../views/places/PlaceDetail.view';
 
 /**
  * Configuración de rutas de la aplicación
