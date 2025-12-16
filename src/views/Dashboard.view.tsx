@@ -89,12 +89,23 @@ const Dashboard: React.FC = () => {
 
                 if (favsResult.status === 'fulfilled') {
                     const favsResponse = favsResult.value;
+                    console.log('📦 Raw favorites response:', favsResponse);
+
                     const favList = Array.isArray(favsResponse)
                         ? favsResponse
                         : (favsResponse?.data && Array.isArray(favsResponse.data) ? favsResponse.data : []);
+
+                    console.log('⭐ Processed favorites list:', favList);
+                    console.log('⭐ Favorites count:', favList.length);
+
+                    if (favList.length > 0) {
+                        console.log('⭐ First favorite sample:', favList[0]);
+                        console.log('⭐ First favorite images:', favList[0].images);
+                    }
+
                     setFavorites(favList);
                 } else {
-                    console.error('Error cargando favoritos', favsResult.reason);
+                    console.error('❌ Favorites fetch failed:', favsResult.reason);
                     setFavorites([]);
                 }
             }

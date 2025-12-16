@@ -74,7 +74,9 @@ export const placesService = {
 
     // Favoritos
     async getFavorites(page: number = 1): Promise<PaginatedResponse<Place>> {
+        console.log('🔍 Fetching favorites from API...');
         const response = await api.get<PaginatedResponse<Place>>(`/favorites?page=${page}`);
+        console.log('📥 Favorites API response:', response.data);
         return response.data;
     },
 

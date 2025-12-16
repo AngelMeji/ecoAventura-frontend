@@ -29,19 +29,45 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
         return colors[categoryName] || 'bg-gray-100 text-gray-800';
     };
 
-    // Helper para obtener URL de imagen
+    // Helper para obtener URL de imagen (Backend V2 compatible)
     const getImageUrl = () => {
+        // DEBUG: Ver estructura completa del destino
+        console.log('🏞️ Full destination object for', destination.name, ':', destination);
+
+        // DEBUG: Ver estructura de datos de imágenes
+        if (destination.images && destination.images.length > 0) {
+            console.log('🖼️ Image data for', destination.name, ':', destination.images[0]);
+        } else {
+            console.log('❌ No images array or empty for:', destination.name);
+        }
+
         if (destination.images && destination.images.length > 0 && destination.images[0]) {
-            const path = destination.images[0].image_path;
+            const firstImage = destination.images[0];
+
+            // PRIORIDAD 1: full_url del backend V2
+            if (firstImage.full_url) {
+                console.log('✅ Using full_url:', firstImage.full_url);
+                return firstImage.full_url;
+            }
+
+            // PRIORIDAD 2: Construir URL manualmente
+            const path = firstImage.image_path;
+            console.log('⚠️ No full_url, constructing from image_path:', path);
+
             if (path.startsWith('http')) return path;
+
             // Si es un asset local (ej: seed data)
             if (path.startsWith('assets/') || path.startsWith('/assets/')) {
                 return path.startsWith('/') ? path : `/${path}`;
             }
+
             // Si es storage backend
-            return `${STORAGE_URL}/${path}`;
+            const constructedUrl = `${STORAGE_URL}/${path}`;
+            console.log('🔧 Constructed URL:', constructedUrl);
+            return constructedUrl;
         }
-        return 'https://via.placeholder.com/400x300?text=No+Image'; // Imagen por defecto
+        console.log('❌ No images found for:', destination.name);
+        return '/assets/images/placeholder.jpg'; // Cambiar a ruta local
     };
 
     const categoryName = destination.category?.name || 'General';
