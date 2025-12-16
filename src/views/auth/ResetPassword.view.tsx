@@ -18,28 +18,62 @@ const ResetPassword: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Validación: Contraseñas deben coincidir
         if (password !== passwordConfirmation) {
             setStatus('error');
             setMessage('Las contraseñas no coinciden.');
             return;
         }
 
+        // Validación: Mínimo 8 caracteres (requisito del backend)
+        if (password.length < 8) {
+            setStatus('error');
+            setMessage('La contraseña debe tener al menos 8 caracteres.');
+            return;
+        }
+
         setStatus('loading');
         setMessage('');
 
+        // Preparar datos para enviar
+        const resetData = {
+            token,
+            email,
+            password,
+            password_confirmation: passwordConfirmation
+        };
+
+        // DEBUG: Mostrar qué se está enviando
+        console.log('🔍 Datos que se enviarán al backend:', resetData);
+        console.log('📧 Email:', email);
+        console.log('🔑 Token:', token);
+        console.log('🔒 Password length:', password.length);
+
         try {
-            await authService.resetPassword({
-                token,
-                email,
-                password,
-                password_confirmation: passwordConfirmation
-            });
+            await authService.resetPassword(resetData);
             setStatus('success');
             setMessage('Contraseña restablecida correctamente.');
             setTimeout(() => navigate('/login'), 3000);
         } catch (error: any) {
             setStatus('error');
-            setMessage(error.response?.data?.message || 'Error al restablecer la contraseña.');
+
+            // DEBUG: Mostrar detalles completos del error
+            console.error('❌ Error completo:', error);
+            console.error('📋 Response data:', error.response?.data);
+            console.error('🚨 Validation errors:', error.response?.data?.errors);
+
+            // Construir mensaje de error detallado
+            let errorMsg = error.response?.data?.message || 'Error al restablecer la contraseña.';
+
+            if (error.response?.data?.errors) {
+                const validationErrors = error.response.data.errors;
+                errorMsg += '\n\nDetalles:\n';
+                Object.keys(validationErrors).forEach(field => {
+                    errorMsg += `• ${field}: ${validationErrors[field].join(', ')}\n`;
+                });
+            }
+
+            setMessage(errorMsg);
         }
     };
 

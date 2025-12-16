@@ -72,7 +72,7 @@ export const appRoutes: RouteObject[] = [
         )
     },
     {
-        path: '/password/reset',
+        path: '/reset-password',
         element: (
             <AuthLayout>
                 <ResetPassword />
