@@ -19,6 +19,11 @@ const PlaceDetail: React.FC = () => {
     // Reviews state
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+
+    // Inline editing state
+    const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+    const [editForm, setEditForm] = useState({ rating: 0, comment: '' });
+
     const user = authService.getCurrentUser();
 
     useEffect(() => {
@@ -228,7 +233,7 @@ const PlaceDetail: React.FC = () => {
                                 }}
                                 className={`p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${place.is_favorite
                                     ? 'bg-white text-red-500 shadow-red-500/30'
-                                    : 'bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-red-500'
+                                    : 'bg-white/70 backdrop-blur-md text-gray-700 hover:bg-white hover:text-red-500'
                                     }`}
                             >
                                 <svg className="w-6 h-6" fill={place.is_favorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -379,65 +384,105 @@ const PlaceDetail: React.FC = () => {
                                     {place.reviews && place.reviews.length > 0 ? (
                                         place.reviews.map((rev: any, idx: number) => (
                                             <div key={idx} className="group bg-white rounded-2xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all">
-                                                <div className="flex items-start justify-between mb-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-eco-primary-100 to-eco-primary-200 flex items-center justify-center text-eco-primary-700 font-bold text-lg">
-                                                            {(rev.user?.name || 'U')[0].toUpperCase()}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold text-gray-900">{rev.user?.name || 'Viajero'}</div>
-                                                            <div className="flex text-yellow-400 text-sm">
-                                                                {[...Array(5)].map((_, i) => (
-                                                                    <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {(user?.role === 'admin' || user?.id === rev.user_id) && (
-                                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            {user?.id === rev.user_id && (
+                                                {editingReviewId === rev.id ? (
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="text-sm font-medium text-gray-700">Editar Calificación:</span>
+                                                            {[1, 2, 3, 4, 5].map(star => (
                                                                 <button
-                                                                    onClick={() => {
-                                                                        const newComment = prompt('Editar tu comentario:', rev.comment);
-                                                                        const newRating = Number(prompt('Calificación (1-5):', rev.rating));
-                                                                        if (newComment !== null && newRating) {
-                                                                            placesService.updateReview(rev.id, { comment: newComment, rating: newRating })
-                                                                                .then(() => {
-                                                                                    alert('Reseña actualizada');
-                                                                                    loadPlace(place.id.toString());
-                                                                                })
-                                                                                .catch(() => alert('Error actualizando'));
-                                                                        }
-                                                                    }}
-                                                                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
-                                                                    title="Editar"
+                                                                    key={star}
+                                                                    onClick={() => setEditForm({ ...editForm, rating: star })}
+                                                                    className={`text-xl focus:outline-none ${star <= editForm.rating ? 'text-yellow-400' : 'text-gray-200'}`}
+                                                                    type="button"
                                                                 >
-                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                                    ★
                                                                 </button>
-                                                            )}
+                                                            ))}
+                                                        </div>
+                                                        <textarea
+                                                            value={editForm.comment}
+                                                            onChange={e => setEditForm({ ...editForm, comment: e.target.value })}
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-primary-400 focus:outline-none"
+                                                            rows={3}
+                                                        ></textarea>
+                                                        <div className="flex justify-end gap-2">
                                                             <button
-                                                                onClick={async () => {
-                                                                    if (confirm('¿Eliminar esta reseña?')) {
-                                                                        try {
-                                                                            await placesService.deleteReview(rev.id);
-                                                                            setPlace(prev => prev ? {
-                                                                                ...prev,
-                                                                                reviews: prev.reviews?.filter(r => r.id !== rev.id)
-                                                                            } : null);
-                                                                        } catch (e) {
-                                                                            alert('Error eliminando reseña');
-                                                                        }
-                                                                    }
-                                                                }}
-                                                                className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                                                                title="Eliminar"
+                                                                onClick={() => setEditingReviewId(null)}
+                                                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium"
                                                             >
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                Cancelar
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (!editForm.comment || editForm.rating === 0) return alert('Completa los campos');
+                                                                    placesService.updateReview(rev.id, editForm)
+                                                                        .then(() => {
+                                                                            setEditingReviewId(null);
+                                                                            loadPlace(place.id.toString());
+                                                                        })
+                                                                        .catch(() => alert('Error actualizando'));
+                                                                }}
+                                                                className="px-4 py-2 bg-eco-primary-600 text-white rounded-lg text-sm font-medium hover:bg-eco-primary-700"
+                                                            >
+                                                                Guardar
                                                             </button>
                                                         </div>
-                                                    )}
-                                                </div>
-                                                <p className="text-gray-600 leading-relaxed text-sm">{rev.comment}</p>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-eco-primary-100 to-eco-primary-200 flex items-center justify-center text-eco-primary-700 font-bold text-lg">
+                                                                    {(rev.user?.name || 'U')[0].toUpperCase()}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="font-bold text-gray-900">{rev.user?.name || 'Viajero'}</div>
+                                                                    <div className="flex text-yellow-400 text-sm">
+                                                                        {[...Array(5)].map((_, i) => (
+                                                                            <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {(user?.role === 'admin' || user?.id === rev.user_id) && (
+                                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    {user?.id === rev.user_id && (
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditingReviewId(rev.id);
+                                                                                setEditForm({ rating: rev.rating, comment: rev.comment });
+                                                                            }}
+                                                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                                                                            title="Editar"
+                                                                        >
+                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (confirm('¿Eliminar esta reseña?')) {
+                                                                                try {
+                                                                                    await placesService.deleteReview(rev.id);
+                                                                                    setPlace(prev => prev ? {
+                                                                                        ...prev,
+                                                                                        reviews: prev.reviews?.filter(r => r.id !== rev.id)
+                                                                                    } : null);
+                                                                                } catch (e) {
+                                                                                    alert('Error eliminando reseña');
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                                        title="Eliminar"
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-gray-600 leading-relaxed text-sm">{rev.comment}</p>
+                                                    </>
+                                                )}
                                             </div>
                                         ))
                                     ) : (

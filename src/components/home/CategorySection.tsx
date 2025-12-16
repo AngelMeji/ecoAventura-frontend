@@ -47,9 +47,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                                 ? 'bg-eco-teal-500 text-white'
                                 : 'bg-eco-teal-100 text-eco-teal-600 group-hover:bg-eco-teal-500 group-hover:text-white transition-colors'
                             }
-                        `}>
-                            {category.icon}
-                        </div>
+                        `} dangerouslySetInnerHTML={{ __html: category.icon }} />
 
                         <h3 className="font-bold text-gray-800 mb-1 group-hover:text-eco-teal-700">
                             {category.name}

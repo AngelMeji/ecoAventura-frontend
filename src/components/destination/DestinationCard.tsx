@@ -49,10 +49,10 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
     return (
         <div
             onClick={onClick}
-            className={`group bg-white rounded-3xl shadow-lg shadow-eco-primary-900/5 overflow-hidden transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-eco-primary-900/10 hover:-translate-y-2 ${isHighlighted ? 'ring-4 ring-eco-accent shadow-2xl scale-105' : 'hover:ring-2 hover:ring-eco-primary-100/50'
+            className={`group bg-white rounded-3xl shadow-lg shadow-eco-primary-900/5 overflow-hidden transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-eco-primary-900/10 hover:-translate-y-2 flex flex-col h-full ${isHighlighted ? 'ring-4 ring-eco-accent shadow-2xl scale-105' : 'hover:ring-2 hover:ring-eco-primary-100/50'
                 }`}
         >
-            <div className="relative h-56 overflow-hidden">
+            <div className="relative h-56 shrink-0 overflow-hidden">
                 <img
                     src={getImageUrl()}
                     alt={destination.name}
@@ -66,12 +66,12 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                 </div>
             </div>
 
-            <div className="p-6">
-                <h3 className="text-2xl font-display font-bold text-gray-800 mb-2 group-hover:text-eco-primary-700 transition-colors">
+            <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-2xl font-display font-bold text-gray-800 mb-2 group-hover:text-eco-primary-700 transition-colors line-clamp-1">
                     {destination.name}
                 </h3>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2 font-light leading-relaxed">
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2 font-light leading-relaxed flex-grow">
                     {destination.short_description}
                 </p>
 

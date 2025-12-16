@@ -136,18 +136,21 @@ const Home: React.FC = () => {
             <main className="container mx-auto px-4 py-8 space-y-16">
                 {/* Hero Section */}
                 <div className="relative overflow-hidden rounded-3xl bg-eco-primary-900 shadow-xl animate-fade-in-up">
-                    <div className="absolute inset-0 opacity-40 mix-blend-multiply bg-[url('https://images.unsplash.com/photo-1544985220-54ee036c3a1e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-eco-primary-900/90 to-transparent"></div>
+                    <div className="absolute inset-0 bg-[url('/assets/hero_background_colombia.png')] bg-cover bg-center"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
                     <div className="relative px-8 py-20 md:px-12 md:py-24 text-white max-w-2xl">
-                        <span className="text-eco-accent font-bold tracking-wider uppercase mb-2 block">Descubre Colombia</span>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6">
+                        <span className="text-eco-accent font-bold tracking-wider uppercase mb-2 block drop-shadow-md">Descubre Colombia</span>
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 drop-shadow-lg">
                             Explora Paraísos <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-eco-secondary to-eco-accent">Ecoturísticos</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-400 to-red-400">Ecoturísticos</span>
                         </h1>
-                        <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
+                        <p className="text-lg md:text-xl text-gray-100 mb-8 leading-relaxed drop-shadow-md font-medium">
                             Sumérgete en la magia de la biodiversidad. Encuentra los destinos más hermosos y sostenibles para tu próxima aventura en la naturaleza.
                         </p>
-                        <button className="px-8 py-4 bg-eco-accent hover:bg-eco-accent-hover text-eco-primary-900 font-bold rounded-full transition-all hover:scale-105 shadow-lg flex items-center gap-2">
+                        <button
+                            onClick={() => document.getElementById('destinations-grid')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="px-8 py-4 bg-eco-accent hover:bg-eco-accent-hover text-eco-primary-900 font-bold rounded-full transition-all hover:scale-105 shadow-lg flex items-center gap-2"
+                        >
                             Comenzar Aventura
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                         </button>
