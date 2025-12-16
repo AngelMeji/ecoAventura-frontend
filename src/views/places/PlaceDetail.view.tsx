@@ -342,7 +342,6 @@ const PlaceDetail: React.FC = () => {
                                                 onChange={e => setComment(e.target.value)}
                                                 className="w-full p-4 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-eco-primary-400 focus:border-eco-primary-400 outline-none transition-all resize-y min-h-[100px]"
                                                 placeholder="¿Qué te pareció este lugar? Comparte tu experiencia..."
-                                                required
                                             ></textarea>
                                             <div className="flex justify-end">
                                                 <button

@@ -20,19 +20,13 @@ const Register: React.FC = () => {
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.name.trim()) {
-            newErrors.name = 'El nombre es requerido';
-        }
+        // Removed client-side required checks as per user request (backend handles them)
 
-        if (!formData.email.trim()) {
-            newErrors.email = 'El correo electrónico es requerido';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'El correo electrónico no es válido';
         }
 
-        if (!formData.password) {
-            newErrors.password = 'La contraseña es requerida';
-        } else if (formData.password.length < 6) {
+        if (formData.password && formData.password.length < 6) {
             newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
         }
 
@@ -118,7 +112,6 @@ const Register: React.FC = () => {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Tu nombre"
-                        required
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.name ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.name && <p className="mt-1 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>{errors.name}</p>}
@@ -135,7 +128,6 @@ const Register: React.FC = () => {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="tu@email.com"
-                        required
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.email ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.email && <p className="mt-1 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>{errors.email}</p>}
@@ -152,7 +144,6 @@ const Register: React.FC = () => {
                         value={formData.password}
                         onChange={handleChange}
                         placeholder="••••••••"
-                        required
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.password ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.password && <p className="mt-1 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>{errors.password}</p>}
@@ -169,7 +160,6 @@ const Register: React.FC = () => {
                         value={formData.password_confirmation}
                         onChange={handleChange}
                         placeholder="••••••••"
-                        required
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.password_confirmation ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.password_confirmation && (

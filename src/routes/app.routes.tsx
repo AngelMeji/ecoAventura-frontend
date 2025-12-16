@@ -10,7 +10,7 @@ import Login from '../views/Login.view';
 import Register from '../views/Register.view';
 import Dashboard from '../views/Dashboard.view';
 import Profile from '../views/Profile.view';
-import PlaceForm from '../views/PlaceForm.view';
+import PlaceForm from '../views/places/PlaceForm.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
 import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';

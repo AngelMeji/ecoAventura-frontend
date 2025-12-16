@@ -15,6 +15,7 @@ export interface PlaceImage {
     place_id?: number;
     image_path: string; // Ruta relativa en storage
     full_url?: string; // V2: URL completa desde el backend
+    is_primary?: boolean;
 }
 
 // Interfaz para Reseñas
