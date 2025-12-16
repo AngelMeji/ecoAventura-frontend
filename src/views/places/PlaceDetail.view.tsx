@@ -19,6 +19,7 @@ const PlaceDetail: React.FC = () => {
     // Reviews state
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     // Inline editing state
     const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
@@ -62,14 +63,15 @@ const PlaceDetail: React.FC = () => {
 
     const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault();
+        setMessage(null);
         if (!place) return;
         if (rating === 0) {
-            alert('Por favor selecciona una calificación');
+            setMessage({ type: 'error', text: 'Por favor selecciona una calificación' });
             return;
         }
         try {
             await placesService.createReview(place.id, { rating, comment });
-            alert('¡Reseña enviada con éxito!');
+            setMessage({ type: 'success', text: '¡Reseña enviada con éxito!' });
             setComment('');
             setRating(0);
 
@@ -85,19 +87,17 @@ const PlaceDetail: React.FC = () => {
                 console.log('DATA 422:', error.response.data); // Para debugging
                 const data = error.response.data;
                 const validationErrors = data.errors;
-                let message = data.message || 'Error de validación'; // Fallback al mensaje general
+                let msgText = data.message || 'Error de validación'; // Fallback al mensaje general
 
                 if (validationErrors) {
-                    message += ':\n';
-                    // Concatenar todos los mensajes de error
-                    Object.values(validationErrors).forEach((msgs: any) => {
-                        message += `\n- ${msgs.join(', ')}`;
-                    });
+                    // Concatenar todos los mensajes de error de forma legible
+                    const details = Object.values(validationErrors).flat().join(', ');
+                    msgText = `${msgText}: ${details}`;
                 }
-                alert(message);
+                setMessage({ type: 'error', text: msgText });
             } else {
                 // Mensaje genérico para otros errores
-                alert(error.message || 'Error al enviar reseña. Por favor intenta nuevamente.');
+                setMessage({ type: 'error', text: error.message || 'Error al enviar reseña. Por favor intenta nuevamente.' });
             }
         }
     };
@@ -337,6 +337,18 @@ const PlaceDetail: React.FC = () => {
                                                 </div>
                                             </div>
 
+                                            {message && (
+                                                <div className={`p-4 rounded-xl mb-4 flex items-center gap-3 ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                                                    }`}>
+                                                    {message.type === 'success' ? (
+                                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                    ) : (
+                                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    )}
+                                                    <p>{message.text}</p>
+                                                </div>
+                                            )}
+
                                             <textarea
                                                 value={comment}
                                                 onChange={e => setComment(e.target.value)}
@@ -401,13 +413,14 @@ const PlaceDetail: React.FC = () => {
                                                             </button>
                                                             <button
                                                                 onClick={() => {
-                                                                    if (!editForm.comment || editForm.rating === 0) return alert('Completa los campos');
+                                                                    if (!editForm.comment || editForm.rating === 0) return setMessage({ type: 'error', text: 'Completa los campos' });
                                                                     placesService.updateReview(rev.id, editForm)
                                                                         .then(() => {
                                                                             setEditingReviewId(null);
                                                                             loadPlace(place.id.toString());
+                                                                            setMessage({ type: 'success', text: 'Reseña actualizada con éxito' });
                                                                         })
-                                                                        .catch(() => alert('Error actualizando'));
+                                                                        .catch(() => setMessage({ type: 'error', text: 'Error actualizando' }));
                                                                 }}
                                                                 className="px-4 py-2 bg-eco-primary-600 text-white rounded-lg text-sm font-medium hover:bg-eco-primary-700"
                                                             >
@@ -438,6 +451,7 @@ const PlaceDetail: React.FC = () => {
                                                                             onClick={() => {
                                                                                 setEditingReviewId(rev.id);
                                                                                 setEditForm({ rating: rev.rating, comment: rev.comment });
+                                                                                setMessage(null);
                                                                             }}
                                                                             className="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
                                                                             title="Editar"
@@ -454,8 +468,9 @@ const PlaceDetail: React.FC = () => {
                                                                                         ...prev,
                                                                                         reviews: prev.reviews?.filter(r => r.id !== rev.id)
                                                                                     } : null);
+                                                                                    setMessage({ type: 'success', text: 'Reseña eliminada' });
                                                                                 } catch (e) {
-                                                                                    alert('Error eliminando reseña');
+                                                                                    setMessage({ type: 'error', text: 'Error eliminando reseña' });
                                                                                 }
                                                                             }
                                                                         }}
