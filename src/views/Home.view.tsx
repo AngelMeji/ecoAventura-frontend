@@ -8,6 +8,7 @@ import FeaturedSection from '../components/home/FeaturedSection';
 import { DestinationController } from '../controllers/Destination.controller';
 import type { Place } from '../models/Place.model'; // Usamos el nuevo modelo Place
 import DestinationModal from '../components/destination/DestinationModal';
+import Footer from '../components/layout/Footer';
 
 /**
  * Vista principal - Home
@@ -255,21 +256,7 @@ const Home: React.FC = () => {
                 />
             )}
 
-            <footer className="bg-white border-t border-gray-100 mt-20">
-                <div className="container mx-auto px-6 py-12 text-center">
-                    <div className="flex justify-center mb-6">
-                        {/* Optional Footer Logo */}
-                        <span className="text-2xl font-display font-bold text-eco-primary-800">EcoAventura</span>
-                    </div>
-                    <div className="flex justify-center gap-6 mb-8 text-gray-500">
-                        <a href="#" className="hover:text-eco-primary-600">Inicio</a>
-                        <a href="#" className="hover:text-eco-primary-600">Destinos</a>
-                        <a href="#" className="hover:text-eco-primary-600">Blog</a>
-                        <a href="#" className="hover:text-eco-primary-600">Contacto</a>
-                    </div>
-                    <p className="text-gray-400 text-sm">© 2025 EcoTurismo Colombia. Todos los derechos reservados.</p>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

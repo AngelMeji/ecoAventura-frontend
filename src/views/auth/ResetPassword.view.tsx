@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/authService';
 
 const ResetPassword: React.FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    // El token y email suelen venir en la URL desde el correo
     const token = searchParams.get('token') || '';
     const emailParam = searchParams.get('email') || '';
 
@@ -45,79 +44,106 @@ const ResetPassword: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-            <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden animate-fade-in-up">
-                <div className="bg-eco-primary-600 p-8 text-center">
-                    <h2 className="text-3xl font-display font-bold text-white mb-2">Nueva Contraseña</h2>
-                    <p className="text-eco-primary-100">Crea una nueva contraseña segura para tu cuenta.</p>
+        <div className="auth-card backdrop-blur-xl bg-white/95 shadow-2xl rounded-3xl overflow-hidden ring-1 ring-white/50">
+            <div className="bg-gradient-to-r from-eco-primary-600 to-eco-primary-800 p-8 text-center relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div className="relative z-10 text-white">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                    </div>
+                    <h2 className="text-2xl font-display font-bold mb-2">Nueva Contraseña</h2>
+                    <p className="text-eco-primary-100 text-sm font-light">Crea una nueva contraseña segura.</p>
                 </div>
+            </div>
 
-                <div className="p-8">
-                    {status === 'success' ? (
-                        <div className="text-center space-y-4">
-                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-2xl">
-                                ✓
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800">¡Éxito!</h3>
-                            <p className="text-gray-600">{message}</p>
-                            <p className="text-sm text-gray-400">Redirigiendo al login...</p>
+            <div className="p-8">
+                {status === 'success' ? (
+                    <div className="text-center animate-fade-in space-y-6">
+                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-short border-4 border-green-100">
+                            <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            {status === 'error' && (
-                                <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm text-center font-medium border border-red-100">
-                                    {message}
-                                </div>
-                            )}
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">¡Éxito!</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed">{message}</p>
+                            <p className="text-xs text-eco-primary-500 font-medium mt-2 animate-pulse">Redirigiendo al login...</p>
+                        </div>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+                        {status === 'error' && (
+                            <div className="p-4 bg-red-50 text-red-700 rounded-xl text-sm font-medium border border-red-100 flex items-center gap-3 animate-shake">
+                                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                {message}
+                            </div>
+                        )}
 
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Correo Electrónico</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                </div>
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-eco-primary-500 focus:ring-2 focus:ring-eco-primary-200 transition-all outline-none"
+                                    className={`auth-input pl-10 ${emailParam ? 'bg-gray-50' : ''}`}
                                     placeholder="ejemplo@correo.com"
                                     required
-                                    readOnly={!!emailParam} // Readonly si viene de la URL
+                                    readOnly={!!emailParam}
                                 />
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Nueva Contraseña</label>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Nueva Contraseña</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                </div>
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-eco-primary-500 focus:ring-2 focus:ring-eco-primary-200 transition-all outline-none"
-                                    placeholder="********"
+                                    className="auth-input pl-10"
+                                    placeholder="••••••••"
                                     required
                                     minLength={8}
                                 />
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Confirmar Contraseña</label>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Confirmar Contraseña</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                </div>
                                 <input
                                     type="password"
                                     value={passwordConfirmation}
                                     onChange={(e) => setPasswordConfirmation(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-eco-primary-500 focus:ring-2 focus:ring-eco-primary-200 transition-all outline-none"
-                                    placeholder="********"
+                                    className="auth-input pl-10"
+                                    placeholder="••••••••"
                                     required
                                 />
                             </div>
+                        </div>
 
-                            <button
-                                type="submit"
-                                disabled={status === 'loading'}
-                                className="w-full py-3 bg-eco-primary-600 text-white rounded-xl font-bold shadow-lg shadow-eco-primary-600/30 hover:bg-eco-primary-700 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-                            >
-                                {status === 'loading' ? 'Restableciendo...' : 'Restablecer Contraseña'}
-                            </button>
-                        </form>
-                    )}
-                </div>
+                        <button
+                            type="submit"
+                            disabled={status === 'loading'}
+                            className="auth-button shadow-xl shadow-eco-primary-600/20"
+                        >
+                            {status === 'loading' ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Restableciendo...
+                                </span>
+                            ) : 'Restablecer Contraseña'}
+                        </button>
+                    </form>
+                )}
             </div>
         </div>
     );

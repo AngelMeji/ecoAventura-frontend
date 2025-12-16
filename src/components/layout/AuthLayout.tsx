@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from './Header';
+import Footer from './Footer';
 
 interface AuthLayoutProps {
     children: React.ReactNode;
@@ -25,6 +26,11 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
                     {children}
                 </div>
             </main>
+
+            {/* Footer */}
+            <div className="relative z-20 w-full text-white/80">
+                <Footer />
+            </div>
         </div>
     );
 };

@@ -124,29 +124,36 @@ const PlaceDetail: React.FC = () => {
 
     if (!place) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-eco-bg p-4 text-center">
-                <div className="text-6xl mb-4 opacity-50 text-eco-primary-300">
-                    <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-eco-bg p-4 text-center relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5 pointer-events-none">
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                 </div>
-                <h2 className="text-3xl font-display font-bold text-eco-primary-900 mb-2">Lugar no encontrado</h2>
-                <p className="text-eco-text-light mb-8 max-w-md mx-auto">
-                    Es posible que el lugar que buscas haya sido eliminado o no esté disponible actualmente.
-                </p>
-                <div className="flex gap-4">
-                    <button
-                        onClick={() => navigate('/home')}
-                        className="auth-button shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-                    >
-                        Ir al Mapa
-                    </button>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="px-6 py-3 rounded-full border-2 border-eco-primary-200 text-eco-primary-700 font-semibold hover:bg-eco-primary-50 transition-colors"
-                    >
-                        Volver Atrás
-                    </button>
+
+                <div className="relative z-10 bg-white/80 backdrop-blur-xl p-8 md:p-12 rounded-3xl shadow-2xl border border-white/50 max-w-lg w-full animate-fade-in-up">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-red-50 rounded-full flex items-center justify-center animate-bounce-short">
+                        <svg className="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-3xl font-display font-bold text-gray-800 mb-3">Lugar no encontrado</h2>
+                    <p className="text-eco-text-light mb-8 max-w-md mx-auto">
+                        Es posible que el lugar que buscas haya sido eliminado o no esté disponible actualmente.
+                    </p>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => navigate('/home')}
+                            className="auth-button shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                        >
+                            Ir al Mapa
+                        </button>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="px-6 py-3 rounded-full border-2 border-eco-primary-200 text-eco-primary-700 font-semibold hover:bg-eco-primary-50 transition-colors"
+                        >
+                            Volver Atrás
+                        </button>
+                    </div>
                 </div>
             </div>
         );
