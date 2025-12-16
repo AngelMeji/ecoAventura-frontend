@@ -15,7 +15,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             </div>
 
             {/* Header */}
-            <div className="relative z-10 w-full">
+            <div className="relative z-20 w-full">
                 <Header />
             </div>
 

@@ -279,8 +279,8 @@ const Dashboard: React.FC = () => {
                                     <div className="p-8 text-center text-gray-500">
                                         <p>¡Todo al día! No hay lugares pendientes de revisión.</p>
                                     </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
+                                ) : (<>
+                                    <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                                                 <tr>
@@ -348,7 +348,65 @@ const Dashboard: React.FC = () => {
                                             </tbody>
                                         </table>
                                     </div>
-                                )}
+
+                                    {/* Mobile Cards (Pending) */}
+                                    <div className="md:hidden space-y-4 p-4">
+                                        {pendingPlaces.map(place => (
+                                            <div key={place.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="font-bold text-gray-900">{place.name}</p>
+                                                        <p className="text-xs text-eco-primary-600 font-bold">{place.category?.name}</p>
+                                                    </div>
+                                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                                        {place.user?.name}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                                    <button
+                                                        onClick={() => handleApprove(place.id)}
+                                                        className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                        APROBAR
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/place/${place.slug || place.id}`, { state: { placeData: place } })}
+                                                        className="px-3 py-2 bg-eco-primary-50 text-eco-primary-700 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                        VER
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!confirm('¿Rechazar lugar?')) return;
+                                                            try {
+                                                                await placesService.reject(place.id);
+                                                                setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                            } catch (e) { alert('Error rechazando'); }
+                                                        }}
+                                                        className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                                                    >
+                                                        Rechazar
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (!confirm('¿Solicitar cambios?')) return;
+                                                            try {
+                                                                await placesService.needsFix(place.id);
+                                                                setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                            } catch (e) { alert('Error solicitando cambios'); }
+                                                        }}
+                                                        className="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                                                    >
+                                                        Cambios
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>)}
                             </div>
 
                             {/* ALL Places Table (Management) */}
@@ -359,7 +417,7 @@ const Dashboard: React.FC = () => {
                                         Administrar Todos los Lugares
                                     </h2>
                                 </div>
-                                <div className="overflow-x-auto">
+                                <div className="hidden md:block overflow-x-auto">
                                     <table className="w-full text-left">
                                         <thead className="bg-gray-50/50 text-xs uppercase text-gray-500 font-bold tracking-wider">
                                             <tr>
@@ -438,6 +496,76 @@ const Dashboard: React.FC = () => {
                                         </tbody>
                                     </table>
                                 </div>
+                                {/* Mobile Cards (All Places) */}
+                                <div className="md:hidden space-y-4 p-4">
+                                    {allPlaces && allPlaces.map(place => (
+                                        <div key={place.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                                            <div className="flex gap-3">
+                                                <div className="w-16 h-16 rounded bg-gray-200 overflow-hidden flex-shrink-0">
+                                                    {place.images && place.images[0] && (
+                                                        <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-gray-900 truncate">{place.name}</p>
+                                                    <p className="text-sm text-gray-500">{place.user?.name}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center gap-2">
+                                                <div className="flex-1">
+                                                    <select
+                                                        value={place.status}
+                                                        onChange={async (e) => {
+                                                            const newStatus = e.target.value;
+                                                            if (!confirm(`¿Cambiar estado a ${newStatus}?`)) return;
+                                                            try {
+                                                                if (newStatus === 'approved') await placesService.approve(place.id);
+                                                                else if (newStatus === 'rejected') await placesService.reject(place.id);
+                                                                else if (newStatus === 'needs_fix') await placesService.needsFix(place.id);
+                                                                setAllPlaces(prev => prev.map(p => p.id === place.id ? { ...p, status: newStatus as any } : p));
+                                                            } catch (error) {
+                                                                alert('Error cambiando estado');
+                                                            }
+                                                        }}
+                                                        className={`w-full px-3 py-1.5 rounded-lg text-xs font-bold border-none cursor-pointer ${place.status === 'approved' ? 'bg-eco-primary-100 text-eco-primary-700' :
+                                                            place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                place.status === 'needs_fix' ? 'bg-orange-100 text-orange-700' :
+                                                                    'bg-red-100 text-red-700'
+                                                            }`}
+                                                    >
+                                                        <option value="pending">Pendiente</option>
+                                                        <option value="approved">Aprobado</option>
+                                                        <option value="needs_fix">Requiere Cambios</option>
+                                                        <option value="rejected">Rechazado</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end gap-2 pt-2 border-t border-gray-50">
+                                                <button
+                                                    onClick={() => navigate(`/places/edit/${place.id}`)}
+                                                    className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm('¿Eliminar lugar?')) {
+                                                            placesService.delete(place.id).then(() => {
+                                                                alert('Lugar eliminado');
+                                                                loadDashboardData();
+                                                            });
+                                                        }
+                                                    }}
+                                                    className="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-sm font-medium"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Admin Users Table Component */}
@@ -503,7 +631,7 @@ const Dashboard: React.FC = () => {
                                         Mis Publicaciones
                                         <span className="text-sm font-normal text-gray-500">({partnerPlaces.length})</span>
                                     </h3>
-                                    <div className="overflow-x-auto">
+                                    <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                                                 <tr>
@@ -554,6 +682,44 @@ const Dashboard: React.FC = () => {
                                                 ))}
                                             </tbody>
                                         </table>
+                                    </div>
+                                    {/* Mobile Cards (Partner Places) */}
+                                    <div className="md:hidden space-y-4 p-4">
+                                        {partnerPlaces.map(place => (
+                                            <div key={place.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                                                <div className="flex gap-3">
+                                                    <div className="w-16 h-16 rounded bg-gray-200 overflow-hidden flex-shrink-0">
+                                                        {place.images && place.images[0] && (
+                                                            <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-gray-900 truncate">{place.name}</p>
+                                                        <p className="text-xs text-gray-500 mb-1">{place.category?.name}</p>
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-block ${place.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                            place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                'bg-red-100 text-red-700'
+                                                            }`}>
+                                                            {place.status === 'approved' ? 'Publicado' : place.status === 'pending' ? 'En Revisión' : 'Rechazado'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end gap-2 pt-2 border-t border-gray-50">
+                                                    <button
+                                                        onClick={() => navigate(`/place/${place.slug || place.id}`, { state: { placeData: place } })}
+                                                        className="px-3 py-1.5 bg-eco-primary-50 text-eco-primary-700 rounded-lg text-sm font-medium"
+                                                    >
+                                                        Ver
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/places/edit/${place.id}`)}
+                                                        className="px-3 py-1.5 bg-eco-secondary-light/50 text-eco-secondary-hover rounded-lg text-sm font-medium"
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}

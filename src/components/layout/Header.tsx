@@ -7,6 +7,7 @@ const Header: React.FC = () => {
     const location = useLocation();
     const user = authService.getCurrentUser();
     const isAuthenticated = !!user;
+    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -22,8 +23,10 @@ const Header: React.FC = () => {
         window.location.href = '/login';
     };
 
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
     return (
-        <header className="bg-white/90 backdrop-blur-md border-b border-eco-primary-100 sticky top-0 z-[9999] shadow-sm transition-all duration-300">
+        <header className="bg-white border-b border-eco-primary-100 sticky top-0 z-[9999] shadow-sm transition-all duration-300">
             <div className="container mx-auto px-6 py-4 flex items-center justify-between">
                 <Link
                     to="/home"
@@ -33,12 +36,26 @@ const Header: React.FC = () => {
                             window.location.reload();
                         }
                     }}
-                    className="flex-shrink-0 hover:scale-105 transition-transform"
+                    className="flex-shrink-0 hover:scale-105 transition-transform z-50 relative"
                 >
                     <Logo />
                 </Link>
 
-                <div className="flex gap-4 items-center">
+                {/* Hamburger Button (Spin & Cross Animation) */}
+                <button
+                    className="md:hidden z-50 relative w-12 h-12 flex justify-center items-center focus:outline-none rounded-full hover:bg-gray-50 transition-colors group"
+                    onClick={toggleMenu}
+                    aria-label="Toggle menu"
+                >
+                    <div className={`flex flex-col justify-between w-6 h-[18px] transform transition-transform duration-500 ease-in-out ${isMenuOpen ? 'rotate-180' : ''}`}>
+                        <span className={`block h-0.5 w-full bg-eco-primary-700 rounded-full transition-all duration-300 ease-in-out origin-center ${isMenuOpen ? 'translate-y-[8px] rotate-45' : ''}`} />
+                        <span className={`block h-0.5 w-full bg-eco-primary-700 rounded-full transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'}`} />
+                        <span className={`block h-0.5 w-full bg-eco-primary-700 rounded-full transition-all duration-300 ease-in-out origin-center ${isMenuOpen ? '-translate-y-[8px] -rotate-45' : ''}`} />
+                    </div>
+                </button>
+
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex gap-4 items-center">
                     <Link
                         to="/home"
                         onClick={(e) => {
@@ -66,8 +83,8 @@ const Header: React.FC = () => {
                             >
                                 {user.role === 'admin' ? 'Panel Admin' : (user.role === 'partner' ? 'Panel Socio' : 'Mi Cuenta')}
                             </Link>
-                            <div className="h-6 w-px bg-gray-200 mx-1"></div>
-                            <div className="hidden md:flex items-center gap-2">
+
+                            <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-sm">
                                     {user?.name?.charAt(0).toUpperCase()}
                                 </div>
@@ -104,6 +121,65 @@ const Header: React.FC = () => {
                             </Link>
                         </>
                     )}
+                </div>
+
+                {/* Mobile Navigation Menu */}
+                <div className={`fixed inset-0 bg-white transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) z-40 flex flex-col pt-24 px-6 md:hidden ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
+                    <div className="flex flex-col gap-6">
+                        <Link
+                            to="/home"
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`text-2xl font-display font-medium transition-colors ${isActive('/home') ? 'text-eco-primary-600' : 'text-gray-800'}`}
+                        >
+                            Inicio
+                        </Link>
+
+                        {isAuthenticated ? (
+                            <>
+                                <Link
+                                    to="/dashboard"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className={`text-2xl font-display font-medium transition-colors ${isActive('/dashboard') ? 'text-eco-primary-600' : 'text-gray-800'}`}
+                                >
+                                    {user.role === 'admin' ? 'Panel Admin' : (user.role === 'partner' ? 'Panel Socio' : 'Mi Cuenta')}
+                                </Link>
+                                <div className="flex items-center gap-3 py-4 border-t border-gray-100">
+                                    <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-lg">
+                                        {user?.name?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span className="text-lg font-medium text-gray-700">
+                                        {user?.name}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        handleLogout();
+                                    }}
+                                    className="text-left text-xl text-eco-accent-red font-medium py-2"
+                                >
+                                    Cerrar Sesión
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/login"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className={`text-2xl font-display font-medium transition-colors ${isActive('/login') ? 'text-eco-primary-600' : 'text-gray-800'}`}
+                                >
+                                    Iniciar Sesión
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-2xl font-display font-medium bg-gradient-to-r from-eco-primary-600 to-eco-primary-500 bg-clip-text text-transparent"
+                                >
+                                    Registrarse
+                                </Link>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>

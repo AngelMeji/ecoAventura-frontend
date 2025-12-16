@@ -93,67 +93,126 @@ const AdminUsersTable: React.FC = () => {
                 </button>
             </div>
 
-            <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
-                    <tr>
-                        <th className="p-4 border-b">ID</th>
-                        <th className="p-4 border-b">Usuario</th>
-                        <th className="p-4 border-b">Email</th>
-                        <th className="p-4 border-b">Rol</th>
-                        <th className="p-4 border-b text-right">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                    {users.map(u => (
-                        <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="p-4 text-gray-500">#{u.id}</td>
-                            <td className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                        {u.avatar ? (
-                                            <img
-                                                src={u.avatar.startsWith('http') ? u.avatar : `/upload/${u.avatar.split('/').pop()}`}
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    if (!target.src.includes('storage')) {
-                                                        target.src = `http://localhost:8000/storage/${u.avatar}`;
-                                                    }
-                                                }}
-                                            />
-                                        ) : <span className="text-gray-500 font-bold">{u.name[0]}</span>}
-                                    </div>
-                                    <span className="font-medium text-gray-900">{u.name}</span>
-                                </div>
-                            </td>
-                            <td className="p-4 text-gray-600">{u.email}</td>
-                            <td className="p-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                                    u.role === 'partner' ? 'bg-eco-teal-100 text-eco-teal-700' : 'bg-gray-100 text-gray-700'
-                                    }`}>
-                                    {u.role === 'admin' ? '👑 Admin' : u.role === 'partner' ? '🤝 Socio' : '👤 Usuario'}
-                                </span>
-                            </td>
-                            <td className="p-4 text-right space-x-2">
-                                <button
-                                    onClick={() => handleEdit(u)}
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="Editar"
-                                >
-                                    ✏️
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(u.id)}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Eliminar"
-                                >
-                                    🗑️
-                                </button>
-                            </td>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+                        <tr>
+                            <th className="p-4 border-b">ID</th>
+                            <th className="p-4 border-b">Usuario</th>
+                            <th className="p-4 border-b">Email</th>
+                            <th className="p-4 border-b">Rol</th>
+                            <th className="p-4 border-b text-right">Acciones</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {users.map(u => (
+                            <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="p-4 text-gray-500">#{u.id}</td>
+                                <td className="p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                            {u.avatar ? (
+                                                <img
+                                                    src={u.avatar.startsWith('http') ? u.avatar : `/upload/${u.avatar.split('/').pop()}`}
+                                                    alt={u.name}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        if (!target.src.includes('storage')) {
+                                                            target.src = `http://localhost:8000/storage/${u.avatar}`;
+                                                        }
+                                                    }}
+                                                />
+                                            ) : <span className="text-gray-500 font-bold">{u.name[0]}</span>}
+                                        </div>
+                                        <span className="font-medium text-gray-900">{u.name}</span>
+                                    </div>
+                                </td>
+                                <td className="p-4 text-gray-600">{u.email}</td>
+                                <td className="p-4">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                        u.role === 'partner' ? 'bg-eco-teal-100 text-eco-teal-700' : 'bg-gray-100 text-gray-700'
+                                        }`}>
+                                        {u.role === 'admin' ? '👑 Admin' : u.role === 'partner' ? '🤝 Socio' : '👤 Usuario'}
+                                    </span>
+                                </td>
+                                <td className="p-4 text-right space-x-2">
+                                    <button
+                                        onClick={() => handleEdit(u)}
+                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        title="Editar"
+                                    >
+                                        ✏️
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(u.id)}
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Eliminar"
+                                    >
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {users.map(u => (
+                    <div key={u.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                    {u.avatar ? (
+                                        <img
+                                            src={u.avatar.startsWith('http') ? u.avatar : `/upload/${u.avatar.split('/').pop()}`}
+                                            alt={u.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                if (!target.src.includes('storage')) {
+                                                    target.src = `http://localhost:8000/storage/${u.avatar}`;
+                                                }
+                                            }}
+                                        />
+                                    ) : <span className="text-gray-500 font-bold">{u.name[0]}</span>}
+                                </div>
+                                <div>
+                                    <span className="font-bold text-gray-900 block">{u.name}</span>
+                                    <span className="text-xs text-gray-500">#{u.id}</span>
+                                </div>
+                            </div>
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                u.role === 'partner' ? 'bg-eco-teal-100 text-eco-teal-700' : 'bg-gray-100 text-gray-700'
+                                }`}>
+                                {u.role === 'admin' ? 'Admin' : u.role === 'partner' ? 'Socio' : 'Usuario'}
+                            </span>
+                        </div>
+
+                        <div className="text-sm text-gray-600 break-all">
+                            {u.email}
+                        </div>
+
+                        <div className="flex justify-end pt-2 border-t border-gray-50 gap-2">
+                            <button
+                                onClick={() => handleEdit(u)}
+                                className="px-3 py-1.5 text-blue-600 bg-blue-50 rounded-lg text-sm font-medium"
+                            >
+                                Editar
+                            </button>
+                            <button
+                                onClick={() => handleDelete(u.id)}
+                                className="px-3 py-1.5 text-red-600 bg-red-50 rounded-lg text-sm font-medium"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
             {/* Edit Modal */}
             <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Editar Usuario">
