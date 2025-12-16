@@ -72,7 +72,6 @@ const ForgotPassword: React.FC = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="auth-input pl-10"
                                     placeholder="ejemplo@correo.com"
-                                    required
                                 />
                             </div>
                         </div>

@@ -89,7 +89,6 @@ const ResetPassword: React.FC = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     className={`auth-input pl-10 ${emailParam ? 'bg-gray-50' : ''}`}
                                     placeholder="ejemplo@correo.com"
-                                    required
                                     readOnly={!!emailParam}
                                 />
                             </div>
@@ -107,8 +106,6 @@ const ResetPassword: React.FC = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="auth-input pl-10"
                                     placeholder="••••••••"
-                                    required
-                                    minLength={8}
                                 />
                             </div>
                         </div>
@@ -125,7 +122,6 @@ const ResetPassword: React.FC = () => {
                                     onChange={(e) => setPasswordConfirmation(e.target.value)}
                                     className="auth-input pl-10"
                                     placeholder="••••••••"
-                                    required
                                 />
                             </div>
                         </div>

@@ -243,7 +243,6 @@ const PlaceForm: React.FC = () => {
                             <div className="col-span-2">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre del Lugar *</label>
                                 <input
-                                    required
                                     type="text"
                                     value={name}
                                     onChange={e => setName(e.target.value)}
@@ -256,7 +255,6 @@ const PlaceForm: React.FC = () => {
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Categoría *</label>
                                 <div className="relative">
                                     <select
-                                        required
                                         value={categoryId}
                                         onChange={e => setCategoryId(e.target.value)}
                                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all bg-gray-50 focus:bg-white appearance-none cursor-pointer"
@@ -296,7 +294,6 @@ const PlaceForm: React.FC = () => {
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Descripción Corta *</label>
                             <input
-                                required
                                 type="text"
                                 value={shortDesc}
                                 onChange={e => setShortDesc(e.target.value)}

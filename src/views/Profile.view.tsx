@@ -207,7 +207,6 @@ const Profile: React.FC = () => {
                                             value={profileData.name}
                                             onChange={e => setProfileData({ ...profileData, name: e.target.value })}
                                             className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-eco-primary-500 focus:ring-4 focus:ring-eco-primary-500/10 transition-all p-3 outline-none"
-                                            required
                                         />
                                     </div>
                                     <div>
@@ -266,7 +265,6 @@ const Profile: React.FC = () => {
                                         value={passwordData.current_password}
                                         onChange={e => setPasswordData({ ...passwordData, current_password: e.target.value })}
                                         className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-eco-secondary focus:ring-4 focus:ring-eco-secondary/10 transition-all p-3 outline-none"
-                                        required
                                     />
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -277,7 +275,6 @@ const Profile: React.FC = () => {
                                             value={passwordData.password}
                                             onChange={e => setPasswordData({ ...passwordData, password: e.target.value })}
                                             className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-eco-secondary focus:ring-4 focus:ring-eco-secondary/10 transition-all p-3 outline-none"
-                                            required
                                         />
                                     </div>
                                     <div>
@@ -287,7 +284,6 @@ const Profile: React.FC = () => {
                                             value={passwordData.password_confirmation}
                                             onChange={e => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
                                             className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-eco-secondary focus:ring-4 focus:ring-eco-secondary/10 transition-all p-3 outline-none"
-                                            required
                                         />
                                     </div>
                                 </div>

@@ -79,7 +79,6 @@ const Login: React.FC = () => {
                         value={credentials.email}
                         onChange={handleChange}
                         placeholder="tu@email.com"
-                        required
                         className="auth-input ring-offset-2 focus:ring-2 focus:ring-eco-primary-500/20"
                     />
                 </div>
@@ -95,7 +94,6 @@ const Login: React.FC = () => {
                         value={credentials.password}
                         onChange={handleChange}
                         placeholder="••••••••"
-                        required
                         className="auth-input ring-offset-2 focus:ring-2 focus:ring-eco-primary-500/20"
                     />
                 </div>
