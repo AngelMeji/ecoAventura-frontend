@@ -59,12 +59,21 @@ const Profile: React.FC = () => {
                 data = formData;
             }
 
-            const response: any = await authService.updateProfile(data); // Asumimos que devuelve el objeto response completo o data
+            const response: any = await authService.updateProfile(data);
 
-            // Verificamos éxito basado en la respuesta estándar V2
-            if (response && (response.success || response.id)) { // response.id es fallback por si devuelve el user directo
-                setMsg({ type: 'success', text: 'Perfil actualizado con éxito. Redirigiendo...' });
+            // DEBUG: Ver qué devuelve el backend
+            console.log('📋 Respuesta del backend:', response);
+
+            // Verificar éxito según formato V2: { success: true, message: "...", user: {...} }
+            if (response && response.success === true) {
+                setMsg({ type: 'success', text: response.message || 'Perfil actualizado con éxito. Redirigiendo...' });
                 // Redirigir al dashboard tras breve pausa
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+            } else if (response && response.id) {
+                // Fallback: Si el backend devuelve el user directamente (sin wrapper)
+                setMsg({ type: 'success', text: 'Perfil actualizado con éxito. Redirigiendo...' });
                 setTimeout(() => {
                     window.location.href = '/dashboard';
                 }, 1500);
@@ -74,6 +83,8 @@ const Profile: React.FC = () => {
 
         } catch (error: any) {
             console.error('Update error:', error);
+            console.error('Error response:', error.response?.data);
+
             // Manejo de errores de validación (422)
             if (error.response?.status === 422) {
                 const errors = error.response.data.errors;
@@ -82,7 +93,6 @@ const Profile: React.FC = () => {
             } else {
                 setMsg({ type: 'error', text: error.response?.data?.message || 'Error al actualizar perfil' });
             }
-            // NOTA: No limpiamos profileData aquí para persistencia
         } finally {
             setLoading(false);
         }

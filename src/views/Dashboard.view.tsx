@@ -41,21 +41,37 @@ const Dashboard: React.FC = () => {
                 } catch (e) { console.warn('Backend missing getAdminAllPlaces'); }
 
             } else if (user.role === 'partner') {
-                const data = await placesService.getPartnerDashboard();
-                setStats(data?.stats || {});
+                // Intentar obtener dashboard del partner
+                let dashboardData: any = null;
+                try {
+                    dashboardData = await placesService.getPartnerDashboard();
+                    setStats(dashboardData?.stats || {});
+                } catch (error) {
+                    console.warn('⚠️ Partner dashboard endpoint falló (probablemente error de backend), usando fallback:', error);
+                    // Si falla, al menos inicializamos stats vacío
+                    setStats({});
+                }
 
                 // Robust extraction for Partner Places
                 let pPlaces: Place[] = [];
-                // 1. Try direct from dashboard
-                if (data?.places && Array.isArray(data.places)) pPlaces = data.places;
-                else if (data?.places?.data && Array.isArray(data.places.data)) pPlaces = data.places.data;
 
-                // 2. Fallback: Fetch all if empty
+                // 1. Try direct from dashboard (si funcionó)
+                if (dashboardData?.places && Array.isArray(dashboardData.places)) {
+                    pPlaces = dashboardData.places;
+                } else if (dashboardData?.places?.data && Array.isArray(dashboardData.places.data)) {
+                    pPlaces = dashboardData.places.data;
+                }
+
+                // 2. Fallback: Fetch all usando /api/places?user_id=X (siempre intentar si está vacío)
                 if (pPlaces.length === 0) {
                     try {
+                        console.log('🔄 Obteniendo lugares del partner usando fallback endpoint...');
                         const allResp: any = await placesService.getAll({ user_id: user.id });
                         pPlaces = Array.isArray(allResp) ? allResp : allResp.data || [];
-                    } catch (e) { console.warn('Fallback partner fetch failed'); }
+                        console.log(`✅ Lugares del partner obtenidos: ${pPlaces.length}`);
+                    } catch (e) {
+                        console.error('❌ Fallback partner fetch failed:', e);
+                    }
                 }
                 setPartnerPlaces(pPlaces);
             } else {

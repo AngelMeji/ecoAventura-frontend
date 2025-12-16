@@ -111,15 +111,24 @@ export const authService = {
     },
 
     // Actualizar perfil
-    async updateProfile(data: Partial<User> | FormData): Promise<User> {
+    async updateProfile(data: Partial<User> | FormData): Promise<any> {
         if (data instanceof FormData) {
             data.append('_method', 'PUT');
         }
 
-        const response = await api.post<User>('/me/profile', data, {
+        const response = await api.post<any>('/me/profile', data, {
             headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
         });
-        localStorage.setItem('user', JSON.stringify(response.data));
+
+        // Actualizar localStorage con el usuario actualizado
+        if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        } else if (response.data.id) {
+            // Fallback: si el backend devuelve el user directamente
+            localStorage.setItem('user', JSON.stringify(response.data));
+        }
+
+        // Devolver la respuesta completa para que la vista pueda verificar 'success'
         return response.data;
     },
 
