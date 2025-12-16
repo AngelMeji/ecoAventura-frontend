@@ -48,28 +48,9 @@ const PlaceDetail: React.FC = () => {
             // Manejar respuesta envuelta de Laravel Resource (data.data)
             const loadedPlace = data.data || data;
 
-            // VERIFICACIÓN MANUAL DE FAVORITO (Persistencia)
-            // Si el backend no devuelve 'is_favorite', verificamos contra la lista de favoritos del usuario
-            if (user && loadedPlace.is_favorite === undefined) {
-                try {
-                    const favsResponse: any = await placesService.getFavorites();
-                    const rawList = Array.isArray(favsResponse)
-                        ? favsResponse
-                        : (favsResponse?.data ? favsResponse.data : []);
-
-                    // Verificar si el ID del lugar está en la lista (como id directo o place_id)
-                    const isFav = rawList.some((f: any) =>
-                        (f.place_id && f.place_id === loadedPlace.id) ||
-                        (f.id === loadedPlace.id)
-                    );
-
-                    // Forzar el estado en el objeto local
-                    loadedPlace.is_favorite = isFav;
-                    console.log(`Verificación manual favorrito para ${loadedPlace.id}: ${isFav}`);
-                } catch (err) {
-                    console.warn('Falló verificación manual de favoritos', err);
-                }
-            }
+            // V2: El backend ya devuelve 'is_favorite' en el objeto Place
+            // No es necesaria la verificación manual
+            console.log(`Lugar cargado: ${loadedPlace.name}, Favorito: ${loadedPlace.is_favorite}`);
 
             setPlace(loadedPlace);
         } catch (error) {
@@ -191,7 +172,7 @@ const PlaceDetail: React.FC = () => {
                     {/* Header Image / Carousel */}
                     <div className="relative h-[400px] md:h-[500px] bg-gray-200 group">
                         <img
-                            src={getFullImageUrl(images[currentImageIndex].image_path)}
+                            src={images[currentImageIndex].full_url || getFullImageUrl(images[currentImageIndex].image_path)}
                             alt={place.name}
                             className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                         />

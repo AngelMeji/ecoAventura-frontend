@@ -12,6 +12,8 @@ import Dashboard from '../views/Dashboard.view';
 import Profile from '../views/Profile.view';
 import PlaceForm from '../views/PlaceForm.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
+import ForgotPassword from '../views/auth/ForgotPassword.view';
+import ResetPassword from '../views/auth/ResetPassword.view';
 
 /**
  * Configuración de rutas de la aplicación
@@ -58,6 +60,22 @@ export const appRoutes: RouteObject[] = [
         element: (
             <AuthLayout>
                 <Register />
+            </AuthLayout>
+        )
+    },
+    {
+        path: '/forgot-password',
+        element: (
+            <AuthLayout>
+                <ForgotPassword />
+            </AuthLayout>
+        )
+    },
+    {
+        path: '/password/reset',
+        element: (
+            <AuthLayout>
+                <ResetPassword />
             </AuthLayout>
         )
     }

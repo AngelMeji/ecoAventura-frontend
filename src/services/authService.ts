@@ -22,14 +22,26 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Interceptor para manejar errores globales (ej. 401 Unauthorized)
+// Interceptor para manejar respuestas y errores globales
 api.interceptors.response.use(
     (response) => response,
-    (error: AxiosError) => {
-        if (error.response?.status === 401) {
-            // Si el token expiró o no es válido, cerrar sesión
-            authService.logout();
-            window.location.href = '/login';
+    (error: AxiosError<any>) => {
+        // Manejo de Errores V2: El backend devuelve { success: false, message: '...', errors: {...} }
+        if (error.response) {
+            const { status, data } = error.response;
+
+            // 401: No autorizado (Token vencido o inválido)
+            if (status === 401) {
+                authService.logout();
+                window.location.href = '/login';
+                return Promise.reject(error);
+            }
+
+            // Si hay un mensaje de error del backend, lo propagamos
+            if (data && data.message) {
+                // Aquí podrías disparar una notificación global (Toast)
+                console.warn('Backend Error:', data.message);
+            }
         }
         return Promise.reject(error);
     }
@@ -114,6 +126,17 @@ export const authService = {
     // Actualizar contraseña
     async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<void> {
         await api.put('/me/password', data);
+    },
+
+    // Recuperar contraseña
+    async forgotPassword(email: string): Promise<any> {
+        const response = await api.post('/password/email', { email });
+        return response.data;
+    },
+
+    async resetPassword(data: any): Promise<any> {
+        const response = await api.post('/password/reset', data);
+        return response.data;
     },
 
     // Métodos auxiliares locales
