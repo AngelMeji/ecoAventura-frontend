@@ -38,6 +38,8 @@ const Register: React.FC = () => {
 
         if (formData.password !== formData.password_confirmation) {
             newErrors.password_confirmation = 'Las contraseñas no coinciden';
+        } else if (formData.password.length > 12) {
+            newErrors.password = 'La contraseña no puede tener más de 12 caracteres';
         }
 
         setErrors(newErrors);
@@ -77,8 +79,6 @@ const Register: React.FC = () => {
                 ...errors,
                 [e.target.name]: '',
             });
-            // Redirigir al home por defecto (los usuarios nuevos son 'user')
-            window.location.href = '/home';
         }
     };
 

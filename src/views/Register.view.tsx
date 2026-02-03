@@ -71,8 +71,6 @@ const Register: React.FC = () => {
                 ...errors,
                 [e.target.name]: '',
             });
-            // Redirigir al home por defecto (los usuarios nuevos son 'user')
-            window.location.href = '/home';
         }
     };
 

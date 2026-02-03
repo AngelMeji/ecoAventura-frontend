@@ -55,8 +55,8 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 }) => {
     const mapRef = useRef<L.Map>(null);
 
-    // Center of Risaralda, Colombia
-    const center: [number, number] = [4.8, -75.6];
+    // Center of Risaralda, Colombia (Pereira)
+    const center: [number, number] = [4.8143, -75.6946];
 
     const handleMarkerClick = (destinationId: number) => {
         if (onMarkerClick) {
@@ -80,7 +80,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 
             <MapContainer
                 center={center}
-                zoom={10}
+                zoom={13}
                 scrollWheelZoom={true}
                 className="w-full h-full"
                 ref={mapRef}
