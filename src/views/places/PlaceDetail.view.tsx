@@ -84,15 +84,15 @@ const PlaceDetail: React.FC = () => {
         } catch (error: any) {
             // Manejo específico para errores de validación (422)
             if (error.response && error.response.status === 422) {
-                console.log('DATA 422:', error.response.data); // Para debugging
                 const data = error.response.data;
                 const validationErrors = data.errors;
-                let msgText = data.message || 'Error de validación'; // Fallback al mensaje general
+                let msgText = '';
 
                 if (validationErrors) {
-                    // Concatenar todos los mensajes de error de forma legible
-                    const details = Object.values(validationErrors).flat().join(', ');
-                    msgText = `${msgText}: ${details}`;
+                    // Usar solo los errores detallados, ignorando el resumen automático de Laravel
+                    msgText = Object.values(validationErrors).flat().join('\n');
+                } else {
+                    msgText = data.message || 'Error de validación';
                 }
                 setMessage({ type: 'error', text: msgText });
             } else {
@@ -345,7 +345,7 @@ const PlaceDetail: React.FC = () => {
                                                     ) : (
                                                         <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                     )}
-                                                    <p>{message.text}</p>
+                                                    <p className="whitespace-pre-line">{message.text}</p>
                                                 </div>
                                             )}
 

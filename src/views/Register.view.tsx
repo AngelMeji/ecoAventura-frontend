@@ -53,9 +53,19 @@ const Register: React.FC = () => {
             alert(`¡Bienvenido ${response.user.name}! Tu cuenta ha sido creada exitosamente.`);
             navigate('/home'); // Redirigir al Home tras registro exitoso
         } catch (err: any) {
-            setErrors({
-                general: err.message || 'Error al registrar',
-            });
+            console.error('Register error:', err);
+            const newErrors: Record<string, string> = {};
+
+            if (err.errors) {
+                // Mapear errores de validación del backend a los campos
+                Object.keys(err.errors).forEach(key => {
+                    newErrors[key] = err.errors[key][0];
+                });
+            } else {
+                newErrors.general = err.message || 'Error al registrar. Por favor intente de nuevo.';
+            }
+
+            setErrors(newErrors);
         } finally {
             setLoading(false);
         }

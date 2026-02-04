@@ -39,6 +39,50 @@ const Profile: React.FC = () => {
         }
     }, [user?.id]);
 
+    // Estado para drag & drop
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Prevenir comportamiento por defecto del navegador al arrastrar archivos
+    useEffect(() => {
+        const preventDefaults = (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Prevenir que el navegador abra el archivo
+        window.addEventListener('dragover', preventDefaults);
+        window.addEventListener('drop', preventDefaults);
+
+        return () => {
+            window.removeEventListener('dragover', preventDefaults);
+            window.removeEventListener('drop', preventDefaults);
+        };
+    }, []);
+
+    // Funciones para manejar drag & drop
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = e.dataTransfer.files;
+        if (files && files[0] && files[0].type.startsWith('image/')) {
+            setProfileData({ ...profileData, avatarFile: files[0] });
+        }
+    };
+
     if (!authService.isAuthenticated() || !user) {
         return <Navigate to="/login" replace />;
     }
@@ -93,16 +137,15 @@ const Profile: React.FC = () => {
             // Limpiar campos del formulario primero
             setPasswordData({ current_password: '', password: '', password_confirmation: '' });
 
+            // Limpiar sesión local directamente (los tokens ya fueron revocados en el backend)
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+
             // Mostrar alerta de confirmación con el mensaje del backend
-            alert(response.message || '¡Éxito! Tu contraseña ha sido actualizada correctamente.');
+            alert(response.message || 'Cambio de contraseña exitoso. Por favor, ingrese nuevamente para iniciar sesión con sus nuevas credenciales.');
 
-            // Después de que el usuario confirma (hace click en OK), cerrar sesión
-            console.log('Cerrando sesión...');
-            await authService.logout();
-            console.log('Sesión cerrada, redirigiendo...');
-
-            // Redirigir al login después del logout
-            window.location.href = '/login';
+            // Redirigir al login (replace fuerza recarga completa)
+            window.location.replace('/login');
         } catch (error: any) {
             // Extraer mensaje de error en español
             let errorMessage = 'Error al actualizar contraseña';
@@ -154,7 +197,13 @@ const Profile: React.FC = () => {
                     <div className="md:col-span-1">
                         <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 sticky top-24">
                             <div className="p-8 text-center bg-gradient-to-b from-eco-primary-50 to-transparent">
-                                <div className="w-32 h-32 mx-auto bg-white rounded-full mb-6 p-1 border-4 border-white shadow-lg relative group">
+                                <div
+                                    className={`w-32 h-32 mx-auto bg-white rounded-full mb-6 p-1 border-4 shadow-lg relative group transition-all ${isDragging ? 'border-eco-primary-500 scale-105' : 'border-white'
+                                        }`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
                                     <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 relative">
                                         {profileData.avatar || profileData.avatarFile ? (
                                             <img
@@ -180,7 +229,8 @@ const Profile: React.FC = () => {
                                             </div>
                                         )}
 
-                                        <label htmlFor="avatar-upload" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                        <label htmlFor="avatar-upload" className={`absolute inset-0 flex items-center justify-center transition-opacity cursor-pointer ${isDragging ? 'bg-eco-primary-500/60 opacity-100' : 'bg-black/40 opacity-0 group-hover:opacity-100'
+                                            }`}>
                                             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                         </label>
                                     </div>

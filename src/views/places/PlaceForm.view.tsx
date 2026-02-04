@@ -38,6 +38,7 @@ const PlaceForm: React.FC = () => {
     // Images State
     const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
     const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
         if (!user || (user.role !== 'partner' && user.role !== 'admin')) {
@@ -129,6 +130,58 @@ const PlaceForm: React.FC = () => {
 
         // Reset file input
         if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    // Funciones para drag & drop
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) return;
+
+        const newPreviews: ImagePreview[] = [];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            // Validar tipo y tamaño
+            if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
+                alert(`Archivo ${file.name} no es una imagen válida`);
+                continue;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`Archivo ${file.name} excede el límite de 5MB`);
+                continue;
+            }
+
+            newPreviews.push({
+                file,
+                url: URL.createObjectURL(file),
+                isPrimary: imagePreviews.length === 0 && newPreviews.length === 0,
+                isExisting: false
+            });
+        }
+
+        // Máximo 10 imágenes
+        const total = imagePreviews.length + newPreviews.length;
+        if (total > 10) {
+            alert('Máximo 10 imágenes por lugar');
+            setImagePreviews(prev => [...prev, ...newPreviews.slice(0, 10 - prev.length)]);
+        } else {
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
     };
 
     const handleRemoveImage = (index: number) => {
@@ -448,7 +501,13 @@ const PlaceForm: React.FC = () => {
                             {imagePreviews.length < 10 && (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 transition-colors group cursor-pointer"
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    className={`flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl transition-all group cursor-pointer ${isDragging
+                                            ? 'border-eco-primary-500 bg-eco-primary-50'
+                                            : 'border-gray-300 hover:bg-gray-50'
+                                        }`}
                                 >
                                     <input
                                         ref={fileInputRef}

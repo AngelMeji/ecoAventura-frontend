@@ -38,6 +38,50 @@ const Profile: React.FC = () => {
         }
     }, [user?.id]);
 
+    // Estado para drag & drop
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Prevenir comportamiento por defecto del navegador al arrastrar archivos
+    useEffect(() => {
+        const preventDefaults = (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Prevenir que el navegador abra el archivo
+        window.addEventListener('dragover', preventDefaults);
+        window.addEventListener('drop', preventDefaults);
+
+        return () => {
+            window.removeEventListener('dragover', preventDefaults);
+            window.removeEventListener('drop', preventDefaults);
+        };
+    }, []);
+
+    // Funciones para manejar drag & drop
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = e.dataTransfer.files;
+        if (files && files[0] && files[0].type.startsWith('image/')) {
+            setProfileData({ ...profileData, avatarFile: files[0] });
+        }
+    };
+
     if (!authService.isAuthenticated() || !user) {
         return <Navigate to="/login" replace />;
     }
@@ -107,11 +151,37 @@ const Profile: React.FC = () => {
         setLoading(true);
         setMsg({ type: '', text: '' });
         try {
-            await authService.updatePassword(passwordData);
-            setMsg({ type: 'success', text: 'Contraseña actualizada correctamente' });
+            const response = await authService.updatePassword(passwordData);
+
+            // Limpiar campos del formulario
             setPasswordData({ current_password: '', password: '', password_confirmation: '' });
+
+            // Limpiar sesión local directamente (los tokens ya fueron revocados en el backend)
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+
+            // Mostrar alerta de confirmación con el mensaje del backend
+            alert(response.message || 'Cambio de contraseña exitoso. Por favor, ingrese nuevamente para iniciar sesión con sus nuevas credenciales.');
+
+            // Redirigir al login (replace fuerza recarga completa)
+            window.location.replace('/login');
         } catch (error: any) {
-            setMsg({ type: 'error', text: error.message || 'Error al actualizar contraseña' });
+            // Extraer mensaje de error en español
+            let errorMessage = 'Error al actualizar contraseña';
+
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.data?.errors) {
+                const errors = error.response.data.errors;
+                const firstError = Object.values(errors)[0];
+                if (Array.isArray(firstError) && firstError.length > 0) {
+                    errorMessage = firstError[0] as string;
+                }
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            setMsg({ type: 'error', text: errorMessage });
         } finally {
             setLoading(false);
         }
@@ -147,20 +217,28 @@ const Profile: React.FC = () => {
                                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                             </div>
                             <div className="px-6 pb-6 text-center -mt-12 relative">
-                                <div className="w-24 h-24 mx-auto bg-white p-1 rounded-full shadow-lg mb-4">
+                                <div
+                                    className={`w-24 h-24 mx-auto bg-white p-1 rounded-full shadow-lg mb-4 transition-all ${isDragging ? 'ring-4 ring-eco-primary-500 scale-105' : ''
+                                        }`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
                                     <div className="w-full h-full rounded-full overflow-hidden bg-eco-primary-50 relative group">
-                                        {profileData.avatar ? (
+                                        {profileData.avatar || profileData.avatarFile ? (
                                             <img
                                                 src={
-                                                    profileData.avatar.startsWith('http')
-                                                        ? profileData.avatar
-                                                        : `/upload/${profileData.avatar.split('/').pop()}`
+                                                    profileData.avatarFile
+                                                        ? URL.createObjectURL(profileData.avatarFile)
+                                                        : (profileData.avatar.startsWith('http')
+                                                            ? profileData.avatar
+                                                            : `/upload/${profileData.avatar.split('/').pop()}`)
                                                 }
                                                 alt="Avatar"
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
-                                                    if (!target.src.includes('storage')) {
+                                                    if (!target.src.includes('storage') && !profileData.avatarFile) {
                                                         target.src = `http://localhost:8000/storage/${profileData.avatar}`;
                                                     }
                                                 }}
