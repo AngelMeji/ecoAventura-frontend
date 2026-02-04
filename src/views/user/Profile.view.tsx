@@ -7,6 +7,7 @@ const Profile: React.FC = () => {
     const user = authService.getCurrentUser();
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
+    const [passwordMsg, setPasswordMsg] = useState({ type: '', text: '' });
 
     const [profileData, setProfileData] = useState<{
         name: string;
@@ -69,18 +70,58 @@ const Profile: React.FC = () => {
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validación: Contraseñas coinciden
         if (passwordData.password !== passwordData.password_confirmation) {
-            setMsg({ type: 'error', text: 'Las contraseñas no coinciden' });
+            const errorMsg = 'Las contraseñas no coinciden';
+            setPasswordMsg({ type: 'error', text: errorMsg });
             return;
         }
+
+        // Validación: Longitud mínima
+        if (passwordData.password.length < 6) {
+            const errorMsg = 'La nueva contraseña debe tener al menos 6 caracteres';
+            setPasswordMsg({ type: 'error', text: errorMsg });
+            return;
+        }
+
         setLoading(true);
-        setMsg({ type: '', text: '' });
+        setPasswordMsg({ type: '', text: '' });
         try {
-            await authService.updatePassword(passwordData);
-            setMsg({ type: 'success', text: 'Contraseña actualizada correctamente' });
+            const response = await authService.updatePassword(passwordData);
+
+            // Limpiar campos del formulario primero
             setPasswordData({ current_password: '', password: '', password_confirmation: '' });
+
+            // Mostrar alerta de confirmación con el mensaje del backend
+            alert(response.message || '¡Éxito! Tu contraseña ha sido actualizada correctamente.');
+
+            // Después de que el usuario confirma (hace click en OK), cerrar sesión
+            console.log('Cerrando sesión...');
+            await authService.logout();
+            console.log('Sesión cerrada, redirigiendo...');
+
+            // Redirigir al login después del logout
+            window.location.href = '/login';
         } catch (error: any) {
-            setMsg({ type: 'error', text: error.message || 'Error al actualizar contraseña' });
+            // Extraer mensaje de error en español
+            let errorMessage = 'Error al actualizar contraseña';
+
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.data?.errors) {
+                // Si hay errores de validación, tomar el primero
+                const errors = error.response.data.errors;
+                const firstError = Object.values(errors)[0];
+                if (Array.isArray(firstError) && firstError.length > 0) {
+                    errorMessage = firstError[0] as string;
+                }
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            // Solo mostrar el error en la UI, sin alert
+            setPasswordMsg({ type: 'error', text: errorMessage });
         } finally {
             setLoading(false);
         }
@@ -219,6 +260,19 @@ const Profile: React.FC = () => {
                                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 Seguridad
                             </h2>
+
+                            {/* Mensaje de error/éxito para contraseña */}
+                            {passwordMsg.text && (
+                                <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 animate-fade-in ${passwordMsg.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                                    {passwordMsg.type === 'success' ? (
+                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                    ) : (
+                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    )}
+                                    <span className="font-medium">{passwordMsg.text}</span>
+                                </div>
+                            )}
+
                             <form onSubmit={handlePasswordUpdate} className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Contraseña Actual</label>

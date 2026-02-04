@@ -133,8 +133,9 @@ export const authService = {
     },
 
     // Actualizar contraseña
-    async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<void> {
-        await api.put('/me/password', data);
+    async updatePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<any> {
+        const response = await api.put('/me/password', data);
+        return response.data;
     },
 
     // Recuperar contraseña
