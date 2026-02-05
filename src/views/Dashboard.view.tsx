@@ -5,6 +5,7 @@ import { placesService } from '../services/placesService';
 import Header from '../components/layout/Header';
 import type { Place } from '../models/Place.model';
 import AdminUsersTable from '../components/dashboard/AdminUsersTable';
+import AdminReviewsTable from '../components/dashboard/AdminReviewsTable';
 
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
@@ -583,6 +584,20 @@ const Dashboard: React.FC = () => {
                                 </div>
                                 <div className="p-0">
                                     <AdminUsersTable />
+                                </div>
+                            </div>
+
+                            {/* Admin Reviews Table Component */}
+                            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                                <div className="p-6 border-b border-gray-100 bg-purple-50/50 flex justify-between items-center">
+                                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                                        Moderación de Reseñas
+                                    </h2>
+                                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Comentarios</span>
+                                </div>
+                                <div className="p-0">
+                                    <AdminReviewsTable />
                                 </div>
                             </div>
                         </div>

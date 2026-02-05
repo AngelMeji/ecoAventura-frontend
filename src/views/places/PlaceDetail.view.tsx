@@ -482,7 +482,9 @@ const PlaceDetail: React.FC = () => {
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <p className="text-gray-600 leading-relaxed text-sm">{rev.comment}</p>
+                                                        <p className={`leading-relaxed text-sm ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
+                                                            {rev.is_hidden ? 'Este comentario ha sido ocultado por moderación.' : rev.comment}
+                                                        </p>
                                                     </>
                                                 )}
                                             </div>

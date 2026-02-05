@@ -126,7 +126,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                         e.stopPropagation();
                         window.location.href = `/place/${destination.slug || destination.id}`;
                     }}
-                    className="w-full bg-eco-primary-600 hover:bg-eco-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group-hover:bg-eco-primary-700"
+                    className="relative z-20 w-full bg-eco-primary-600 hover:bg-eco-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group-hover:bg-eco-primary-700"
                 >
                     <span>Explorar Destino</span>
                     <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

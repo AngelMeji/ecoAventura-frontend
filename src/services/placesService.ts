@@ -175,5 +175,16 @@ export const placesService = {
     // SPEC: DELETE /admin/users/{id}
     async deleteUser(id: number): Promise<void> {
         await api.delete(`/admin/users/${id}`);
+    },
+
+    // === ADMIN REVIEW MODERATION ===
+    async getAllReviews(): Promise<any[]> {
+        const response = await api.get('/admin/reviews');
+        return response.data;
+    },
+
+    async toggleHideReview(id: number): Promise<any> {
+        const response = await api.patch(`/admin/reviews/${id}/toggle-hide`);
+        return response.data;
     }
 };

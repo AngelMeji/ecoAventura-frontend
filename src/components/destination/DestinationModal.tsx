@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Place } from '../../models/Place.model';
+import { authService } from '../../services/authService';
 
 // URL base para las imágenes (storage)
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
@@ -11,14 +12,30 @@ interface DestinationModalProps {
 }
 
 const DestinationModal: React.FC<DestinationModalProps> = ({
-    destination,
+    destination: initialDestination,
     isOpen,
     onClose
 }) => {
+    const [destination, setDestination] = useState<Place>(initialDestination);
     const [activeTab, setActiveTab] = useState<'info' | 'reviews'>('info');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+
+    const user = authService.getCurrentUser();
+
+    // Sincronizar estado local cuando cambia la prop inicial o se abre el modal
+    useEffect(() => {
+        if (isOpen) {
+            setDestination(initialDestination);
+            setMessage(null);
+            setRating(0);
+            setComment('');
+            setActiveTab('info');
+        }
+    }, [initialDestination, isOpen]);
 
     if (!isOpen) return null;
 
@@ -48,72 +65,54 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         setRating(value);
     };
 
-    // Estado para manejar errores de validación específicos del backend
-    const [errors, setErrors] = useState<string[]>([]);
-
     const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault();
-        setErrors([]); // Limpiar errores previos
+        setMessage(null);
 
         // Validación básica en frontend
         if (rating === 0) {
-            alert('Por favor selecciona una calificación');
+            setMessage({ type: 'error', text: 'Por favor selecciona una calificación' });
             return;
         }
 
+        setSubmitting(true);
         try {
             // Importar el servicio dinámicamente
             const { placesService } = await import('../../services/placesService');
 
             // Llamada al servicio para crear la reseña
-            const newReview = await placesService.createReview(destination.id, { rating, comment });
+            await placesService.createReview(destination.id, { rating, comment });
 
             // Éxito: Limpiar formulario y notificar
-            alert('¡Reseña enviada con éxito!');
+            setMessage({ type: 'success', text: '¡Reseña enviada con éxito!' });
             setComment('');
             setRating(0);
 
-            // INTENTO DE ACTUALIZAR LA UI:
-            // Como las props son inmutables, podemos intentar cerrar el modal para forzar refresco en la vista padre
-            // o (idealmente) usar una función de callback si existiera.
-            // Por ahora, notificamos al usuario.
-            // Si el backend devuelve la nueva reseña, podríamos mostrarla localmente, 
-            // pero la estructura de `destination.reviews` viene de props.
-
-            // Opcional: Recargar la página si estamos en una vista que depende de esto
-            console.log('Review created:', newReview);
-
-            // CERRAR MODAL para que el usuario vea el cambio si la vista padre se actualiza (o para que al reabrir cargue de nuevo)
-            // onClose(); 
-            // O podemos intentar recargar los datos del lugar
-
-            // FORCE RELOAD workaround (since we don't have a callback prop yet)
-            window.location.reload();
+            // Actualizar los datos del lugar localmente para mostrar la nueva reseña
+            const updated: any = await placesService.getOne(destination.id);
+            const loadedPlace = updated.data || updated;
+            setDestination(loadedPlace);
 
         } catch (error: any) {
             console.error('Error enviando reseña:', error);
 
             // Manejo de errores 422 (Validación de Laravel)
             if (error.response && error.response.status === 422) {
-                console.log('DATA 422:', error.response.data);
                 const data = error.response.data;
                 const validationErrors = data.errors;
-                const errorMessages: string[] = [];
+                let msgText = '';
 
-                // Extraer mensajes de error del objeto de respuesta
                 if (validationErrors) {
-                    Object.values(validationErrors).forEach((errArray: any) => {
-                        errorMessages.push(...errArray);
-                    });
-                } else if (data.message) {
-                    errorMessages.push(data.message);
+                    msgText = Object.values(validationErrors).flat().join('\n');
+                } else {
+                    msgText = data.message || 'Error de validación';
                 }
-
-                setErrors(errorMessages.length > 0 ? errorMessages : ['Error de validación desconocido.']);
+                setMessage({ type: 'error', text: msgText });
             } else {
-                // Otros errores (500, red, etc.)
-                alert(error.message || 'Ocurrió un error al enviar la reseña. Inténtalo de nuevo.');
+                setMessage({ type: 'error', text: error.message || 'Ocurrió un error al enviar la reseña.' });
             }
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -242,53 +241,102 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                             </div>
 
                             {/* Write Review Form */}
-                            <div className="border border-gray-200 rounded-xl p-6">
-                                <h4 className="font-bold text-gray-800 mb-4">Escribe una Reseña</h4>
-                                <form onSubmit={handleSubmitReview}>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Calificación</label>
-                                        <div className="flex gap-2">
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <button
-                                                    key={star}
-                                                    type="button"
-                                                    onClick={() => handleRating(star)}
-                                                    className="focus:outline-none transition-transform hover:scale-110"
-                                                >
-                                                    <svg className={`w-8 h-8 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                                </button>
-                                            ))}
+                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                {user ? (
+                                    <form onSubmit={handleSubmitReview} className="space-y-4">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+                                            <h4 className="font-bold text-gray-800">Escribe una Reseña</h4>
+                                            <div className="flex items-center gap-1 bg-white px-4 py-2 rounded-full border border-gray-200">
+                                                <span className="text-sm text-gray-500 mr-2">Calificación:</span>
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => handleRating(star)}
+                                                        className={`text-2xl transition-transform hover:scale-125 focus:outline-none ${star <= rating ? 'text-yellow-400' : 'text-gray-200 hover:text-yellow-200'}`}
+                                                    >
+                                                        ★
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="mb-4">
+
+                                        {message && (
+                                            <div className={`p-4 rounded-xl mb-4 flex items-center gap-3 ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                                                }`}>
+                                                {message.type === 'success' ? (
+                                                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                ) : (
+                                                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                )}
+                                                <p className="whitespace-pre-line text-sm">{message.text}</p>
+                                            </div>
+                                        )}
+
                                         <textarea
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
                                             placeholder="Comparte tu experiencia..."
-                                            className="w-full p-3 border border-gray-300 rounded-lg"
-                                            rows={4}
+                                            className="w-full p-4 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-eco-primary-400 focus:border-eco-primary-400 outline-none transition-all resize-y min-h-[100px]"
+                                            rows={3}
                                         />
-                                    </div>
-                                    {/* Mostrar errores de validación si existen */}
-                                    {errors.length > 0 && (
-                                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                            <p className="font-bold text-red-700 text-sm mb-1">No se pudo enviar la reseña:</p>
-                                            <ul className="list-disc list-inside text-sm text-red-600">
-                                                {errors.map((err, idx) => (
-                                                    <li key={idx}>{err}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
 
-                                    <button
-                                        type="submit"
-                                        disabled={rating === 0 || !comment.trim()}
-                                        className="bg-eco-primary-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-eco-primary-700 disabled:opacity-50"
-                                    >
-                                        Publicar Reseña
-                                    </button>
-                                </form>
+                                        <div className="flex justify-end">
+                                            <button
+                                                type="submit"
+                                                disabled={rating === 0 || submitting}
+                                                className="bg-eco-primary-600 text-white px-8 py-2 rounded-xl font-bold hover:bg-eco-primary-700 transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {submitting ? 'Enviando...' : 'Publicar Reseña'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="flex items-center gap-4 bg-yellow-50 p-6 rounded-xl border border-yellow-100 text-yellow-800">
+                                        <div className="bg-yellow-100 p-2 rounded-full flex-shrink-0">
+                                            <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                        </div>
+                                        <p className="font-medium text-sm">Inicia sesión para compartir tu experiencia.</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Reviews List */}
+                            <div className="space-y-6">
+                                <h4 className="text-xl font-bold text-gray-800 border-b border-gray-100 pb-4">
+                                    Opiniones de otros viajeros ({destination.reviews?.length || 0})
+                                </h4>
+
+                                {destination.reviews && destination.reviews.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {destination.reviews.map((rev: any, idx: number) => (
+                                            <div key={idx} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:border-gray-200 transition-all">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold">
+                                                            {(rev.user?.name || 'U')[0].toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-gray-900 text-sm">{rev.user?.name || 'Anónimo'}</p>
+                                                            <div className="flex text-yellow-400 text-xs">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <p className={`text-sm leading-relaxed ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
+                                                    {rev.is_hidden ? 'Este comentario ha sido ocultado por moderación.' : rev.comment}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                        <p className="text-gray-500 italic text-sm">Aún no hay reseñas. ¡Sé el primero!</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

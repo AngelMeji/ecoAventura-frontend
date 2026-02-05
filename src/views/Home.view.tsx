@@ -4,7 +4,6 @@ import DestinationCard from '../components/destination/DestinationCard';
 import FilterBar from '../components/home/FilterBar';
 import Header from '../components/layout/Header';
 import CategorySection from '../components/home/CategorySection';
-import FeaturedSection from '../components/home/FeaturedSection';
 import { DestinationController } from '../controllers/Destination.controller';
 import type { Place } from '../models/Place.model'; // Usamos el nuevo modelo Place
 import DestinationModal from '../components/destination/DestinationModal';
@@ -25,8 +24,6 @@ const Home: React.FC = () => {
 
     // Estados para las secciones (stats y destacados)
     const [categoryStats, setCategoryStats] = useState<any[]>([]);
-    const [featuredDestinations, setFeaturedDestinations] = useState<Place[]>([]);
-    const [popularDestinations, setPopularDestinations] = useState<Place[]>([]);
 
     // Cargar datos al inicio
     useEffect(() => {
@@ -44,8 +41,6 @@ const Home: React.FC = () => {
             await Promise.all([
                 fetchDestinations(),
                 DestinationController.getCategoryStats().then(setCategoryStats),
-                DestinationController.getFeaturedDestinations().then(setFeaturedDestinations),
-                DestinationController.getPopularDestinations().then(setPopularDestinations)
             ]);
         } catch (error) {
             console.error('Error cargando datos iniciales:', error);
@@ -121,6 +116,82 @@ const Home: React.FC = () => {
         setSelectedDestination(null);
     };
 
+    const renderMapSection = () => (
+        <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-eco-primary-100 rounded-lg text-eco-primary-700">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                </div>
+                <div>
+                    <h2 className="text-3xl font-display font-bold text-gray-800">
+                        Mapa de Destinos
+                    </h2>
+                    <p className="text-gray-500">Ubica tu próxima experiencia</p>
+                </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden shadow-lg border-4 border-white ring-1 ring-gray-100">
+                <InteractiveMap
+                    destinations={destinations as any[]}
+                    onMarkerClick={handleMarkerClick}
+                    highlightedDestination={highlightedDestination}
+                />
+            </div>
+        </div>
+    );
+
+    const renderDestinationsGrid = () => (
+        <div id="destinations-grid" className="animate-fade-in-up" style={{ animationDelay: searchQuery ? '0.2s' : '0.4s' }}>
+            <div className="flex items-center gap-3 mb-8">
+                <div className="p-2 bg-eco-primary-100 rounded-lg text-eco-primary-700">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                <div>
+                    <h2 className="text-3xl font-display font-bold text-gray-800">
+                        {searchQuery ? 'Resultados de Búsqueda' : (loading ? 'Buscando destinos...' : 'Todos los Destinos')}
+                    </h2>
+                    {!loading && (
+                        <p className="text-gray-500">
+                            {destinations.length} {destinations.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-primary-600 mb-4"></div>
+                    <p className="text-gray-500">Cargando experiencias...</p>
+                </div>
+            ) : (
+                destinations.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
+                        <div className="text-eco-primary-200 mb-4 flex justify-center">
+                            <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">No encontramos destinos</h3>
+                        <p className="text-gray-500">Intenta con otra búsqueda o categoría</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {destinations.map((destination) => (
+                            <div
+                                key={destination.id}
+                                id={`destination-${destination.id}`}
+                            >
+                                <DestinationCard
+                                    destination={destination as any}
+                                    isHighlighted={highlightedDestination === destination.id}
+                                    onClick={() => handleCardClick(destination.id)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )
+            )}
+        </div>
+    );
+
     // Loading se manejará inline para no desmontar todo el layout
     // if (loading) { return ... }  <-- REMOVED
 
@@ -167,88 +238,24 @@ const Home: React.FC = () => {
                     />
                 )}
 
-                {/* Featured Section */}
-                {!searchQuery && activeCategory === 'Todos' && featuredDestinations.length > 0 && (
-                    <FeaturedSection
-                        featuredDestinations={featuredDestinations}
-                        popularDestinations={popularDestinations}
-                        onDestinationClick={handleCardClick}
-                    />
+                {/* Content Sections - Reordered if searching */}
+                {searchQuery ? (
+                    <>
+                        {/* 1. Results first when searching */}
+                        {renderDestinationsGrid()}
+
+                        {/* 2. Map second when searching */}
+                        {renderMapSection()}
+                    </>
+                ) : (
+                    <>
+                        {/* 1. Map first when not searching */}
+                        {renderMapSection()}
+
+                        {/* 2. Grid second when not searching */}
+                        {renderDestinationsGrid()}
+                    </>
                 )}
-
-                {/* Map Section */}
-                <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-eco-primary-100 rounded-lg text-eco-primary-700">
-                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-                        </div>
-                        <div>
-                            <h2 className="text-3xl font-display font-bold text-gray-800">
-                                Mapa de Destinos
-                            </h2>
-                            <p className="text-gray-500">Ubica tu próxima experiencia</p>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl overflow-hidden shadow-lg border-4 border-white ring-1 ring-gray-100">
-                        <InteractiveMap
-                            destinations={destinations as any[]}
-                            onMarkerClick={handleMarkerClick}
-                            highlightedDestination={highlightedDestination}
-                        />
-                    </div>
-                </div>
-
-                {/* Destinations Grid */}
-                <div id="destinations-grid" className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="p-2 bg-eco-primary-100 rounded-lg text-eco-primary-700">
-                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        </div>
-                        <div>
-                            <h2 className="text-3xl font-display font-bold text-gray-800">
-                                {loading ? 'Buscando destinos...' : 'Todos los Destinos'}
-                            </h2>
-                            {!loading && (
-                                <p className="text-gray-500">
-                                    {destinations.length} {destinations.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-primary-600 mb-4"></div>
-                            <p className="text-gray-500">Cargando experiencias...</p>
-                        </div>
-                    ) : (
-                        destinations.length === 0 ? (
-                            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-                                <div className="text-eco-primary-200 mb-4 flex justify-center">
-                                    <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-800 mb-2">No encontramos destinos</h3>
-                                <p className="text-gray-500">Intenta con otra búsqueda o categoría</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                                {destinations.map((destination) => (
-                                    <div
-                                        key={destination.id}
-                                        id={`destination-${destination.id}`}
-                                    >
-                                        <DestinationCard
-                                            destination={destination as any}
-                                            isHighlighted={highlightedDestination === destination.id}
-                                            onClick={() => handleCardClick(destination.id)}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        )
-                    )}
-                </div>
             </main>
 
             {selectedDestination && (

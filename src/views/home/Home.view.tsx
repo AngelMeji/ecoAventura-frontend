@@ -4,9 +4,8 @@ import DestinationCard from '../../components/destination/DestinationCard';
 import FilterBar from '../../components/home/FilterBar';
 import Header from '../../components/layout/Header';
 import CategorySection from '../../components/home/CategorySection';
-import FeaturedSection from '../../components/home/FeaturedSection';
 import { DestinationController } from '../../controllers/Destination.controller';
-import type { Place } from '../../models/Place.model'; // Usamos el nuevo modelo Place
+import type { Place } from '../../models/Place.model';
 import DestinationModal from '../../components/destination/DestinationModal';
 
 /**
@@ -22,10 +21,8 @@ const Home: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
 
-    // Estados para las secciones (stats y destacados)
+    // Estados para las secciones
     const [categoryStats, setCategoryStats] = useState<any[]>([]);
-    const [featuredDestinations, setFeaturedDestinations] = useState<Place[]>([]);
-    const [popularDestinations, setPopularDestinations] = useState<Place[]>([]);
 
     // Cargar datos al inicio
     useEffect(() => {
@@ -42,9 +39,7 @@ const Home: React.FC = () => {
         try {
             await Promise.all([
                 fetchDestinations(),
-                DestinationController.getCategoryStats().then(setCategoryStats),
-                DestinationController.getFeaturedDestinations().then(setFeaturedDestinations),
-                DestinationController.getPopularDestinations().then(setPopularDestinations)
+                DestinationController.getCategoryStats().then(setCategoryStats)
             ]);
         } catch (error) {
             console.error('Error cargando datos iniciales:', error);
@@ -156,39 +151,11 @@ const Home: React.FC = () => {
                     </div>
                 )}
 
-                {/* Sólo mostramos destacado si estamos en la vista por defecto */}
-                {!searchQuery && activeCategory === 'Todos' && featuredDestinations.length > 0 && (
-                    <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                        <FeaturedSection
-                            featuredDestinations={featuredDestinations} // Corrección: pasar array de Place, FeaturedSection debe ser compatible
-                            popularDestinations={popularDestinations}
-                            onDestinationClick={handleCardClick}
-                        />
-                    </div>
-                )}
-
-                {/* Map Section - Necesita ser compatible con Place */}
-                <div className="mb-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                    <div className="flex items-center gap-2 mb-6">
-                        <h2 className="text-3xl font-bold text-eco-primary-900 font-display">
-                            Mapa de Destinos
-                        </h2>
-                    </div>
-                    {/* Nota: InteractiveMap necesita ser actualizado para aceptar Place[] si no lo es ya */}
-                    <div className="rounded-2xl overflow-hidden shadow-lg border border-eco-primary-100">
-                        <InteractiveMap
-                            destinations={destinations as any[]}
-                            onMarkerClick={handleMarkerClick}
-                            highlightedDestination={highlightedDestination}
-                        />
-                    </div>
-                </div>
-
-                {/* Destinations Grid */}
-                <div id="destinations-grid" className="mb-12 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+                {/* Destinations Grid - Aparece primero cuando hay búsqueda */}
+                <div id="destinations-grid" className="mb-12 animate-fade-in-up" style={{ animationDelay: searchQuery ? '0.2s' : '0.4s' }}>
                     <div className="flex items-center gap-3 mb-8">
                         <h2 className="text-3xl font-bold text-eco-primary-900 font-display flex items-baseline gap-3">
-                            Todos los Destinos
+                            {searchQuery ? 'Resultados de Búsqueda' : 'Todos los Destinos'}
                             <span className="text-lg font-normal text-eco-text-light font-sans bg-eco-primary-50 px-3 py-1 rounded-full">
                                 {destinations.length} {destinations.length === 1 ? 'destino' : 'destinos'}
                             </span>
@@ -215,6 +182,22 @@ const Home: React.FC = () => {
                             ))}
                         </div>
                     )}
+                </div>
+
+                {/* Map Section - Aparece después del grid cuando hay búsqueda */}
+                <div className="mb-12 animate-fade-in-up" style={{ animationDelay: searchQuery ? '0.3s' : '0.3s' }}>
+                    <div className="flex items-center gap-2 mb-6">
+                        <h2 className="text-3xl font-bold text-eco-primary-900 font-display">
+                            Mapa de Destinos
+                        </h2>
+                    </div>
+                    <div className="rounded-2xl overflow-hidden shadow-lg border border-eco-primary-100">
+                        <InteractiveMap
+                            destinations={destinations as any[]}
+                            onMarkerClick={handleMarkerClick}
+                            highlightedDestination={highlightedDestination}
+                        />
+                    </div>
                 </div>
             </main>
 
