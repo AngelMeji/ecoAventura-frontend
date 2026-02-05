@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import type { LoginCredentials } from '../../types/auth';
@@ -7,9 +7,21 @@ const Login: React.FC = () => {
     const [credentials, setCredentials] = useState<LoginCredentials>({
         email: '',
         password: '',
+        remember: false,
     });
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const rememberedEmail = localStorage.getItem('remembered_email');
+        if (rememberedEmail) {
+            setCredentials(prev => ({
+                ...prev,
+                email: rememberedEmail,
+                remember: true
+            }));
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,6 +31,13 @@ const Login: React.FC = () => {
         try {
             const response = await authService.login(credentials);
             console.log('Login successful:', response);
+
+            // Handle Remember Me persistence
+            if (credentials.remember) {
+                localStorage.setItem('remembered_email', credentials.email);
+            } else {
+                localStorage.removeItem('remembered_email');
+            }
 
             // Redirect to dashboard or home
             alert(`¡Bienvenido ${response.user.name}!`);
@@ -31,10 +50,11 @@ const Login: React.FC = () => {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCredentials({
-            ...credentials,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value, type, checked } = e.target;
+        setCredentials(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
     };
 
     return (
@@ -66,7 +86,7 @@ const Login: React.FC = () => {
                 Accede a tu cuenta de EcoTurismo
             </p>
 
-            
+
             {/* Error Message */}
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
@@ -112,6 +132,9 @@ const Login: React.FC = () => {
                     <label className="flex items-center">
                         <input
                             type="checkbox"
+                            name="remember"
+                            checked={credentials.remember || false}
+                            onChange={handleChange}
                             className="w-4 h-4 text-eco-teal-500 border-gray-300 rounded focus:ring-eco-teal-500"
                         />
                         <span className="ml-2 text-gray-600">Recordarme</span>

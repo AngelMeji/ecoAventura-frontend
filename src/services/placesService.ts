@@ -155,8 +155,8 @@ export const placesService = {
     },
 
     // Gestión de Usuarios (CRUD Admin)
-    async getAllUsers(): Promise<any[]> {
-        const response = await api.get('/admin/users');
+    async getAllUsers(page: number = 1): Promise<PaginatedResponse<any>> {
+        const response = await api.get<PaginatedResponse<any>>(`/admin/users?page=${page}`);
         return response.data;
     },
 
@@ -178,8 +178,8 @@ export const placesService = {
     },
 
     // === ADMIN REVIEW MODERATION ===
-    async getAllReviews(): Promise<any[]> {
-        const response = await api.get('/admin/reviews');
+    async getAllReviews(page: number = 1): Promise<PaginatedResponse<any>> {
+        const response = await api.get<PaginatedResponse<any>>(`/admin/reviews?page=${page}`);
         return response.data;
     },
 

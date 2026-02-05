@@ -14,6 +14,7 @@ export interface User {
 export interface LoginCredentials {
     email: string;
     password: string;
+    remember?: boolean;
 }
 
 // Datos para registro de usuario

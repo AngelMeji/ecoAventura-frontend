@@ -20,23 +20,50 @@ const Modal = ({ isOpen, onClose, title, children }: any) => {
 const AdminUsersTable: React.FC = () => {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [isEditOpen, setIsEditOpen] = useState(false);
 
     // Create Mode States
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'user' });
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '', password_confirmation: '', role: 'user' });
+    const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     useEffect(() => {
         loadUsers();
     }, []);
 
-    const loadUsers = () => {
+    const loadUsers = (page: number = 1) => {
         setLoading(true);
-        placesService.getAllUsers()
-            .then(data => setUsers(Array.isArray(data) ? data : []))
+        placesService.getAllUsers(page)
+            .then((data: any) => {
+                // Support both standard array and paginated response
+                if (data.data && Array.isArray(data.data)) {
+                    setUsers(data.data);
+                    setCurrentPage(data.current_page);
+                    setLastPage(data.last_page);
+                } else if (Array.isArray(data)) {
+                    setUsers(data);
+                } else {
+                    setUsers([]);
+                }
+            })
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
+    };
+
+    // Pagination handlers
+    const handleNextPage = () => {
+        if (currentPage < lastPage) {
+            loadUsers(currentPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            loadUsers(currentPage - 1);
+        }
     };
 
     const handleDelete = async (id: number) => {
@@ -68,15 +95,34 @@ const AdminUsersTable: React.FC = () => {
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
+        setFormMessage(null);
+
+        // Validar contraseñas
+        if (newUser.password !== newUser.password_confirmation) {
+            setFormMessage({ type: 'error', text: 'Las contraseñas no coinciden' });
+            return;
+        }
+
         try {
             await placesService.createUser(newUser);
-            alert('Usuario creado con éxito');
-            setIsCreateOpen(false);
-            setNewUser({ name: '', email: '', password: '', role: 'user' });
-            loadUsers();
+            setFormMessage({ type: 'success', text: '¡Usuario creado con éxito!' });
+
+            // Limpiar formulario después de un breve delay para que vean el mensaje
+            setTimeout(() => {
+                if (isCreateOpen) {
+                    setIsCreateOpen(false);
+                    setNewUser({ name: '', email: '', password: '', password_confirmation: '', role: 'user' });
+                    setFormMessage(null);
+                    loadUsers();
+                }
+            }, 2000);
+
         } catch (error: any) {
             console.error(error);
-            alert('Error creando usuario: ' + (error.response?.data?.message || error.message || 'Error desconocido'));
+            setFormMessage({
+                type: 'error',
+                text: (error.response?.data?.message || 'Error al crear usuario. Verifica los datos.')
+            });
         }
     };
 
@@ -230,6 +276,63 @@ const AdminUsersTable: React.FC = () => {
                 ))}
             </div>
 
+
+
+            {/* Pagination Controls */}
+            {
+                lastPage > 1 && (
+                    <div className="flex justify-between items-center px-4 py-3 bg-white border-t border-gray-200 sm:px-6 mt-4 rounded-lg shadow-sm">
+                        <div className="flex-1 flex justify-between sm:hidden">
+                            <button
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 1}
+                                className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={currentPage === lastPage}
+                                className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm text-gray-700">
+                                    Página <span className="font-medium">{currentPage}</span> de <span className="font-medium">{lastPage}</span>
+                                </p>
+                            </div>
+                            <div>
+                                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <button
+                                        onClick={handlePrevPage}
+                                        disabled={currentPage === 1}
+                                        className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span className="sr-only">Anterior</span>
+                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={handleNextPage}
+                                        disabled={currentPage === lastPage}
+                                        className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span className="sr-only">Siguiente</span>
+                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
             {/* Edit Modal */}
             <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Editar Usuario">
                 <form onSubmit={handleUpdate} className="space-y-4">
@@ -308,6 +411,17 @@ const AdminUsersTable: React.FC = () => {
                         />
                     </div>
                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Repetir Contraseña *</label>
+                        <input
+                            className="w-full p-2 border rounded-lg"
+                            type="password"
+                            value={newUser.password_confirmation}
+                            onChange={e => setNewUser({ ...newUser, password_confirmation: e.target.value })}
+                            placeholder="Confirma la contraseña"
+                            required
+                        />
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
                         <select
                             className="w-full p-2 border rounded-lg"
@@ -320,12 +434,24 @@ const AdminUsersTable: React.FC = () => {
                         </select>
                     </div>
                     <div className="flex justify-end gap-2 mt-6">
-                        <button type="button" onClick={() => setIsCreateOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                        <button type="button" onClick={() => { setIsCreateOpen(false); setFormMessage(null); }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
                         <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow-sm">Crear Usuario</button>
                     </div>
+
+                    {formMessage && (
+                        <div className={`mt-4 p-3 rounded-lg flex items-center gap-2 animate-fade-in ${formMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                            }`}>
+                            {formMessage.type === 'success' ? (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                            ) : (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                            )}
+                            <span className="text-sm font-medium">{formMessage.text}</span>
+                        </div>
+                    )}
                 </form>
             </Modal>
-        </div>
+        </div >
     );
 };
 

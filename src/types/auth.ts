@@ -8,6 +8,7 @@ export interface User {
 export interface LoginCredentials {
     email: string;
     password: string;
+    remember?: boolean;
 }
 
 export interface RegisterData {
