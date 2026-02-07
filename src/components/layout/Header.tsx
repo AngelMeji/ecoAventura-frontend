@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../common/Logo';
+import AccessibilityMenu from '../common/AccessibilityMenu';
 import { authService } from '../../services/authService';
 
 const Header: React.FC = () => {
@@ -56,6 +57,7 @@ const Header: React.FC = () => {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex gap-4 items-center">
+                    <AccessibilityMenu />
                     <Link
                         to="/home"
                         onClick={(e) => {
@@ -126,6 +128,9 @@ const Header: React.FC = () => {
                 {/* Mobile Navigation Menu */}
                 <div className={`fixed inset-0 bg-white transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) z-40 flex flex-col pt-24 px-6 md:hidden ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
                     <div className="flex flex-col gap-6">
+                        <div className="flex justify-end p-2">
+                            <AccessibilityMenu />
+                        </div>
                         <Link
                             to="/home"
                             onClick={() => setIsMenuOpen(false)}

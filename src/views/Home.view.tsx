@@ -202,10 +202,11 @@ const Home: React.FC = () => {
             <main className="container mx-auto px-4 py-8 space-y-16">
                 {/* Hero Section */}
                 <div className="relative overflow-hidden rounded-3xl bg-eco-primary-900 shadow-xl animate-fade-in-up">
-                    <div className="absolute inset-0 bg-[url('/assets/hero_background_colombia.png')] bg-cover bg-center"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                    <div className="absolute inset-0 bg-[url('/assets/risaralda_hero.png')] bg-cover bg-center"></div>
+                    {/* Green gradient fade from left (text side) to transparent right (image side) */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-eco-primary-900 via-eco-primary-900/70 to-transparent"></div>
                     <div className="relative px-8 py-20 md:px-12 md:py-24 text-white max-w-2xl">
-                        <span className="text-eco-accent font-bold tracking-wider uppercase mb-2 block drop-shadow-md">Descubre Colombia</span>
+                        <span className="text-eco-accent font-bold tracking-wider uppercase mb-2 block drop-shadow-md">Descubre Risaralda</span>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 drop-shadow-lg">
                             Explora Paraísos <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-400 to-red-400">Ecoturísticos</span>

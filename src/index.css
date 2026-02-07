@@ -60,6 +60,33 @@
       opacity: 0.5;
     }
   }
+
+}
+
+@layer utilities {
+
+  /* Accessibility */
+  .grayscale {
+    filter: grayscale(100%);
+  }
+
+  .invert-colors {
+    filter: invert(100%);
+    background-color: white;
+    /* Ensure background exists to be inverted */
+  }
+
+  /* Keep images and videos normal by re-inverting them */
+  .invert-colors img,
+  .invert-colors video,
+  .invert-colors .custom-marker,
+  /* Leaflet markers */
+  .invert-colors [style*="background-image"]
+
+  /* Background images (rough heuristic) */
+    {
+    filter: invert(100%);
+  }
 }
 
 @layer base {

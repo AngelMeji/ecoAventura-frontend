@@ -252,7 +252,6 @@ const Profile: React.FC = () => {
                                 </div>
                                 <h3 className="text-xl font-display font-bold text-gray-800">{user.name}</h3>
                                 <p className="text-sm font-medium text-eco-primary-600 uppercase tracking-wider mb-4">{user.role}</p>
-                                <p className="text-gray-500 text-sm italic">"{profileData.bio || 'Sin biografía'}"</p>
                             </div>
                         </div>
                     </div>
@@ -308,15 +307,7 @@ const Profile: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">Biografía</label>
-                                    <textarea
-                                        value={profileData.bio}
-                                        onChange={e => setProfileData({ ...profileData, bio: e.target.value })}
-                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-eco-primary-500 focus:ring-4 focus:ring-eco-primary-500/10 transition-all p-3 outline-none min-h-[100px]"
-                                        placeholder="Cuéntanos un poco sobre ti..."
-                                    />
-                                </div>
+
 
                                 <div className="flex justify-end pt-4">
                                     <button

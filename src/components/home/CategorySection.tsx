@@ -36,20 +36,20 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         className={`
                             relative p-4 rounded-xl border-2 transition-all duration-300 text-left group
                             ${activeCategory === category.slug
-                                ? 'border-eco-teal-500 bg-eco-teal-50'
-                                : 'border-gray-100 bg-white hover:border-eco-teal-200 hover:shadow-lg'
+                                ? 'border-eco-primary-500 bg-eco-primary-50'
+                                : 'border-gray-100 bg-white hover:border-eco-primary-500 hover:bg-eco-primary-50 hover:shadow-lg'
                             }
                         `}
                     >
                         <div className={`
                             w-12 h-12 rounded-full flex items-center justify-center text-2xl mb-3
                             ${activeCategory === category.slug
-                                ? 'bg-eco-teal-500 text-white'
-                                : 'bg-eco-teal-100 text-eco-teal-600 group-hover:bg-eco-teal-500 group-hover:text-white transition-colors'
+                                ? 'bg-eco-primary-500 text-white'
+                                : 'bg-eco-primary-100 text-eco-primary-600 group-hover:bg-eco-primary-200 group-hover:text-eco-primary-700 transition-colors'
                             }
                         `} dangerouslySetInnerHTML={{ __html: category.icon }} />
 
-                        <h3 className="font-bold text-gray-800 mb-1 group-hover:text-eco-teal-700">
+                        <h3 className="font-bold text-gray-800 mb-1 group-hover:text-eco-primary-700">
                             {category.name}
                         </h3>
 

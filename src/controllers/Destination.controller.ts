@@ -45,92 +45,113 @@ export class DestinationController {
      * Obtiene estadísticas de categorías
      */
     static async getCategoryStats(): Promise<{ name: string; slug: string; count: number; avgRating: number; icon: string }[]> {
-        try {
-            const categories = await placesService.getCategories();
+        // Categorías Principales de Ecoturismo en Risaralda
+        const defaultCategories = [
+            { name: 'Avistamiento de Aves', slug: 'avistamiento-de-aves' },
+            { name: 'Senderismo', slug: 'senderismo' },
+            { name: 'Paisaje Cultural Cafetero', slug: 'paisaje-cultural-cafetero' },
+            { name: 'Termales', slug: 'termales' },
+            { name: 'Nevados y Alta Montaña', slug: 'nevados' },
+            { name: 'Cascadas', slug: 'cascadas' },
+            { name: 'Glamping', slug: 'glamping' },
+            { name: 'Parques Temáticos', slug: 'parques-tematicos' },
+            { name: 'Ríos y Lagos', slug: 'rios-y-lagos' },
+            { name: 'Miradores', slug: 'miradores' },
+            { name: 'Turismo Rural', slug: 'turismo-rural' },
+            { name: 'Aventura', slug: 'aventura' }
+        ];
 
-            // Icon mapping helper
-            const getIcon = (rawSlug: string) => {
-                // Normalize: lowercase, remove accents, replace spaces with dashes
-                const slug = rawSlug.toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/ /g, '-');
+        // Helper para mapear iconos
+        const getIcon = (rawSlug: string) => {
+            const slug = rawSlug.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/ /g, '-');
 
-                const icons: Record<string, string> = {
-                    // Naturaleza (Nature) - Leaf
-                    'naturaleza': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>', // Leaf-like shape
+            const icons: Record<string, string> = {
+                // Avistamiento de Aves - Pájaro / Binoculares (User requested: Bird flying/perched or binoculars)
+                // Avistamiento de Aves - Pájaro (Perched Bird - User Request)
+                'avistamiento-de-aves': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 18h16M5.8 9.6c.9-1.2 2.5-1.6 3.9-1.1 1.3.5 2.3 1.6 2.7 2.9l.4 1.3-1.4.3c-.8.2-1.6-.2-1.9-1-.3-.8-.1-1.6.5-2.2l-1.3-1c-.5.4-.8 1-.9 1.6-.1.6.1 1.2.5 1.6l1.5 1.5c1.1 1.1 2.6 1.7 4.1 1.7 1.5 0 3-.6 4.1-1.7l1-1M6.5 9.5c.3-.3.7-.4 1.1-.4.4 0 .7.1 1 .4l2.5 2.5" /></svg>',
+                // Using a simpler, cleaner perched bird path for better clarity
+                'aviturismo': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15c0-2.2 4-4 4-4h.5c1.5 0 3-1.5 4-2.5 1-1 2.5-1.5 4-1.5 1.5 0 3 1 3 3 0 1.5-1 3-3 4-2 1-4 2-8 3-2 0-3.5-1-3.5-2z M 5 18 L 5 21 M 9 18 L 9 21 M 2 18 h 10" /></svg>',
+                'aves': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15c0-2.2 4-4 4-4h.5c1.5 0 3-1.5 4-2.5 1-1 2.5-1.5 4-1.5 1.5 0 3 1 3 3 0 1.5-1 3-3 4-2 1-4 2-8 3-2 0-3.5-1-3.5-2z M 5 18 L 5 21 M 9 18 L 9 21 M 2 18 h 10" /></svg>',
 
-                    // Aventura (Adventure) - Compass
-                    'aventura': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>', // Replaced with compass below or map
-                    'aventura-real': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>', // Puzzle? No. Let's use generic map.
+                // Senderismo - Caminante con Mochila y Bastón (Hiker Silhouette)
+                'senderismo': '<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M18 21h-1.5V5h1.5v16zm-5-1l-2.5-6-2.5 6h-1.8l3-7.5-3.5-5.5 1.2-1 4.5 1.5 2 4 1.5 5.5h-1.9zM7 13c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3zM12.5 5.5c.8 0 1.5-.7 1.5-1.5S13.3 2.5 12.5 2.5 11 3.2 11 4s.7 1.5 1.5 1.5z"/></svg>',
 
-                    // Cascadas (Waterfalls)
-                    'cascadas': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>', // Down arrow (water falling) - Simple symbolic
+                // Paisaje Cultural Cafetero - Taza de Café / Grano (User requested: Coffee bean or cup)
+                'paisaje-cultural-cafetero': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3" /></svg>', // Smoking Coffee Cup
 
-                    // Termal (Thermal) - Three wavy lines (Steam)
-                    'termal': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>', // Lightning usually used for energy/power. Let's try steam: 
-                    'termal-real': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>', // Sun (Heat). 
+                // Termales - Ondas de agua con vapor (User requested: Waves with steam)
+                'termales': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 14a6 6 0 0012 0M6 14v2m12-2v2M12 3v5m4-5v5m-8-5v5M4 14.8C2.8 16 2.8 18 4 19.2s3.2 1.2 4.4 0c1.2-1.2 1.2-3.2 0-4.4M15.6 14.8c-1.2 1.2-1.2 3.2 0 4.4s3.2 1.2 4.4 0c1.2-1.2 1.2-3.2 0-4.4" /></svg>', // Steam and waves
+                'termal': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v5m4-5v5m-8-5v5M4 14.8c0 2.2 3.6 4.2 8 4.2s8-2 8-4.2" /></svg>',
 
-                    // Fauna - Paw
-                    'fauna': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>',
+                // Nevados - Montaña con nieve (User requested: Mountain with snow cap)
+                'nevados': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 19.4L14 4l-4.5 9.9M7 19.4L3 14 12 4M21 19.4H3M12 4l2.5 5.5-5 5" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4l3 7h-6l3-7z" /></svg>', // Mountain peak
 
-                    // Senderismo (Hiking) - Footprints
-                    'senderismo': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l-4 4m0 0l-4-4m4 4V3" /></svg>', // Down arrow? No. Let's use a "Location" marker with a path? Or simple boot... Let's use the Footsteps icon from before, it was okay, or path.
-                    'senderismo-new': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>', // This is the fingerprint scan? No, footprints. Correct.
+                // Cascadas - Caída de agua con ondas (S-Curve Waterfall from image)
+                'cascadas': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 3c0 4-2 6-4 9v6M13 3c0 4-2 6-4 9v6M9 3c0 4-2 6-4 9v6M3 21c2 0 3-1 6-1s4 1 6 1 4-1 6-1" /></svg>', // Three streams curving down into waves
 
-                    // Camping - Tent
-                    'camping': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21H4l8-14 8 14zM12 7v14" /></svg>',
+                // Glamping - Carpa Tipi (User requested: Tipi/Dome tent)
+                'glamping': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 21H4L12 3l8 18zM12 7v14M9 21l3-5 3 5" /></svg>', // Tipi Tent
 
-                    // Playas (Beaches) - Umbrella
-                    'playas': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>', // Sun
+                // Parques Temáticos - Ticket (User requested: Ticket)
+                'parques-tematicos': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>',
 
-                    // Montañas (Mountains) - Peaks
-                    'montanas': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>', // Lightning? No. 
-                    'montanas-real': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>', // Map
+                // Ríos y Lagos - Tres ondas de agua (Three Waves - User requested)
+                'rios-y-lagos': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6c2.5-2 5.5-2 8 0s5.5 2 8 0 M3 12c2.5-2 5.5-2 8 0s5.5 2 8 0 M3 18c2.5-2 5.5-2 8 0s5.5 2 8 0" /></svg>',
+                'rios': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6c2.5-2 5.5-2 8 0s5.5 2 8 0 M3 12c2.5-2 5.5-2 8 0s5.5 2 8 0 M3 18c2.5-2 5.5-2 8 0s5.5 2 8 0" /></svg>',
 
-                    // Ríos (Rivers) - Water Waves
-                    'rios': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>',
+                // Miradores - Ojo (User requested: Eye or person looking)
+                'miradores': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>',
 
-                    // Lagos (Lakes) - Water
-                    'lagos': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>',
+                // Turismo Rural - Casa de campo (User requested: Farm/House)
+                'turismo-rural': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>',
 
-                    // Bosques (Forests) - Tree
-                    'bosques': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>', // Actually tree
-
-                    // Parques Naturales - Signpost
-                    'parques-naturales': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>', // Map marker
-
-                    // Reservas Ecológicas - Shield/Protection
-                    'reservas-ecologicas': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>', // Shield
-
-                    // Miradores (Viewpoints) - Eye
-                    'miradores': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>',
-
-                    // Cuevas (Caves) - Dark Circle/Arch
-                    'cuevas': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>', // Home (Cave entrance proxy)
-
-                    // Deportes Extremos - Lightning
-                    'deportes-extremos': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>',
-
-                    // Observación de Aves - Bird/Paper Airplane
-                    'observacion-de-aves': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>',
-
-                    // Turismo Rural - House/Farm
-                    'turismo-rural': '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>'
-                };
-                return icons[slug] || '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>';
+                // Aventura - Brújula (User requested: Compass)
+                'aventura': '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.5" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.83 9.17l-5.66 5.66-2.5-2.5 5.66-5.66 2.5 2.5z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2v2m0 16v2m10-10h-2M4 12H2" /></svg>' // Compass
             };
 
-            return categories.map((cat: any) => ({
-                name: cat.name,
-                slug: cat.slug || cat.name.toLowerCase().replace(/ /g, '-'),
-                count: cat.count || cat.places_count || 0, // Fix: Backend sends 'count'
-                avgRating: cat.avgRating || cat.avg_rating || 0, // Fix: Backend sends 'avgRating'
-                icon: cat.icon || getIcon(cat.slug || cat.name.toLowerCase()) // Fix: Backend sends icon too
+            // Icono genérico
+            return icons[slug] || '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>';
+        };
+
+        try {
+            const backendCategories = await placesService.getCategories();
+            const categoryMap = new Map();
+
+            // 1. Inicializar predeterminadas (Risaralda)
+            defaultCategories.forEach(cat => {
+                categoryMap.set(cat.slug, { ...cat, count: 0, avgRating: 0 });
+            });
+
+            // 2. Combinar con datos del backend
+            backendCategories.forEach((cat: any) => {
+                const slug = cat.slug || cat.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ /g, '-');
+                if (categoryMap.has(slug)) {
+                    const existing = categoryMap.get(slug);
+                    categoryMap.set(slug, {
+                        ...existing,
+                        count: cat.count || cat.places_count || 0,
+                        avgRating: cat.avgRating || cat.avg_rating || 0
+                    });
+                }
+            });
+
+            return Array.from(categoryMap.values()).map((cat: any) => ({
+                ...cat,
+                icon: cat.icon || getIcon(cat.slug)
             }));
+
         } catch (error) {
             console.error('Error fetching categories:', error);
-            return [];
+            // Fallback
+            return defaultCategories.map(cat => ({
+                ...cat,
+                count: 0,
+                avgRating: 0,
+                icon: getIcon(cat.slug)
+            }));
         }
     }
 
