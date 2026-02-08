@@ -194,10 +194,17 @@ const PlaceDetail: React.FC = () => {
             <main className="container mx-auto px-4 py-8 max-w-5xl">
                 <button
                     onClick={() => navigate(-1)}
-                    className="mb-6 text-eco-text-light hover:text-eco-primary-600 flex items-center gap-2 group transition-colors"
+                    className="group flex items-center gap-2 px-5 py-2.5 bg-white text-eco-primary-700 rounded-full shadow-md hover:shadow-lg hover:bg-eco-primary-50 transition-all duration-300 transform hover:-translate-y-0.5 mb-8 border border-eco-primary-100"
                 >
-                    <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                    <span className="font-medium">Volver</span>
+                    <svg
+                        className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span className="font-semibold text-sm tracking-wide uppercase">Volver</span>
                 </button>
 
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
