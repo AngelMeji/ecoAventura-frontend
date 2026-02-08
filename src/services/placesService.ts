@@ -126,13 +126,13 @@ export const placesService = {
     },
 
     // Moderación de Lugares (Solo Admin)
-    async getPendingPlaces(): Promise<Place[]> {
-        const response = await api.get<Place[]>('/admin/places/pending');
+    async getPendingPlaces(page: number = 1): Promise<PaginatedResponse<Place>> {
+        const response = await api.get<PaginatedResponse<Place>>(`/admin/places/pending?page=${page}`);
         return response.data;
     },
 
-    async getAdminAllPlaces(): Promise<Place[]> {
-        const response = await api.get<Place[]>('/admin/places'); // Requires backend route
+    async getAdminAllPlaces(page: number = 1): Promise<PaginatedResponse<Place>> {
+        const response = await api.get<PaginatedResponse<Place>>('/admin/places', { params: { page } });
         return response.data;
     },
 

@@ -33,13 +33,14 @@ const Dashboard: React.FC = () => {
                 const data = await placesService.getAdminDashboard();
                 setStats(data?.stats || {});
                 const pendingResponse = await placesService.getPendingPlaces();
-                const pending = Array.isArray(pendingResponse) ? pendingResponse : (pendingResponse as any).data || [];
-                setPendingPlaces(pending);
+                setPendingPlaces(pendingResponse.data || []);
 
                 try {
-                    const all = await placesService.getAdminAllPlaces();
-                    setAllPlaces(Array.isArray(all) ? all : []);
-                } catch (e) { console.warn('Backend missing getAdminAllPlaces'); }
+                    const allResponse = await placesService.getAdminAllPlaces();
+                    setAllPlaces(allResponse.data || []);
+                } catch (e) {
+                    console.warn('Backend missing getAdminAllPlaces or error fetching:', e);
+                }
 
             } else if (user.role === 'partner') {
                 // Intentar obtener dashboard del partner
