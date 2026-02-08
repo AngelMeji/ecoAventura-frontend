@@ -4,6 +4,8 @@ import { placesService } from '../../services/placesService';
 import type { Place } from '../../models/Place.model';
 import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
+import Alert from '../../components/common/Alert';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
 
@@ -24,6 +26,12 @@ const PlaceDetail: React.FC = () => {
     // Inline editing state
     const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({ rating: 0, comment: '' });
+
+    // Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        reviewId: number | null;
+    }>({ isOpen: false, reviewId: null });
 
     const user = authService.getCurrentUser();
 
@@ -99,6 +107,23 @@ const PlaceDetail: React.FC = () => {
                 // Mensaje genérico para otros errores
                 setMessage({ type: 'error', text: error.message || 'Error al enviar reseña. Por favor intenta nuevamente.' });
             }
+        }
+    };
+
+    const handleDeleteReview = async () => {
+        if (!confirmModal.reviewId) return;
+
+        try {
+            await placesService.deleteReview(confirmModal.reviewId);
+            setPlace(prev => prev ? {
+                ...prev,
+                reviews: prev.reviews?.filter(r => r.id !== confirmModal.reviewId)
+            } : null);
+            setMessage({ type: 'success', text: 'Reseña eliminada correctamente' });
+        } catch (e) {
+            setMessage({ type: 'error', text: 'Error eliminando reseña' });
+        } finally {
+            setConfirmModal({ isOpen: false, reviewId: null });
         }
     };
 
@@ -338,15 +363,12 @@ const PlaceDetail: React.FC = () => {
                                             </div>
 
                                             {message && (
-                                                <div className={`p-4 rounded-xl mb-4 flex items-center gap-3 ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
-                                                    }`}>
-                                                    {message.type === 'success' ? (
-                                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                    ) : (
-                                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                    )}
-                                                    <p className="whitespace-pre-line">{message.text}</p>
-                                                </div>
+                                                <Alert
+                                                    type={message.type}
+                                                    message={message.text}
+                                                    onClose={() => setMessage(null)}
+                                                    className="mb-4"
+                                                />
                                             )}
 
                                             <textarea
@@ -460,20 +482,7 @@ const PlaceDetail: React.FC = () => {
                                                                         </button>
                                                                     )}
                                                                     <button
-                                                                        onClick={async () => {
-                                                                            if (confirm('¿Eliminar esta reseña?')) {
-                                                                                try {
-                                                                                    await placesService.deleteReview(rev.id);
-                                                                                    setPlace(prev => prev ? {
-                                                                                        ...prev,
-                                                                                        reviews: prev.reviews?.filter(r => r.id !== rev.id)
-                                                                                    } : null);
-                                                                                    setMessage({ type: 'success', text: 'Reseña eliminada' });
-                                                                                } catch (e) {
-                                                                                    setMessage({ type: 'error', text: 'Error eliminando reseña' });
-                                                                                }
-                                                                            }
-                                                                        }}
+                                                                        onClick={() => setConfirmModal({ isOpen: true, reviewId: rev.id })}
                                                                         className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                                                                         title="Eliminar"
                                                                     >
@@ -500,6 +509,16 @@ const PlaceDetail: React.FC = () => {
                         )}
                     </div>
                 </div>
+
+                <ConfirmationModal
+                    isOpen={confirmModal.isOpen}
+                    title="¿Eliminar reseña?"
+                    message="Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este comentario?"
+                    confirmText="Sí, eliminar"
+                    cancelText="Cancelar"
+                    onConfirm={handleDeleteReview}
+                    onCancel={() => setConfirmModal({ isOpen: false, reviewId: null })}
+                />
             </main>
         </div>
     );

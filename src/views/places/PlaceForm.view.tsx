@@ -4,6 +4,8 @@ import { placesService } from '../../services/placesService';
 import type { Category, PlaceImage } from '../../models/Place.model';
 import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
+import Alert from '../../components/common/Alert';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 interface ImagePreview {
     id?: number; // Solo para imágenes existentes
@@ -35,6 +37,10 @@ const PlaceForm: React.FC = () => {
     const [duration, setDuration] = useState('');
     const [bestSeason, setBestSeason] = useState('');
 
+    // Feedback States
+    const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error' | 'warning' | 'info', text: string } | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: () => void }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
+
     // Images State
     const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
     const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
@@ -51,12 +57,20 @@ const PlaceForm: React.FC = () => {
         }
     }, [id]);
 
+    // Scroll to top when message changes
+    useEffect(() => {
+        if (formMessage) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [formMessage]);
+
     const loadCategories = async () => {
         try {
             const data = await placesService.getCategories();
             setCategories(data);
         } catch (error) {
             console.error('Error loading categories', error);
+            setFormMessage({ type: 'error', text: 'Error cargando categorías. Por favor recarga la página.' });
         }
     };
 
@@ -87,8 +101,8 @@ const PlaceForm: React.FC = () => {
             }
         } catch (error) {
             console.error('Error loading place', error);
-            alert('Error cargando lugar');
-            navigate('/dashboard');
+            setFormMessage({ type: 'error', text: 'Error cargando información del lugar.' });
+            setTimeout(() => navigate('/dashboard'), 3000);
         } finally {
             setLoading(false);
         }
@@ -97,17 +111,25 @@ const PlaceForm: React.FC = () => {
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
+        processFiles(files);
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
+    const processFiles = (files: FileList) => {
+        setFormMessage(null);
         const newPreviews: ImagePreview[] = [];
+        let errorMsg = '';
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             // Validar tipo y tamaño
             if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
-                alert(`Archivo ${file.name} no es una imagen válida`);
+                errorMsg = `Archivo ${file.name} no es una imagen válida. `;
                 continue;
             }
             if (file.size > 5 * 1024 * 1024) {
-                alert(`Archivo ${file.name} excede el límite de 5MB`);
+                errorMsg = `Archivo ${file.name} excede el límite de 5MB. `;
                 continue;
             }
 
@@ -119,17 +141,18 @@ const PlaceForm: React.FC = () => {
             });
         }
 
+        if (errorMsg) {
+            setFormMessage({ type: 'warning', text: errorMsg });
+        }
+
         // Máximo 10 imágenes
         const total = imagePreviews.length + newPreviews.length;
         if (total > 10) {
-            alert('Máximo 10 imágenes por lugar');
+            setFormMessage({ type: 'warning', text: 'Máximo 10 imágenes por lugar. Se han descartado algunas imágenes.' });
             setImagePreviews(prev => [...prev, ...newPreviews.slice(0, 10 - prev.length)]);
         } else {
             setImagePreviews(prev => [...prev, ...newPreviews]);
         }
-
-        // Reset file input
-        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     // Funciones para drag & drop
@@ -152,36 +175,7 @@ const PlaceForm: React.FC = () => {
 
         const files = e.dataTransfer.files;
         if (!files || files.length === 0) return;
-
-        const newPreviews: ImagePreview[] = [];
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            // Validar tipo y tamaño
-            if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
-                alert(`Archivo ${file.name} no es una imagen válida`);
-                continue;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                alert(`Archivo ${file.name} excede el límite de 5MB`);
-                continue;
-            }
-
-            newPreviews.push({
-                file,
-                url: URL.createObjectURL(file),
-                isPrimary: imagePreviews.length === 0 && newPreviews.length === 0,
-                isExisting: false
-            });
-        }
-
-        // Máximo 10 imágenes
-        const total = imagePreviews.length + newPreviews.length;
-        if (total > 10) {
-            alert('Máximo 10 imágenes por lugar');
-            setImagePreviews(prev => [...prev, ...newPreviews.slice(0, 10 - prev.length)]);
-        } else {
-            setImagePreviews(prev => [...prev, ...newPreviews]);
-        }
+        processFiles(files);
     };
 
     const handleRemoveImage = (index: number) => {
@@ -212,6 +206,7 @@ const PlaceForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setFormMessage(null);
 
         const formData = new FormData();
         formData.append('name', name);
@@ -230,6 +225,9 @@ const PlaceForm: React.FC = () => {
         newImages.forEach((img, index) => {
             formData.append('images[]', img.file!, img.file!.name);
             if (img.isPrimary) {
+                // Ajustar índice basado en si es la única imagen o posición relativa
+                // Mejor estrategia: enviar el nombre del archivo primario o un índice relativo correcto
+                // El backend espera 'primary_image_index' relativo al array 'images[]' enviado
                 formData.append('primary_image_index', index.toString());
             }
         });
@@ -248,14 +246,20 @@ const PlaceForm: React.FC = () => {
         try {
             if (isEditing) {
                 await placesService.update(parseInt(id!), formData);
-                if (confirm('Lugar actualizado correctamente. ¿Volver al panel?')) {
-                    navigate('/dashboard');
-                }
+                setConfirmModal({
+                    isOpen: true,
+                    title: '¡Actualización Exitosa!',
+                    message: 'El lugar ha sido actualizado correctamente. ¿Deseas volver al panel de administración?',
+                    onConfirm: () => navigate('/dashboard')
+                });
             } else {
                 await placesService.create(formData);
-                if (confirm('Lugar creado correctamente y pendiente de aprobación. ¿Volver al panel?')) {
-                    navigate('/dashboard');
-                }
+                setConfirmModal({
+                    isOpen: true,
+                    title: '¡Lugar Publicado!',
+                    message: 'El lugar ha sido creado correctamente y está pendiente de aprobación. ¿Deseas volver al panel?',
+                    onConfirm: () => navigate('/dashboard')
+                });
             }
         } catch (error: any) {
             console.error('Error saving place', error);
@@ -267,7 +271,10 @@ const PlaceForm: React.FC = () => {
                 errorDetails = Object.values(errors).flat().join('\n');
             }
 
-            alert(`Error al guardar:\n${msg}\n${errorDetails}`);
+            setFormMessage({
+                type: 'error',
+                text: `Error al guardar:\n${msg}\n${errorDetails}`
+            });
         } finally {
             setLoading(false);
         }
@@ -289,7 +296,16 @@ const PlaceForm: React.FC = () => {
                     </h1>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+                {formMessage && (
+                    <Alert
+                        type={formMessage.type as any}
+                        message={formMessage.text}
+                        className="mb-8 shadow-xl"
+                        onClose={() => setFormMessage(null)}
+                    />
+                )}
+
+                <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 animate-fade-in-up">
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Basic Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -505,8 +521,8 @@ const PlaceForm: React.FC = () => {
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
                                     className={`flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl transition-all group cursor-pointer ${isDragging
-                                            ? 'border-eco-primary-500 bg-eco-primary-50'
-                                            : 'border-gray-300 hover:bg-gray-50'
+                                        ? 'border-eco-primary-500 bg-eco-primary-50'
+                                        : 'border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <input
@@ -555,6 +571,17 @@ const PlaceForm: React.FC = () => {
                         </div>
                     </form>
                 </div>
+
+                <ConfirmationModal
+                    isOpen={confirmModal.isOpen}
+                    title={confirmModal.title}
+                    message={confirmModal.message}
+                    confirmText="Volver al Panel"
+                    cancelText="Quedarse"
+                    type="success"
+                    onConfirm={confirmModal.onConfirm}
+                    onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                />
             </div>
         </div>
     );
