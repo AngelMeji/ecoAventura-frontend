@@ -4,6 +4,8 @@ import { placesService } from '../services/placesService';
 import type { Category } from '../models/Place.model';
 import Header from '../components/layout/Header';
 import { authService } from '../services/authService';
+import Alert from '../components/common/Alert';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 
 const PlaceForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -29,6 +31,10 @@ const PlaceForm: React.FC = () => {
 
     // Estado para errores de validación
     const [errors, setErrors] = useState<Record<string, string[]>>({});
+
+    // Feedback states
+    const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; message: string } | null>(null);
+    const [modal, setModal] = useState<{ title: string; message: string; onConfirm: () => void; type?: 'danger' | 'warning' | 'info' | 'success' } | null>(null);
 
     useEffect(() => {
         if (!user || (user.role !== 'partner' && user.role !== 'admin')) {
@@ -67,8 +73,8 @@ const PlaceForm: React.FC = () => {
             setBestSeason(place.best_season || '');
         } catch (error) {
             console.error('Error loading place', error);
-            alert('Error cargando lugar');
-            navigate('/dashboard');
+            setAlert({ type: 'error', message: 'Error al cargar el lugar' });
+            setTimeout(() => navigate('/dashboard'), 2000);
         } finally {
             setLoading(false);
         }
@@ -101,14 +107,20 @@ const PlaceForm: React.FC = () => {
         try {
             if (isEditing) {
                 await placesService.update(parseInt(id!), formData);
-                if (confirm('Lugar actualizado correctamente. ¿Volver al panel?')) {
-                    navigate('/dashboard');
-                }
+                setModal({
+                    title: 'Lugar Actualizado',
+                    message: 'El lugar se ha actualizado correctamente. ¿Deseas volver al panel de control?',
+                    type: 'success',
+                    onConfirm: () => navigate('/dashboard')
+                });
             } else {
                 await placesService.create(formData);
-                if (confirm('Lugar creado correctamente y pendiente de aprobación. ¿Volver al panel?')) {
-                    navigate('/dashboard');
-                }
+                setModal({
+                    title: 'Lugar Creado',
+                    message: 'El lugar ha sido creado correctamente y está pendiente de aprobación. ¿Deseas volver al panel de control?',
+                    type: 'success',
+                    onConfirm: () => navigate('/dashboard')
+                });
             }
         } catch (error: any) {
             console.error('Error saving place', error);
@@ -116,11 +128,11 @@ const PlaceForm: React.FC = () => {
             if (error.response?.status === 422) {
                 // Errores de validación
                 setErrors(error.response.data.errors || {});
-                alert('Por favor corrige los errores señalados en el formulario.');
+                setAlert({ type: 'error', message: 'Por favor, corrige los errores señalados en el formulario.' });
             } else {
                 // Otros errores
                 const msg = error.response?.data?.message || error.message || 'Error desconocido';
-                alert(`Error al guardar: ${msg}`);
+                setAlert({ type: 'error', message: `Error al guardar: ${msg}` });
             }
         } finally {
             setLoading(false);
@@ -136,7 +148,29 @@ const PlaceForm: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <div className="container mx-auto px-4 py-8 max-w-3xl">
+            <main className="container mx-auto px-4 py-8 max-w-3xl relative">
+                {/* Global Feedback */}
+                {alert && (
+                    <div className="fixed top-24 right-4 z-[10000] w-full max-w-sm animate-fade-in">
+                        <Alert
+                            type={alert.type}
+                            message={alert.message}
+                            onClose={() => setAlert(null)}
+                        />
+                    </div>
+                )}
+
+                {modal && (
+                    <ConfirmationModal
+                        isOpen={!!modal}
+                        title={modal.title}
+                        message={modal.message}
+                        type={modal.type}
+                        onConfirm={modal.onConfirm}
+                        onCancel={() => setModal(null)}
+                    />
+                )}
+
                 <h1 className="text-3xl font-bold text-gray-800 mb-6 font-display">
                     {isEditing ? 'Editar Lugar' : 'Publicar Nuevo Lugar'}
                 </h1>
@@ -332,7 +366,7 @@ const PlaceForm: React.FC = () => {
                         </div>
                     </form>
                 </div>
-            </div>
+            </main>
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Place } from '../../models/Place.model';
 import { authService } from '../../services/authService';
+import { placesService } from '../../services/placesService';
 
 // URL base para las imágenes (storage)
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
@@ -116,6 +117,26 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         }
     };
 
+    const handleToggleFavorite = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!user) {
+            setMessage({ type: 'error', text: 'Debes iniciar sesión para guardar favoritos' });
+            return;
+        }
+
+        try {
+            if (destination.is_favorite) {
+                await placesService.removeFavorite(destination.id);
+                setDestination({ ...destination, is_favorite: false });
+            } else {
+                await placesService.addFavorite(destination.id);
+                setDestination({ ...destination, is_favorite: true });
+            }
+        } catch (error) {
+            console.error('Error toggling favorite', error);
+        }
+    };
+
     const categoryName = destination.category?.name || 'General';
     const currentRating = destination.average_rating || 0;
     const reviewCount = destination.reviews?.length || 0;
@@ -124,10 +145,23 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in duration-200">
 
-                {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
                     <h2 className="text-2xl font-bold text-eco-primary-700">{destination.name}</h2>
                     <div className="flex items-center gap-2">
+                        {user && (
+                            <button
+                                onClick={handleToggleFavorite}
+                                className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${destination.is_favorite
+                                    ? 'text-red-500 bg-red-50'
+                                    : 'text-gray-400 hover:text-red-400 hover:bg-gray-100'
+                                    }`}
+                                title={destination.is_favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
+                            >
+                                <svg className="w-6 h-6" fill={destination.is_favorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+                        )}
                         <button
                             onClick={onClose}
                             className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
@@ -182,15 +216,15 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     <>
                                         <button
                                             onClick={prevImage}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all z-20"
                                         >
-                                            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                                         </button>
                                         <button
                                             onClick={nextImage}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all z-20"
                                         >
-                                            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
                                         </button>
                                     </>
                                 )}

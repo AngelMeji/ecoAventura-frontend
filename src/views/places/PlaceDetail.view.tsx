@@ -218,18 +218,20 @@ const PlaceDetail: React.FC = () => {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
 
                         {images.length > 1 && (
-                            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1); }}
-                                    className="bg-white/20 hover:bg-white/40 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110"
+                                    className="bg-white/30 hover:bg-white/50 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110 shadow-lg border border-white/20"
+                                    aria-label="Imagen anterior"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                                 </button>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1); }}
-                                    className="bg-white/20 hover:bg-white/40 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110"
+                                    className="bg-white/30 hover:bg-white/50 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110 shadow-lg border border-white/20"
+                                    aria-label="Siguiente imagen"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
                         )}
@@ -342,6 +344,29 @@ const PlaceDetail: React.FC = () => {
                                         </div>
                                         <h3 className="font-bold text-gray-900 mb-1">Mejor Temporada</h3>
                                         <p className="text-eco-primary-700 font-medium">{place.best_season || 'Todas'}</p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-12 bg-eco-primary-50/30 rounded-3xl p-8 border border-eco-primary-100/50">
+                                    <h3 className="text-2xl font-display font-bold text-eco-primary-900 mb-6 flex items-center gap-2">
+                                        <svg className="w-6 h-6 text-eco-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        Ubicación
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección Exacta</p>
+                                            <p className="text-gray-800 text-lg">{place.address}</p>
+                                        </div>
+                                        <div className="pt-4 border-t border-eco-primary-100/50 flex flex-wrap gap-8">
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Latitud</p>
+                                                <p className="font-mono text-eco-primary-700">{place.latitude}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Longitud</p>
+                                                <p className="font-mono text-eco-primary-700">{place.longitude}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

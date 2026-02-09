@@ -20,7 +20,11 @@ interface Review {
     };
 }
 
-const AdminReviewsTable: React.FC = () => {
+interface AdminReviewsTableProps {
+    onNotify: (alert: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void;
+}
+
+const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify }) => {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -72,7 +76,7 @@ const AdminReviewsTable: React.FC = () => {
             );
         } catch (error) {
             console.error('Error toggling review visibility:', error);
-            alert('Error al cambiar visibilidad del comentario');
+            onNotify({ type: 'error', message: 'Error al cambiar visibilidad del comentario' });
         } finally {
             setToggling(null);
         }

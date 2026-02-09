@@ -17,7 +17,12 @@ const Modal = ({ isOpen, onClose, title, children }: any) => {
     );
 };
 
-const AdminUsersTable: React.FC = () => {
+interface AdminUsersTableProps {
+    onNotify: (alert: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void;
+    onConfirm: (config: { title: string; message: string; onConfirm: () => void; type?: 'danger' | 'warning' | 'info' | 'success' }) => void;
+}
+
+const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }) => {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -67,13 +72,20 @@ const AdminUsersTable: React.FC = () => {
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')) return;
-        try {
-            await placesService.deleteUser(id);
-            setUsers(prev => prev.filter(u => u.id !== id));
-        } catch (error) {
-            alert('Error eliminando usuario');
-        }
+        onConfirm({
+            title: 'Eliminar Usuario',
+            message: '¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    await placesService.deleteUser(id);
+                    setUsers(prev => prev.filter(u => u.id !== id));
+                    onNotify({ type: 'success', message: 'Usuario eliminado correctamente' });
+                } catch (error) {
+                    onNotify({ type: 'error', message: 'Error eliminando usuario' });
+                }
+            }
+        });
     };
 
     const handleEdit = (user: any) => {
@@ -85,11 +97,11 @@ const AdminUsersTable: React.FC = () => {
         e.preventDefault();
         try {
             await placesService.updateUser(editingUser.id, editingUser);
-            alert('Usuario actualizado');
+            onNotify({ type: 'success', message: 'Usuario actualizado correctamente' });
             setIsEditOpen(false);
             loadUsers();
         } catch (error) {
-            alert('Error actualizando usuario');
+            onNotify({ type: 'error', message: 'Error actualizando usuario' });
         }
     };
 

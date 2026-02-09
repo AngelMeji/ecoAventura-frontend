@@ -148,6 +148,12 @@ export const placesService = {
         return response.data;
     },
 
+    // SPEC: PATCH /places/{id}/set-pending
+    async setPending(id: number): Promise<Place> {
+        const response = await api.patch<Place>(`/places/${id}/set-pending`);
+        return response.data;
+    },
+
     // SPEC: PATCH /places/{id}/needs-fix
     async needsFix(id: number): Promise<Place> {
         const response = await api.patch<Place>(`/places/${id}/needs-fix`);
