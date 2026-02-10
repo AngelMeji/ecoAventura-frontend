@@ -53,7 +53,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         `} dangerouslySetInnerHTML={{ __html: category.icon }} />
 
                         <h3 className="font-bold text-gray-800 mb-1 group-hover:text-eco-primary-700">
-                            {category.name}
+                            {t(`home.categories.names.${category.slug}`) !== `home.categories.names.${category.slug}`
+                                ? t(`home.categories.names.${category.slug}`)
+                                : category.name}
                         </h3>
 
                         <div className="flex items-center justify-between text-xs text-gray-500">

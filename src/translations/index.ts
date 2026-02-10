@@ -51,11 +51,31 @@ export const translations = {
                 title: 'Explorar por Categorías',
                 subtitle: 'Descubre destinos organizados por tipo de experiencia',
                 place_one: 'lugar',
-                place_other: 'lugares'
+                place_other: 'lugares',
+                names: {
+                    'avistamiento-de-aves': 'Avistamiento de aves',
+                    'senderismo': 'Senderismo',
+                    'paisaje-cultural-cafetero': 'Paisaje cultural cafetero',
+                    'termales': 'Termales',
+                    'nevados-y-montanas': 'Nevados y montañas',
+                    'cascadas': 'Cascadas',
+                    'glamping': 'Glamping',
+                    'parques-tematicos': 'Parques temáticos',
+                    'rios-y-lagos': 'Ríos y lagos',
+                    'miradores': 'Miradores'
+                }
             },
             card: {
                 viewDetails: 'Ver Detalles',
-                na: 'N/A'
+                na: 'N/A',
+                difficulty: {
+                    'facil': 'Fácil',
+                    'media': 'Media',
+                    'dificil': 'Difícil',
+                    'Fácil': 'Fácil',
+                    'Media': 'Media',
+                    'Difícil': 'Difícil'
+                }
             },
             modal: {
                 tabs: {
@@ -94,6 +114,29 @@ export const translations = {
                     error: 'Ocurrió un error.'
                 }
             },
+            profile: {
+                title: 'Mi Perfil',
+                personalInfo: 'Información Personal',
+                security: 'Seguridad',
+                profilePhoto: 'Foto de Perfil',
+                uploadNewPhoto: 'Subir Nueva Foto',
+                fullName: 'Nombre Completo',
+                email: 'Correo Electrónico',
+                currentPassword: 'Contraseña Actual',
+                newPassword: 'Nueva Contraseña',
+                confirmPassword: 'Confirmar Contraseña',
+                saving: 'Guardando...',
+                saveChanges: 'Guardar Cambios',
+                updatePassword: 'Actualizar Contraseña',
+                messages: {
+                    passwordMismatch: 'Las contraseñas no coinciden',
+                    profileUpdateSuccess: 'Perfil actualizado con éxito. Redirigiendo...',
+                    profileUpdateError: 'No se pudo actualizar el perfil.',
+                    passwordUpdateSuccess: 'Cambio de contraseña exitoso. Por favor, ingrese nuevamente para iniciar sesión con sus nuevas credenciales.',
+                    passwordUpdateError: 'Error al actualizar contraseña',
+                    invalidData: 'Datos inválidos'
+                }
+            },
             dashboard: {
                 welcome: {
                     hello: 'Hola',
@@ -122,6 +165,13 @@ export const translations = {
                     myPlaces: 'Mis Publicaciones',
                     approved: 'Aprobados',
                     inReview: 'En Revisión'
+                },
+                user: {
+                    favoritePlaces: 'Lugares Favoritos',
+                    writtenReviews: 'Reseñas Escritas',
+                    myFavorites: 'Mis Favoritos',
+                    noFavoritesYet: 'Aún no has guardado ningún lugar favorito.',
+                    exploreMap: 'Explorar Mapa'
                 },
                 partner: {
                     manageDestinations: 'Gestionar Destinos',
@@ -289,11 +339,31 @@ export const translations = {
                 title: 'Explore by Category',
                 subtitle: 'Discover destinations organized by experience type',
                 place_one: 'place',
-                place_other: 'places'
+                place_other: 'places',
+                names: {
+                    'avistamiento-de-aves': 'Bird Watching',
+                    'senderismo': 'Hiking',
+                    'paisaje-cultural-cafetero': 'Coffee Cultural Landscape',
+                    'termales': 'Hot Springs',
+                    'nevados-y-montanas': 'Snow-capped Mountains',
+                    'cascadas': 'Waterfalls',
+                    'glamping': 'Glamping',
+                    'parques-tematicos': 'Theme Parks',
+                    'rios-y-lagos': 'Rivers and Lakes',
+                    'miradores': 'Viewpoints'
+                }
             },
             card: {
                 viewDetails: 'View Details',
-                na: 'N/A'
+                na: 'N/A',
+                difficulty: {
+                    'facil': 'Easy',
+                    'media': 'Medium',
+                    'dificil': 'Hard',
+                    'Fácil': 'Easy',
+                    'Media': 'Medium',
+                    'Difícil': 'Hard'
+                }
             },
             modal: {
                 tabs: {
@@ -332,6 +402,29 @@ export const translations = {
                     error: 'An error occurred.'
                 }
             },
+            profile: {
+                title: 'My Profile',
+                personalInfo: 'Personal Information',
+                security: 'Security',
+                profilePhoto: 'Profile Photo',
+                uploadNewPhoto: 'Upload New Photo',
+                fullName: 'Full Name',
+                email: 'Email Address',
+                currentPassword: 'Current Password',
+                newPassword: 'New Password',
+                confirmPassword: 'Confirm Password',
+                saving: 'Saving...',
+                saveChanges: 'Save Changes',
+                updatePassword: 'Update Password',
+                messages: {
+                    passwordMismatch: 'Passwords do not match',
+                    profileUpdateSuccess: 'Profile updated successfully. Redirecting...',
+                    profileUpdateError: 'Could not update profile.',
+                    passwordUpdateSuccess: 'Password changed successfully. Please log in again with your new credentials.',
+                    passwordUpdateError: 'Error updating password',
+                    invalidData: 'Invalid data'
+                }
+            },
             dashboard: {
                 welcome: {
                     hello: 'Hello',
@@ -360,6 +453,13 @@ export const translations = {
                     myPlaces: 'My Publications',
                     approved: 'Approved',
                     inReview: 'In Review'
+                },
+                user: {
+                    favoritePlaces: 'Favorite Places',
+                    writtenReviews: 'Written Reviews',
+                    myFavorites: 'My Favorites',
+                    noFavoritesYet: 'You haven\'t saved any favorite places yet.',
+                    exploreMap: 'Explore Map'
                 },
                 partner: {
                     manageDestinations: 'Manage Destinations',

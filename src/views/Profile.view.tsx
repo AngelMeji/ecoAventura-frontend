@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import Header from '../components/layout/Header';
+import { useLanguage } from '../context/LanguageContext';
 
 const Profile: React.FC = () => {
+    const { t } = useLanguage();
     const user = authService.getCurrentUser();
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
@@ -110,19 +112,19 @@ const Profile: React.FC = () => {
 
             // Verificar éxito según formato V2: { success: true, message: "...", user: {...} }
             if (response && response.success === true) {
-                setMsg({ type: 'success', text: response.message || 'Perfil actualizado con éxito. Redirigiendo...' });
+                setMsg({ type: 'success', text: response.message || t('home.profile.messages.profileUpdateSuccess') });
                 // Redirigir al dashboard tras breve pausa
                 setTimeout(() => {
                     window.location.href = '/dashboard';
                 }, 1500);
             } else if (response && response.id) {
                 // Fallback: Si el backend devuelve el user directamente (sin wrapper)
-                setMsg({ type: 'success', text: 'Perfil actualizado con éxito. Redirigiendo...' });
+                setMsg({ type: 'success', text: t('home.profile.messages.profileUpdateSuccess') });
                 setTimeout(() => {
                     window.location.href = '/dashboard';
                 }, 1500);
             } else {
-                setMsg({ type: 'error', text: 'No se pudo actualizar el perfil.' });
+                setMsg({ type: 'error', text: t('home.profile.messages.profileUpdateError') });
             }
 
         } catch (error: any) {
@@ -132,10 +134,10 @@ const Profile: React.FC = () => {
             // Manejo de errores de validación (422)
             if (error.response?.status === 422) {
                 const errors = error.response.data.errors;
-                const errorMsg = errors ? Object.values(errors).flat().join(', ') : 'Datos inválidos';
+                const errorMsg = errors ? Object.values(errors).flat().join(', ') : t('home.profile.messages.invalidData');
                 setMsg({ type: 'error', text: errorMsg });
             } else {
-                setMsg({ type: 'error', text: error.response?.data?.message || 'Error al actualizar perfil' });
+                setMsg({ type: 'error', text: error.response?.data?.message || t('home.profile.messages.profileUpdateError') });
             }
         } finally {
             setLoading(false);
@@ -145,7 +147,7 @@ const Profile: React.FC = () => {
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (passwordData.password !== passwordData.password_confirmation) {
-            setMsg({ type: 'error', text: 'Las contraseñas no coinciden' });
+            setMsg({ type: 'error', text: t('home.profile.messages.passwordMismatch') });
             return;
         }
         setLoading(true);
@@ -161,13 +163,13 @@ const Profile: React.FC = () => {
             localStorage.removeItem('user');
 
             // Mostrar alerta de confirmación con el mensaje del backend
-            alert(response.message || 'Cambio de contraseña exitoso. Por favor, ingrese nuevamente para iniciar sesión con sus nuevas credenciales.');
+            alert(response.message || t('home.profile.messages.passwordUpdateSuccess'));
 
             // Redirigir al login (replace fuerza recarga completa)
             window.location.replace('/login');
         } catch (error: any) {
             // Extraer mensaje de error en español
-            let errorMessage = 'Error al actualizar contraseña';
+            let errorMessage = t('home.profile.messages.passwordUpdateError');
 
             if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
@@ -195,7 +197,7 @@ const Profile: React.FC = () => {
                     <div className="p-3 bg-eco-primary-100 rounded-2xl text-eco-primary-600">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     </div>
-                    <h1 className="text-3xl font-display font-bold text-gray-800">Mi Perfil</h1>
+                    <h1 className="text-3xl font-display font-bold text-gray-800">{t('home.profile.title')}</h1>
                 </div>
 
                 {msg.text && (
@@ -262,15 +264,15 @@ const Profile: React.FC = () => {
                         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                             <h2 className="text-xl font-display font-bold text-gray-800 mb-6 flex items-center gap-2">
                                 <svg className="w-5 h-5 text-eco-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                Información Personal
+                                {t('home.profile.personalInfo')}
                             </h2>
                             <form onSubmit={handleProfileUpdate} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">Foto de Perfil</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">{t('home.profile.profilePhoto')}</label>
                                     <div className="flex items-center gap-4">
                                         <label className="cursor-pointer bg-eco-primary-50 hover:bg-eco-primary-100 text-eco-primary-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                            Subir Nueva Foto
+                                            {t('home.profile.uploadNewPhoto')}
                                             <input
                                                 type="file"
                                                 accept="image/*"
@@ -288,7 +290,7 @@ const Profile: React.FC = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Nombre Completo</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('home.profile.fullName')}</label>
                                         <input
                                             type="text"
                                             value={profileData.name}
@@ -297,7 +299,7 @@ const Profile: React.FC = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('home.profile.email')}</label>
                                         <input
                                             type="email"
                                             value={profileData.email}
@@ -318,11 +320,11 @@ const Profile: React.FC = () => {
                                         {loading ? (
                                             <>
                                                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                Guardando...
+                                                {t('home.profile.saving')}
                                             </>
                                         ) : (
                                             <>
-                                                Guardar Cambios
+                                                {t('home.profile.saveChanges')}
                                             </>
                                         )}
                                     </button>
@@ -334,11 +336,11 @@ const Profile: React.FC = () => {
                         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                             <h2 className="text-xl font-display font-bold text-gray-800 mb-6 flex items-center gap-2">
                                 <svg className="w-5 h-5 text-eco-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                Seguridad
+                                {t('home.profile.security')}
                             </h2>
                             <form onSubmit={handlePasswordUpdate} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">Contraseña Actual</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">{t('home.profile.currentPassword')}</label>
                                     <input
                                         type="password"
                                         value={passwordData.current_password}
@@ -348,7 +350,7 @@ const Profile: React.FC = () => {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Nueva Contraseña</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('home.profile.newPassword')}</label>
                                         <input
                                             type="password"
                                             value={passwordData.password}
@@ -357,7 +359,7 @@ const Profile: React.FC = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Confirmar Contraseña</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">{t('home.profile.confirmPassword')}</label>
                                         <input
                                             type="password"
                                             value={passwordData.password_confirmation}
@@ -372,7 +374,7 @@ const Profile: React.FC = () => {
                                         disabled={loading}
                                         className="bg-gray-800 text-white px-8 py-3 rounded-xl hover:bg-gray-900 shadow-lg disabled:opacity-50 font-bold transition-all transform active:scale-95 border-2 border-transparent"
                                     >
-                                        Actualizar Contraseña
+                                        {t('home.profile.updatePassword')}
                                     </button>
                                 </div>
                             </form>

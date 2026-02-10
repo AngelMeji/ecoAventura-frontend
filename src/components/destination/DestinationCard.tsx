@@ -83,7 +83,11 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
 
                 <div className="absolute top-4 right-4 z-10">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm border backdrop-blur-md bg-white/90 ${getCategoryColor(categoryName)}`}>
-                        {categoryName}
+                        {destination.category?.slug
+                            ? (t(`home.categories.names.${destination.category.slug}`) !== `home.categories.names.${destination.category.slug}`
+                                ? t(`home.categories.names.${destination.category.slug}`)
+                                : categoryName)
+                            : categoryName}
                     </span>
                 </div>
             </div>
@@ -112,7 +116,13 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                         <svg className="w-3.5 h-3.5 text-eco-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span className="capitalize">{destination.difficulty || t('home.card.na')}</span>
+                        <span className="capitalize">
+                            {destination.difficulty
+                                ? (t(`home.card.difficulty.${destination.difficulty}`) !== `home.card.difficulty.${destination.difficulty}`
+                                    ? t(`home.card.difficulty.${destination.difficulty}`)
+                                    : destination.difficulty)
+                                : t('home.card.na')}
+                        </span>
                     </div>
                 </div>
 

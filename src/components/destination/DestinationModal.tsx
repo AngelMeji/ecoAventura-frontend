@@ -243,10 +243,18 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                             {/* Details */}
                             <div className="flex flex-wrap gap-3">
                                 <span className="px-3 py-1 bg-eco-primary-100 text-eco-primary-800 rounded-full text-sm font-medium">
-                                    {categoryName}
+                                    {destination.category?.slug
+                                        ? (t(`home.categories.names.${destination.category.slug}`) !== `home.categories.names.${destination.category.slug}`
+                                            ? t(`home.categories.names.${destination.category.slug}`)
+                                            : categoryName)
+                                        : categoryName}
                                 </span>
                                 <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium capitalize">
-                                    {destination.difficulty || t('home.modal.info.difficulty_na')}
+                                    {destination.difficulty
+                                        ? (t(`home.card.difficulty.${destination.difficulty}`) !== `home.card.difficulty.${destination.difficulty}`
+                                            ? t(`home.card.difficulty.${destination.difficulty}`)
+                                            : destination.difficulty)
+                                        : t('home.modal.info.difficulty_na')}
                                 </span>
                                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                                     {destination.duration || t('home.modal.info.duration_na')}

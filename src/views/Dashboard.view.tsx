@@ -8,10 +8,12 @@ import AdminUsersTable from '../components/dashboard/AdminUsersTable';
 import AdminReviewsTable from '../components/dashboard/AdminReviewsTable';
 import Alert from '../components/common/Alert';
 import ConfirmationModal from '../components/common/ConfirmationModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
     const [pendingPlaces, setPendingPlaces] = useState<Place[]>([]);
@@ -125,25 +127,25 @@ const Dashboard: React.FC = () => {
 
     // Map for translating statuses
     const statusMap: { [key: string]: string } = {
-        'pending': 'Pendiente',
-        'approved': 'Aprobado',
-        'rejected': 'Rechazado',
-        'needs_fix': 'Requiere Cambios'
+        'pending': t('home.dashboard.status.pending'),
+        'approved': t('home.dashboard.status.approved'),
+        'rejected': t('home.dashboard.status.rejected'),
+        'needs_fix': t('home.dashboard.status.needs_fix')
     };
 
     const handleApprove = (id: number) => {
         setModal({
-            title: 'Aprobar Lugar',
-            message: '¿Estás seguro de que deseas aprobar este lugar?',
+            title: t('home.dashboard.actions.approve'),
+            message: t('home.dashboard.messages.confirmApprove'),
             type: 'success',
             onConfirm: async () => {
                 try {
                     await placesService.approve(id);
-                    setAlert({ type: 'success', message: 'Lugar aprobado correctamente' });
+                    setAlert({ type: 'success', message: t('home.dashboard.messages.approveSuccess') });
                     setPendingPlaces(prev => prev.filter(p => p.id !== id));
                     loadDashboardData();
                 } catch (error) {
-                    setAlert({ type: 'error', message: 'Error aprobando lugar' });
+                    setAlert({ type: 'error', message: t('home.dashboard.messages.approveError') });
                 }
                 setModal(null);
             }
@@ -154,7 +156,7 @@ const Dashboard: React.FC = () => {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-primary-600"></div>
-                <p className="text-lg font-medium text-gray-600 animate-pulse">Cargando...</p>
+                <p className="text-lg font-medium text-gray-600 animate-pulse">{t('home.dashboard.messages.loading')}</p>
             </div>
         );
     }
@@ -208,25 +210,25 @@ const Dashboard: React.FC = () => {
                             </div>
                         )}
                         <div className="text-center md:text-left flex-1">
-                            <h1 className="text-4xl md:text-5xl font-display font-bold mb-2">Hola, {user.name}</h1>
-                            <p className="text-eco-primary-100 text-lg mb-4 opacity-90">Bienvenido a tu panel de control</p>
+                            <h1 className="text-4xl md:text-5xl font-display font-bold mb-2">{t('home.dashboard.welcome.hello')}, {user.name}</h1>
+                            <p className="text-eco-primary-100 text-lg mb-4 opacity-90">{t('home.dashboard.welcome.subtitle')}</p>
 
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                 <span className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-medium tracking-wide border border-white/10">
                                     {user.role === 'partner' ? (
                                         <span className="flex items-center gap-1">
                                             <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                            Socio Verificado
+                                            {t('home.dashboard.welcome.verifiedPartner')}
                                         </span>
                                     ) : user.role === 'admin' ? (
                                         <span className="flex items-center gap-1">
                                             <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                                            Administrador
+                                            {t('home.dashboard.welcome.admin')}
                                         </span>
                                     ) : (
                                         <span className="flex items-center gap-1">
                                             <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
-                                            Explorador
+                                            {t('home.dashboard.welcome.explorer')}
                                         </span>
                                     )}
                                 </span>
@@ -234,7 +236,7 @@ const Dashboard: React.FC = () => {
                                     onClick={() => navigate('/profile')}
                                     className="bg-white/10 hover:bg-white/20 text-white px-5 py-1.5 rounded-full text-sm font-bold transition-all border border-white/10 flex items-center gap-2"
                                 >
-                                    Editar Perfil
+                                    {t('home.dashboard.welcome.editProfile')}
                                 </button>
                                 {(user.role === 'admin' || user.role === 'partner') && (
                                     <button
@@ -242,7 +244,7 @@ const Dashboard: React.FC = () => {
                                         className="bg-eco-accent hover:bg-eco-accent-hover text-eco-primary-900 px-6 py-2 rounded-full text-sm font-bold shadow-lg shadow-black/10 transition-all hover:scale-105 flex items-center gap-2"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                        Crear Lugar
+                                        {t('home.dashboard.welcome.createPlace')}
                                     </button>
                                 )}
                             </div>
@@ -256,10 +258,10 @@ const Dashboard: React.FC = () => {
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                             {[
-                                { label: 'Usuarios Totales', value: stats?.total_users || 0, bgClass: 'bg-blue-50', textClass: 'text-blue-600', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-                                { label: 'Lugares Publicados', value: stats?.total_places || 0, bgClass: 'bg-green-50', textClass: 'text-green-600', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-                                { label: 'Pendientes', value: stats?.pending_places || 0, bgClass: 'bg-yellow-50', textClass: 'text-yellow-600', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-                                { label: 'Reseñas Totales', value: stats?.reviews_count || 0, bgClass: 'bg-purple-50', textClass: 'text-purple-600', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' }
+                                { label: t('home.dashboard.stats.totalUsers'), value: stats?.total_users || 0, bgClass: 'bg-blue-50', textClass: 'text-blue-600', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+                                { label: t('home.dashboard.stats.totalPlaces'), value: stats?.total_places || 0, bgClass: 'bg-green-50', textClass: 'text-green-600', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                                { label: t('home.dashboard.stats.pendingPlaces'), value: stats?.pending_places || 0, bgClass: 'bg-yellow-50', textClass: 'text-yellow-600', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+                                { label: t('home.dashboard.stats.totalReviews'), value: stats?.reviews_count || 0, bgClass: 'bg-purple-50', textClass: 'text-purple-600', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' }
                             ].map((stat, idx) => (
                                 <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1 group">
                                     <div className={`p-3 rounded-xl ${stat.bgClass} w-fit mb-4 group-hover:scale-110 transition-transform`}>
@@ -276,41 +278,41 @@ const Dashboard: React.FC = () => {
                             <div className="bg-white p-6 rounded-xl shadow-sm">
                                 <h3 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
                                     <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
-                                    Mejor Valorado
+                                    {t('home.dashboard.stats.topRated')}
                                 </h3>
-                                <div className="text-sm text-gray-500">Basado en reseñas</div>
+                                <div className="text-sm text-gray-500">{t('home.dashboard.stats.basedOnReviews')}</div>
                                 {stats?.top_rated ? (
                                     <>
                                         <div className="mt-4 font-bold text-xl text-yellow-600 truncate">{stats.top_rated.name}</div>
-                                        <div className="text-xs text-gray-400">{Number(stats.top_rated.rating).toFixed(1)} ★ ({stats.top_rated.count} reseñas)</div>
+                                        <div className="text-xs text-gray-400">{Number(stats.top_rated.rating).toFixed(1)} ★ ({stats.top_rated.count} {t('home.dashboard.stats.reviews')})</div>
                                     </>
-                                ) : <div className="mt-4 text-gray-400 italic">No hay datos aún</div>}
+                                ) : <div className="mt-4 text-gray-400 italic">{t('home.dashboard.stats.noData')}</div>}
                             </div>
                             <div className="bg-white p-6 rounded-xl shadow-sm">
                                 <h3 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
                                     <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    Más Popular
+                                    {t('home.dashboard.stats.mostPopular')}
                                 </h3>
-                                <div className="text-sm text-gray-500">Más favoritos</div>
+                                <div className="text-sm text-gray-500">{t('home.dashboard.stats.mostFavorites')}</div>
                                 {stats?.most_popular ? (
                                     <>
                                         <div className="mt-4 font-bold text-xl text-red-600 truncate">{stats.most_popular.name}</div>
-                                        <div className="text-xs text-gray-400">{stats.most_popular.favorites} guardados</div>
+                                        <div className="text-xs text-gray-400">{stats.most_popular.favorites} {t('home.dashboard.stats.saved')}</div>
                                     </>
-                                ) : <div className="mt-4 text-gray-400 italic">No hay datos aún</div>}
+                                ) : <div className="mt-4 text-gray-400 italic">{t('home.dashboard.stats.noData')}</div>}
                             </div>
                             <div className="bg-white p-6 rounded-xl shadow-sm">
                                 <h3 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
                                     <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" /></svg>
-                                    Categoría Top
+                                    {t('home.dashboard.stats.topCategory')}
                                 </h3>
-                                <div className="text-sm text-gray-500">Más lugares</div>
+                                <div className="text-sm text-gray-500">{t('home.dashboard.stats.mostPlaces')}</div>
                                 {stats?.top_category ? (
                                     <>
                                         <div className="mt-4 font-bold text-xl text-blue-600 truncate">{stats.top_category.name}</div>
-                                        <div className="text-xs text-gray-400">{stats.top_category.count} lugares</div>
+                                        <div className="text-xs text-gray-400">{stats.top_category.count} {t('home.dashboard.stats.places')}</div>
                                     </>
-                                ) : <div className="mt-4 text-gray-400 italic">No hay datos aún</div>}
+                                ) : <div className="mt-4 text-gray-400 italic">{t('home.dashboard.stats.noData')}</div>}
                             </div>
                         </div>
 
@@ -320,21 +322,21 @@ const Dashboard: React.FC = () => {
                                 <div className="p-6 border-b border-gray-100 bg-yellow-50/50">
                                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        Lugares Pendientes de Aprobación
+                                        {t('home.dashboard.sections.pendingPlaces')}
                                     </h2>
                                 </div>
                                 {pendingPlaces.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500">
-                                        <p>¡Todo al día! No hay lugares pendientes de revisión.</p>
+                                        <p>{t('home.dashboard.messages.allUpToDate')}</p>
                                     </div>
                                 ) : (<>
                                     <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                                                 <tr>
-                                                    <th className="p-4">Lugar</th>
-                                                    <th className="p-4">Socio</th>
-                                                    <th className="p-4 text-right">Acciones</th>
+                                                    <th className="p-4">{t('home.dashboard.tables.place')}</th>
+                                                    <th className="p-4">{t('home.dashboard.tables.partner')}</th>
+                                                    <th className="p-4 text-right">{t('home.dashboard.tables.actions')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
@@ -349,68 +351,68 @@ const Dashboard: React.FC = () => {
                                                             <button
                                                                 onClick={() => handleApprove(place.id)}
                                                                 className="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-bold flex items-center whitespace-nowrap"
-                                                                title="Aprobar"
+                                                                title={t('home.dashboard.actions.approve')}
                                                             >
                                                                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                                APROBAR
+                                                                {t('home.dashboard.actions.approve').toUpperCase()}
                                                             </button>
                                                             <button
                                                                 onClick={() => {
                                                                     setModal({
-                                                                        title: 'Rechazar Lugar',
-                                                                        message: '¿Deseas rechazar este lugar permanentemente?',
+                                                                        title: t('home.dashboard.actions.reject'),
+                                                                        message: t('home.dashboard.messages.confirmReject'),
                                                                         type: 'danger',
                                                                         onConfirm: async () => {
                                                                             try {
                                                                                 await placesService.reject(place.id);
-                                                                                setAlert({ type: 'success', message: 'Lugar rechazado correctamente' });
+                                                                                setAlert({ type: 'success', message: t('home.dashboard.messages.rejectSuccess') });
                                                                                 setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
                                                                                 loadDashboardData();
                                                                             } catch (e) {
-                                                                                setAlert({ type: 'error', message: 'Error al rechazar el lugar' });
+                                                                                setAlert({ type: 'error', message: t('home.dashboard.messages.rejectError') });
                                                                             }
                                                                             setModal(null);
                                                                         }
                                                                     });
                                                                 }}
                                                                 className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-bold flex items-center whitespace-nowrap"
-                                                                title="Rechazar"
+                                                                title={t('home.dashboard.actions.reject')}
                                                             >
                                                                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                                RECHAZAR
+                                                                {t('home.dashboard.actions.reject').toUpperCase()}
                                                             </button>
                                                             <button
                                                                 onClick={() => {
                                                                     setModal({
-                                                                        title: 'Solicitar Cambios',
-                                                                        message: '¿El lugar requiere correcciones por parte del socio?',
+                                                                        title: t('home.dashboard.actions.changes'),
+                                                                        message: t('home.dashboard.messages.confirmChanges'),
                                                                         type: 'warning',
                                                                         onConfirm: async () => {
                                                                             try {
                                                                                 await placesService.needsFix(place.id);
-                                                                                setAlert({ type: 'success', message: 'Solicitud de cambios enviada correctamente' });
+                                                                                setAlert({ type: 'success', message: t('home.dashboard.messages.changesSuccess') });
                                                                                 setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
                                                                                 loadDashboardData();
                                                                             } catch (e) {
-                                                                                setAlert({ type: 'error', message: 'Error al enviar la solicitud' });
+                                                                                setAlert({ type: 'error', message: t('home.dashboard.messages.changesError') });
                                                                             }
                                                                             setModal(null);
                                                                         }
                                                                     });
                                                                 }}
                                                                 className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 text-xs font-bold flex items-center whitespace-nowrap"
-                                                                title="Solicitar Cambios"
+                                                                title={t('home.dashboard.actions.changes')}
                                                             >
                                                                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                                CAMBIOS
+                                                                {t('home.dashboard.actions.changes').toUpperCase()}
                                                             </button>
                                                             <button
                                                                 onClick={() => navigate(`/place/${place.slug || place.id}`, { state: { placeData: place } })}
                                                                 className="px-2 py-1 bg-eco-primary-50 text-eco-primary-700 rounded hover:bg-eco-primary-100 text-xs font-bold transition-colors flex items-center whitespace-nowrap"
-                                                                title="Ver Detalles"
+                                                                title={t('home.dashboard.actions.view')}
                                                             >
                                                                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                                                VER
+                                                                {t('home.dashboard.actions.view').toUpperCase()}
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -877,11 +879,11 @@ const Dashboard: React.FC = () => {
                     <div className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-eco-primary-500">
-                                <p className="text-gray-500">Lugares Favoritos</p>
+                                <p className="text-gray-500">{t('home.dashboard.user.favoritePlaces')}</p>
                                 <p className="text-3xl font-bold">{stats.favorites_count || 0}</p>
                             </div>
                             <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-eco-secondary">
-                                <p className="text-gray-500">Reseñas Escritas</p>
+                                <p className="text-gray-500">{t('home.dashboard.user.writtenReviews')}</p>
                                 <p className="text-3xl font-bold">{stats.reviews_count || 0}</p>
                             </div>
                         </div>
@@ -891,13 +893,13 @@ const Dashboard: React.FC = () => {
                             <div className="p-6 border-b border-gray-100">
                                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                     <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
-                                    Mis Favoritos
+                                    {t('home.dashboard.user.myFavorites')}
                                 </h2>
                             </div>
                             {favorites.length === 0 ? (
                                 <div className="p-12 text-center">
-                                    <p className="text-gray-400 text-lg mb-4">Aún no has guardado ningún lugar favorito.</p>
-                                    <button onClick={() => navigate('/home')} className="text-eco-primary-600 font-bold hover:underline">Explorar Mapa</button>
+                                    <p className="text-gray-400 text-lg mb-4">{t('home.dashboard.user.noFavoritesYet')}</p>
+                                    <button onClick={() => navigate('/home')} className="text-eco-primary-600 font-bold hover:underline">{t('home.dashboard.user.exploreMap')}</button>
                                 </div>
                             ) : (
                                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
