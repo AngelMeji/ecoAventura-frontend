@@ -4,6 +4,7 @@ import { authService } from '../../services/authService';
 import { placesService } from '../../services/placesService';
 import { useLanguage } from '../../context/LanguageContext';
 import { getTranslatedPlace } from '../../translations/places';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 // URL base para las imágenes (storage)
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
@@ -19,8 +20,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     isOpen,
     onClose
 }) => {
-    const { t, language } = useLanguage(); // Get language from context
-    // Translate the initial destination immediately for the initial state
+    const { t, language } = useLanguage();
     const [destination, setDestination] = useState<Place>(() => getTranslatedPlace(initialDestination, language));
 
     const [activeTab, setActiveTab] = useState<'info' | 'reviews'>('info');
@@ -29,6 +29,16 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     const [comment, setComment] = useState('');
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [submitting, setSubmitting] = useState(false);
+
+    // Editing state
+    const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+    const [editForm, setEditForm] = useState({ rating: 0, comment: '' });
+
+    // Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        reviewId: number | null;
+    }>({ isOpen: false, reviewId: null });
 
     const user = authService.getCurrentUser();
 
@@ -45,15 +55,15 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setRating(0);
             setComment('');
             setActiveTab('info');
+            setEditingReviewId(null);
         }
-    }, [isOpen]); // Removed initialDestination from dependencies here as it's handled above
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
-    // Obtener imágenes o usar placeholder si no hay
     const images = destination.images && destination.images.length > 0
         ? destination.images
-        : [{ id: 0, image_path: '/assets/images/placeholder.jpg' }]; // Usar placeholder local o ruta válida
+        : [{ id: 0, image_path: '/assets/images/placeholder.jpg' }];
 
     const getFullImageUrl = (path: string) => {
         if (path.startsWith('http')) return path;
@@ -80,7 +90,6 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         e.preventDefault();
         setMessage(null);
 
-        // Validación básica en frontend
         if (rating === 0) {
             setMessage({ type: 'error', text: t('home.modal.messages.selectRating') });
             return;
@@ -88,26 +97,17 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
         setSubmitting(true);
         try {
-            // Importar el servicio dinámicamente
-            const { placesService } = await import('../../services/placesService');
-
-            // Llamada al servicio para crear la reseña
             await placesService.createReview(destination.id, { rating, comment });
-
-            // Éxito: Limpiar formulario y notificar
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
             setComment('');
             setRating(0);
 
-            // Actualizar los datos del lugar localmente para mostrar la nueva reseña
             const updated: any = await placesService.getOne(destination.id);
             const loadedPlace = updated.data || updated;
             setDestination(loadedPlace);
 
         } catch (error: any) {
             console.error('Error enviando reseña:', error);
-
-            // Manejo de errores 422 (Validación de Laravel)
             if (error.response && error.response.status === 422) {
                 const data = error.response.data;
                 const validationErrors = data.errors;
@@ -124,6 +124,47 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             }
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const handleUpdateReview = async (reviewId: number) => {
+        if (!editForm.comment || editForm.rating === 0) return;
+
+        try {
+            setSubmitting(true);
+            await placesService.updateReview(reviewId, editForm);
+            setEditingReviewId(null);
+
+            // Reload place data
+            const updated: any = await placesService.getOne(destination.id);
+            const loadedPlace = updated.data || updated;
+            setDestination(loadedPlace);
+            setMessage({ type: 'success', text: t('home.modal.messages.success') });
+        } catch (error) {
+            console.error('Error updating review:', error);
+            setMessage({ type: 'error', text: t('home.modal.messages.error') });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDeleteReview = async () => {
+        if (!confirmModal.reviewId) return;
+
+        try {
+            setSubmitting(true);
+            await placesService.deleteReview(confirmModal.reviewId);
+            setDestination(prev => ({
+                ...prev,
+                reviews: prev.reviews?.filter(r => r.id !== confirmModal.reviewId)
+            }));
+            setMessage({ type: 'success', text: t('home.modal.messages.success') });
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            setMessage({ type: 'error', text: t('home.modal.messages.error') });
+        } finally {
+            setSubmitting(false);
+            setConfirmModal({ isOpen: false, reviewId: null });
         }
     };
 
@@ -221,7 +262,6 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     className="w-full h-full object-cover transition-transform duration-500"
                                 />
 
-                                {/* Carousel Controls */}
                                 {images.length > 1 && (
                                     <>
                                         <button
@@ -362,25 +402,90 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                 {destination.reviews && destination.reviews.length > 0 ? (
                                     <div className="space-y-4">
                                         {destination.reviews.map((rev: any, idx: number) => (
-                                            <div key={idx} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:border-gray-200 transition-all">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold">
-                                                            {(rev.user?.name || 'U')[0].toUpperCase()}
+                                            <div key={idx} className="group bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:border-gray-200 transition-all">
+                                                {editingReviewId === rev.id ? (
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="text-sm font-medium text-gray-700">{t('home.modal.reviews.ratingLabel')}</span>
+                                                            {[1, 2, 3, 4, 5].map(star => (
+                                                                <button
+                                                                    key={star}
+                                                                    onClick={() => setEditForm({ ...editForm, rating: star })}
+                                                                    className={`text-xl focus:outline-none ${star <= editForm.rating ? 'text-yellow-400' : 'text-gray-200'}`}
+                                                                    type="button"
+                                                                >
+                                                                    ★
+                                                                </button>
+                                                            ))}
                                                         </div>
-                                                        <div>
-                                                            <p className="font-bold text-gray-900 text-sm">{rev.user?.name || t('home.modal.reviews.anonymous')}</p>
-                                                            <div className="flex text-yellow-400 text-xs">
-                                                                {[...Array(5)].map((_, i) => (
-                                                                    <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
-                                                                ))}
-                                                            </div>
+                                                        <textarea
+                                                            value={editForm.comment}
+                                                            onChange={e => setEditForm({ ...editForm, comment: e.target.value })}
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-primary-400 focus:outline-none"
+                                                            rows={3}
+                                                        ></textarea>
+                                                        <div className="flex justify-end gap-2">
+                                                            <button
+                                                                onClick={() => setEditingReviewId(null)}
+                                                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium"
+                                                            >
+                                                                {t('home.modal.reviews.actions.cancel')}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleUpdateReview(rev.id)}
+                                                                disabled={submitting}
+                                                                className="px-4 py-2 bg-eco-primary-600 text-white rounded-lg text-sm font-medium hover:bg-eco-primary-700 disabled:opacity-50"
+                                                            >
+                                                                {t('home.modal.reviews.actions.save')}
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <p className={`text-sm leading-relaxed ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
-                                                    {rev.is_hidden ? t('home.modal.reviews.hiddenComment') : rev.comment}
-                                                </p>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex items-start justify-between mb-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold">
+                                                                    {(rev.user?.name || 'U')[0].toUpperCase()}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-bold text-gray-900 text-sm">{rev.user?.name || t('home.modal.reviews.anonymous')}</p>
+                                                                    <div className="flex text-yellow-400 text-xs">
+                                                                        {[...Array(5)].map((_, i) => (
+                                                                            <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {(user?.role === 'admin' || user?.id === rev.user_id) && (
+                                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    {user?.id === rev.user_id && (
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditingReviewId(rev.id);
+                                                                                setEditForm({ rating: rev.rating, comment: rev.comment });
+                                                                                setMessage(null);
+                                                                            }}
+                                                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                                                                            title={t('home.modal.reviews.actions.edit')}
+                                                                        >
+                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => setConfirmModal({ isOpen: true, reviewId: rev.id })}
+                                                                        className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                                        title={t('home.modal.reviews.actions.delete')}
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <p className={`text-sm leading-relaxed ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
+                                                            {rev.is_hidden ? t('home.modal.reviews.hiddenComment') : rev.comment}
+                                                        </p>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -394,6 +499,17 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                     )}
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                title={t('home.modal.reviews.actions.confirmDeleteTitle')}
+                message={t('home.modal.reviews.actions.confirmDeleteMessage')}
+                confirmText={t('home.modal.reviews.actions.delete')}
+                cancelText={t('home.modal.reviews.actions.cancel')}
+                onConfirm={handleDeleteReview}
+                onCancel={() => setConfirmModal({ isOpen: false, reviewId: null })}
+                type="danger"
+            />
         </div>
     );
 };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { useLanguage } from '../../context/LanguageContext';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 import type { RegisterData } from '../../models/User.model';
 
 /**
@@ -18,6 +19,11 @@ const Register: React.FC = () => {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string }>({
+        isOpen: false,
+        title: '',
+        message: ''
+    });
 
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
@@ -60,8 +66,11 @@ const Register: React.FC = () => {
         try {
             const response = await authService.register(formData);
             console.log('Registration successful:', response);
-            alert(t('auth.register.success').replace('{name}', response.user.name));
-            navigate('/home'); // Redirigir al Home tras registro exitoso
+            setConfirmModal({
+                isOpen: true,
+                title: '¡Registro Exitoso!',
+                message: t('auth.register.success').replace('{name}', response.user.name)
+            });
         } catch (err: any) {
             setErrors({
                 general: err.message || t('auth.register.error'),
@@ -189,6 +198,17 @@ const Register: React.FC = () => {
                     {t('auth.register.login')}
                 </Link>
             </p>
+
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type="success"
+                confirmText="Ir al Inicio"
+                cancelText="Cerrar"
+                onConfirm={() => navigate('/home')}
+                onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+            />
         </div>
     );
 };

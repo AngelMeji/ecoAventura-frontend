@@ -105,7 +105,15 @@ export const translations = {
                     noReviews: 'Aún no hay reseñas. ¡Sé el primero!',
                     anonymous: 'Anónimo',
                     hiddenComment: 'Este comentario ha sido ocultado por moderación.',
-                    reviewsCount: 'reseñas'
+                    reviewsCount: 'reseñas',
+                    actions: {
+                        edit: 'Editar',
+                        delete: 'Eliminar',
+                        save: 'Guardar',
+                        cancel: 'Cancelar',
+                        confirmDeleteTitle: '¿Eliminar reseña?',
+                        confirmDeleteMessage: 'Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este comentario?'
+                    }
                 },
                 messages: {
                     selectRating: 'Por favor selecciona una calificación',
@@ -445,7 +453,15 @@ export const translations = {
                     noReviews: 'No reviews yet. Be the first!',
                     anonymous: 'Anonymous',
                     hiddenComment: 'This comment has been hidden by moderation.',
-                    reviewsCount: 'reviews'
+                    reviewsCount: 'reviews',
+                    actions: {
+                        edit: 'Edit',
+                        delete: 'Delete',
+                        save: 'Save',
+                        cancel: 'Cancel',
+                        confirmDeleteTitle: 'Delete review?',
+                        confirmDeleteMessage: 'This action cannot be undone. Are you sure you want to delete this comment?'
+                    }
                 },
                 messages: {
                     selectRating: 'Please select a rating',
