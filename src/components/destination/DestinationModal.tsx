@@ -21,7 +21,13 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     onClose
 }) => {
     const { t, language } = useLanguage();
-    const [destination, setDestination] = useState<Place>(() => getTranslatedPlace(initialDestination, language));
+
+    // Unwrap the initial destination if it comes from a Laravel Resource (nested in data)
+    const getUnwrappedDestination = (dest: any) => dest?.data || dest;
+
+    const [destination, setDestination] = useState<Place>(() =>
+        getTranslatedPlace(getUnwrappedDestination(initialDestination), language)
+    );
 
     const [activeTab, setActiveTab] = useState<'info' | 'reviews'>('info');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -44,13 +50,13 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
     // Re-translate when language changes or destination changes
     useEffect(() => {
-        setDestination(getTranslatedPlace(initialDestination, language));
+        setDestination(getTranslatedPlace(getUnwrappedDestination(initialDestination), language));
     }, [initialDestination, language]);
 
     // Sincronizar estado local cuando cambia la prop inicial o se abre el modal
     useEffect(() => {
         if (isOpen) {
-            setDestination(getTranslatedPlace(initialDestination, language));
+            setDestination(getTranslatedPlace(getUnwrappedDestination(initialDestination), language));
             setMessage(null);
             setRating(0);
             setComment('');
@@ -120,7 +126,9 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                 }
                 setMessage({ type: 'error', text: msgText });
             } else {
-                setMessage({ type: 'error', text: error.message || t('home.modal.messages.error') });
+                // Better error message for 500s or other errors
+                const serverMsg = error.response?.data?.message || error.message;
+                setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
             }
         } finally {
             setSubmitting(false);
@@ -140,9 +148,10 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             const loadedPlace = updated.data || updated;
             setDestination(loadedPlace);
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error updating review:', error);
-            setMessage({ type: 'error', text: t('home.modal.messages.error') });
+            const serverMsg = error.response?.data?.message || error.message;
+            setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
         } finally {
             setSubmitting(false);
         }
@@ -159,9 +168,10 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                 reviews: prev.reviews?.filter(r => r.id !== confirmModal.reviewId)
             }));
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error deleting review:', error);
-            setMessage({ type: 'error', text: t('home.modal.messages.error') });
+            const serverMsg = error.response?.data?.message || error.message;
+            setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
         } finally {
             setSubmitting(false);
             setConfirmModal({ isOpen: false, reviewId: null });
