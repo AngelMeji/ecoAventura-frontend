@@ -208,6 +208,7 @@ export const translations = {
                     approved: 'Aprobado',
                     rejected: 'Rechazado',
                     needs_fix: 'Requiere Cambios',
+                    published: 'Publicado',
                     hidden: 'Oculto',
                     visible: 'Visible'
                 },
@@ -284,6 +285,57 @@ export const translations = {
             },
             footer: {
                 rights: 'Todos los derechos reservados.'
+            },
+
+        },
+        auth: {
+            login: {
+                title: 'Iniciar Sesión',
+                subtitle: 'Accede a tu cuenta de EcoTurismo',
+                email: 'Correo Electrónico',
+                password: 'Contraseña',
+                placeholderEmail: 'tu@email.com',
+                placeholderPassword: '••••••••',
+                rememberMe: 'Recordarme',
+                forgotPassword: '¿Olvidaste tu contraseña?',
+                submit: 'Iniciar Sesión',
+                loading: 'Iniciando sesión...',
+                noAccount: '¿No tienes cuenta?',
+                register: 'Regístrate',
+                error: 'Error al iniciar sesión'
+            },
+            register: {
+                title: 'Crear Cuenta',
+                subtitle: 'Únete a la comunidad de EcoTurismo',
+                name: 'Nombre Completo',
+                placeholderName: 'Tu nombre',
+                confirmPassword: 'Confirmar Contraseña',
+                submit: 'Registrarse',
+                loading: 'Registrando...',
+                hasAccount: '¿Ya tienes cuenta?',
+                login: 'Inicia sesión',
+                success: '¡Bienvenido {name}! Tu cuenta ha sido creada exitosamente.',
+                error: 'Error al registrar',
+                validation: {
+                    nameRequired: 'El nombre es requerido',
+                    emailRequired: 'El correo electrónico es requerido',
+                    emailInvalid: 'El correo electrónico no es válido',
+                    passwordRequired: 'La contraseña es requerida',
+                    passwordMin: 'La contraseña debe tener al menos 6 caracteres',
+                    passwordMax: 'La contraseña no puede tener más de 12 caracteres',
+                    passwordMismatch: 'Las contraseñas no coinciden'
+                }
+            },
+            forgotPassword: {
+                title: 'Recuperar Contraseña',
+                subtitle: '¿Olvidaste tu clave? No te preocupes.',
+                backToLogin: 'Volver al inicio de sesión',
+                backToLoginButton: 'VOLVER AL LOGIN',
+                submit: 'Enviar Enlace de Recuperación',
+                loading: 'Enviando...',
+                successTitle: '¡Correo Enviado!',
+                defaultSuccess: 'Enlace de recuperación enviado. Revisa tu correo.',
+                defaultError: 'Error al enviar el enlace.'
             }
         }
     },
@@ -496,6 +548,7 @@ export const translations = {
                     approved: 'Approved',
                     rejected: 'Rejected',
                     needs_fix: 'Needs Fix',
+                    published: 'Published',
                     hidden: 'Hidden',
                     visible: 'Visible'
                 },
@@ -572,6 +625,57 @@ export const translations = {
             },
             footer: {
                 rights: 'All rights reserved.'
+            },
+
+        },
+        auth: {
+            login: {
+                title: 'Login',
+                subtitle: 'Access your EcoTurismo account',
+                email: 'Email Address',
+                password: 'Password',
+                placeholderEmail: 'you@email.com',
+                placeholderPassword: '••••••••',
+                rememberMe: 'Remember me',
+                forgotPassword: 'Forgot your password?',
+                submit: 'Login',
+                loading: 'Logging in...',
+                noAccount: 'Don\'t have an account?',
+                register: 'Register',
+                error: 'Error logging in'
+            },
+            register: {
+                title: 'Create Account',
+                subtitle: 'Join the EcoTurismo community',
+                name: 'Full Name',
+                placeholderName: 'Your name',
+                confirmPassword: 'Confirm Password',
+                submit: 'Register',
+                loading: 'Registering...',
+                hasAccount: 'Already have an account?',
+                login: 'Login',
+                success: 'Welcome {name}! Your account has been created successfully.',
+                error: 'Error registering',
+                validation: {
+                    nameRequired: 'Name is required',
+                    emailRequired: 'Email is required',
+                    emailInvalid: 'Email is invalid',
+                    passwordRequired: 'Password is required',
+                    passwordMin: 'Password must be at least 6 characters',
+                    passwordMax: 'Password cannot be more than 12 characters',
+                    passwordMismatch: 'Passwords do not match'
+                }
+            },
+            forgotPassword: {
+                title: 'Recover Password',
+                subtitle: 'Forgot your key? Don\'t worry.',
+                backToLogin: 'Back to login',
+                backToLoginButton: 'BACK TO LOGIN',
+                submit: 'Send Recovery Link',
+                loading: 'Sending...',
+                successTitle: 'Email Sent!',
+                defaultSuccess: 'Recovery link sent. Check your email.',
+                defaultError: 'Error sending link.'
             }
         }
     }

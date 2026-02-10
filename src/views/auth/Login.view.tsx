@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
+import { useLanguage } from '../../context/LanguageContext';
 import type { LoginCredentials } from '../../models/User.model';
 
 /**
  * Vista de Login
  */
 const Login: React.FC = () => {
+    const { t } = useLanguage();
     const [credentials, setCredentials] = useState<LoginCredentials>({
         email: '',
         password: '',
@@ -30,7 +32,7 @@ const Login: React.FC = () => {
             }
         } catch (err: any) {
             // Manejar error desde authService
-            setError(err.message || 'Error al iniciar sesión');
+            setError(err.message || t('auth.login.error'));
         } finally {
             setLoading(false);
         }
@@ -46,18 +48,18 @@ const Login: React.FC = () => {
     return (
         <div className="auth-card">
             <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-eco-teal-500 rounded-full flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-gradient-to-br from-eco-primary-500 to-eco-primary-700 rounded-full flex items-center justify-center shadow-lg">
+                    <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
             </div>
 
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-                Iniciar Sesión
+                {t('auth.login.title')}
             </h2>
             <p className="text-center text-gray-600 mb-6">
-                Accede a tu cuenta de EcoTurismo
+                {t('auth.login.subtitle')}
             </p>
 
             {error && (
@@ -69,7 +71,7 @@ const Login: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Correo Electrónico
+                        {t('auth.login.email')}
                     </label>
                     <input
                         type="email"
@@ -77,7 +79,7 @@ const Login: React.FC = () => {
                         name="email"
                         value={credentials.email}
                         onChange={handleChange}
-                        placeholder="tu@email.com"
+                        placeholder={t('auth.login.placeholderEmail')}
                         required
                         className="auth-input"
                     />
@@ -85,7 +87,7 @@ const Login: React.FC = () => {
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                        Contraseña
+                        {t('auth.login.password')}
                     </label>
                     <input
                         type="password"
@@ -93,7 +95,7 @@ const Login: React.FC = () => {
                         name="password"
                         value={credentials.password}
                         onChange={handleChange}
-                        placeholder="••••••••"
+                        placeholder={t('auth.login.placeholderPassword')}
                         required
                         className="auth-input"
                     />
@@ -102,22 +104,22 @@ const Login: React.FC = () => {
                 <div className="flex items-center justify-between text-sm">
                     <label className="flex items-center">
                         <input type="checkbox" className="w-4 h-4 text-eco-teal-500 border-gray-300 rounded focus:ring-eco-teal-500" />
-                        <span className="ml-2 text-gray-600">Recordarme</span>
+                        <span className="ml-2 text-gray-600">{t('auth.login.rememberMe')}</span>
                     </label>
                     <a href="#" className="auth-link text-sm">
-                        ¿Olvidaste tu contraseña?
+                        {t('auth.login.forgotPassword')}
                     </a>
                 </div>
 
                 <button type="submit" disabled={loading} className="auth-button disabled:opacity-50 disabled:cursor-not-allowed">
-                    {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                    {loading ? t('auth.login.loading') : t('auth.login.submit')}
                 </button>
             </form>
 
             <p className="text-center text-gray-600 mt-6">
-                ¿No tienes cuenta?{' '}
+                {t('auth.login.noAccount')}{' '}
                 <Link to="/register" className="auth-link">
-                    Regístrate
+                    {t('auth.login.register')}
                 </Link>
             </p>
         </div>

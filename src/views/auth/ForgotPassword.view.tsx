@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
+import { useLanguage } from '../../context/LanguageContext';
 
 const ForgotPassword: React.FC = () => {
+    const { t } = useLanguage();
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
@@ -15,10 +17,10 @@ const ForgotPassword: React.FC = () => {
         try {
             const response = await authService.forgotPassword(email);
             setStatus('success');
-            setMessage(response.message || 'Enlace de recuperación enviado. Revisa tu correo.');
+            setMessage(response.message || t('auth.forgotPassword.defaultSuccess'));
         } catch (error: any) {
             setStatus('error');
-            setMessage(error.response?.data?.message || 'Error al enviar el enlace.');
+            setMessage(error.response?.data?.message || t('auth.forgotPassword.defaultError'));
         }
     };
 
@@ -30,8 +32,8 @@ const ForgotPassword: React.FC = () => {
                     <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
                     </div>
-                    <h2 className="text-2xl font-display font-bold mb-2">Recuperar Contraseña</h2>
-                    <p className="text-eco-primary-100 text-sm font-light">¿Olvidaste tu clave? No te preocupes.</p>
+                    <h2 className="text-2xl font-display font-bold mb-2">{t('auth.forgotPassword.title')}</h2>
+                    <p className="text-eco-primary-100 text-sm font-light">{t('auth.forgotPassword.subtitle')}</p>
                 </div>
             </div>
 
@@ -42,12 +44,12 @@ const ForgotPassword: React.FC = () => {
                             <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">¡Correo Enviado!</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('auth.forgotPassword.successTitle')}</h3>
                             <p className="text-gray-600 text-sm leading-relaxed">{message}</p>
                         </div>
                         <div className="pt-4">
                             <Link to="/login" className="block w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg text-sm uppercase tracking-wide">
-                                Volver al Login
+                                {t('auth.forgotPassword.backToLoginButton')}
                             </Link>
                         </div>
                     </div>
@@ -61,7 +63,7 @@ const ForgotPassword: React.FC = () => {
                         )}
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Correo Electrónico</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">{t('auth.login.email')}</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
@@ -71,7 +73,7 @@ const ForgotPassword: React.FC = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="auth-input pl-10"
-                                    placeholder="ejemplo@correo.com"
+                                    placeholder={t('auth.login.placeholderEmail')}
                                 />
                             </div>
                         </div>
@@ -84,15 +86,15 @@ const ForgotPassword: React.FC = () => {
                             {status === 'loading' ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    Enviando...
+                                    {t('auth.forgotPassword.loading')}
                                 </span>
-                            ) : 'Enviar Enlace de Recuperación'}
+                            ) : t('auth.forgotPassword.submit')}
                         </button>
 
                         <div className="text-center pt-2">
                             <Link to="/login" className="inline-flex items-center text-sm text-gray-500 hover:text-eco-primary-700 font-medium transition-colors group">
                                 <svg className="w-4 h-4 mr-1 transform transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                                Volver al inicio de sesión
+                                {t('auth.forgotPassword.backToLogin')}
                             </Link>
                         </div>
                     </form>

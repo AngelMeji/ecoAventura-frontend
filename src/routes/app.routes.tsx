@@ -6,8 +6,8 @@ import AuthLayout from '../components/layout/AuthLayout';
 
 // Views
 import Home from '../views/Home.view';
-import Login from '../views/Login.view';
-import Register from '../views/Register.view';
+import Login from '../views/auth/Login.view';
+import Register from '../views/auth/Register.view';
 import Dashboard from '../views/Dashboard.view';
 import Profile from '../views/Profile.view';
 import PlaceForm from '../views/places/PlaceForm.view';

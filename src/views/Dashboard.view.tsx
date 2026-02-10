@@ -738,15 +738,15 @@ const Dashboard: React.FC = () => {
                         {/* Partner Stats */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-eco-primary-500">
-                                <p className="text-gray-500">Mis Publicaciones</p>
+                                <p className="text-gray-500">{t('home.dashboard.stats.myPlaces')}</p>
                                 <p className="text-3xl font-bold">{stats.total_places || 0}</p>
                             </div>
                             <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
-                                <p className="text-gray-500">Aprobados</p>
+                                <p className="text-gray-500">{t('home.dashboard.stats.approved')}</p>
                                 <p className="text-3xl font-bold">{stats.approved_places || 0}</p>
                             </div>
                             <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
-                                <p className="text-gray-500">En Revisión</p>
+                                <p className="text-gray-500">{t('home.dashboard.stats.inReview')}</p>
                                 <p className="text-3xl font-bold">{(stats.total_places || 0) - (stats.approved_places || 0)}</p>
                             </div>
                         </div>
@@ -755,9 +755,9 @@ const Dashboard: React.FC = () => {
                         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden relative">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-eco-primary-50 rounded-full blur-3xl opacity-50 -mr-16 -mt-16"></div>
                             <div className="p-10 text-center relative z-10">
-                                <h2 className="text-3xl font-display font-bold text-gray-800 mb-4">Gestionar Destinos</h2>
+                                <h2 className="text-3xl font-display font-bold text-gray-800 mb-4">{t('home.dashboard.partner.manageDestinations')}</h2>
                                 <p className="text-gray-600 mb-8 max-w-2xl mx-auto text-lg font-light">
-                                    Comparte la belleza natural con el mundo. Crea nuevos destinos ecoturísticos y gestiona los existentes desde aquí.
+                                    {t('home.dashboard.partner.manageSubtitle')}
                                 </p>
                                 <div className="flex justify-center gap-4">
                                     <button
@@ -765,7 +765,7 @@ const Dashboard: React.FC = () => {
                                         className="bg-eco-primary-600 text-white px-8 py-4 rounded-full hover:bg-eco-primary-700 shadow-xl shadow-eco-primary-500/30 font-bold flex items-center gap-2 transform transition hover:scale-105 active:scale-95"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                        Publicar Nuevo Lugar
+                                        {t('home.dashboard.partner.publishNew')}
                                     </button>
                                 </div>
                             </div>
@@ -775,16 +775,16 @@ const Dashboard: React.FC = () => {
                                 <div className="p-6">
                                     <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-eco-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                                        Mis Publicaciones
+                                        {t('home.dashboard.partner.myPublications')}
                                         <span className="text-sm font-normal text-gray-500">({partnerPlaces.length})</span>
                                     </h3>
                                     <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                                                 <tr>
-                                                    <th className="p-4">Lugar</th>
-                                                    <th className="p-4">Estado</th>
-                                                    <th className="p-4 text-right">Acciones</th>
+                                                    <th className="p-4">{t('home.dashboard.tables.place')}</th>
+                                                    <th className="p-4">{t('home.dashboard.tables.status')}</th>
+                                                    <th className="p-4 text-right">{t('home.dashboard.tables.actions')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
@@ -799,7 +799,7 @@ const Dashboard: React.FC = () => {
                                                                 </div>
                                                                 <div>
                                                                     <p className="font-bold text-gray-900">{place.name}</p>
-                                                                    <p className="text-xs text-gray-500">{place.category?.name}</p>
+                                                                    <p className="text-xs text-gray-500">{t(`home.categories.names.${place.category?.slug}`) !== `home.categories.names.${place.category?.slug}` ? t(`home.categories.names.${place.category?.slug}`) : place.category?.name}</p>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -808,7 +808,7 @@ const Dashboard: React.FC = () => {
                                                                 place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                                                                     'bg-red-100 text-red-700'
                                                                 }`}>
-                                                                {place.status === 'approved' ? 'Publicado' : place.status === 'pending' ? 'En Revisión' : 'Rechazado'}
+                                                                {place.status === 'approved' ? t('home.dashboard.status.published') : place.status === 'pending' ? t('home.dashboard.status.pending') : t('home.dashboard.status.rejected')}
                                                             </span>
                                                         </td>
                                                         <td className="p-4 text-right space-x-2">
@@ -816,13 +816,13 @@ const Dashboard: React.FC = () => {
                                                                 onClick={() => navigate(`/place/${place.slug || place.id}`, { state: { placeData: place } })}
                                                                 className="px-3 py-1 bg-eco-primary-50 text-eco-primary-700 rounded hover:bg-eco-primary-100 text-xs font-bold font-display"
                                                             >
-                                                                VER
+                                                                {t('home.dashboard.actions.view').toUpperCase()}
                                                             </button>
                                                             <button
                                                                 onClick={() => navigate(`/places/edit/${place.id}`)}
                                                                 className="px-3 py-1 bg-eco-secondary-light text-eco-secondary-hover rounded hover:bg-eco-secondary-light/80 text-xs font-bold transition-colors"
                                                             >
-                                                                EDITAR
+                                                                {t('home.dashboard.actions.edit').toUpperCase()}
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -847,7 +847,7 @@ const Dashboard: React.FC = () => {
                                                             place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                                                                 'bg-red-100 text-red-700'
                                                             }`}>
-                                                            {place.status === 'approved' ? 'Publicado' : place.status === 'pending' ? 'En Revisión' : 'Rechazado'}
+                                                            {place.status === 'approved' ? t('home.dashboard.status.published') : place.status === 'pending' ? t('home.dashboard.status.pending') : t('home.dashboard.status.rejected')}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -856,13 +856,13 @@ const Dashboard: React.FC = () => {
                                                         onClick={() => navigate(`/place/${place.slug || place.id}`, { state: { placeData: place } })}
                                                         className="px-3 py-1.5 bg-eco-primary-50 text-eco-primary-700 rounded-lg text-sm font-medium"
                                                     >
-                                                        Ver
+                                                        {t('home.dashboard.actions.view')}
                                                     </button>
                                                     <button
                                                         onClick={() => navigate(`/places/edit/${place.id}`)}
                                                         className="px-3 py-1.5 bg-eco-secondary-light/50 text-eco-secondary-hover rounded-lg text-sm font-medium"
                                                     >
-                                                        Editar
+                                                        {t('home.dashboard.actions.edit')}
                                                     </button>
                                                 </div>
                                             </div>

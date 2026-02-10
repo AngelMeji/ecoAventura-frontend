@@ -246,12 +246,24 @@ const PlaceForm: React.FC = () => {
         try {
             if (isEditing) {
                 await placesService.update(parseInt(id!), formData);
-                setConfirmModal({
-                    isOpen: true,
-                    title: '¡Actualización Exitosa!',
-                    message: 'El lugar ha sido actualizado correctamente. ¿Deseas volver al panel de administración?',
-                    onConfirm: () => navigate('/dashboard')
-                });
+
+                // If partner edits, set to pending and notify
+                if (user?.role === 'partner') {
+                    await placesService.setPending(parseInt(id!));
+                    setConfirmModal({
+                        isOpen: true,
+                        title: '¡Cambios Enviados a Revisión!',
+                        message: 'Tu lugar ha sido actualizado y marcado como "Pendiente". Un administrador revisará los cambios antes de que vuelva a ser público. Puedes ver el estado en tu panel.',
+                        onConfirm: () => navigate('/dashboard')
+                    });
+                } else {
+                    setConfirmModal({
+                        isOpen: true,
+                        title: '¡Actualización Exitosa!',
+                        message: 'El lugar ha sido actualizado correctamente. ¿Deseas volver al panel de administración?',
+                        onConfirm: () => navigate('/dashboard')
+                    });
+                }
             } else {
                 await placesService.create(formData);
                 setConfirmModal({
