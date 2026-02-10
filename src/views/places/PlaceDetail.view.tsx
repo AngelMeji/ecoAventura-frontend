@@ -6,6 +6,7 @@ import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
+import PlaceChatbot from '../../components/places/PlaceChatbot';
 
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
 
@@ -15,7 +16,7 @@ const PlaceDetail: React.FC = () => {
     const location = useLocation();
     const [place, setPlace] = useState<Place | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'info' | 'reviews'>('info');
+    const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'chatbot'>('info');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     // Reviews state
@@ -312,6 +313,18 @@ const PlaceDetail: React.FC = () => {
                                 <span className="absolute bottom-0 left-0 w-full h-1 bg-eco-primary-600 rounded-t-full" />
                             )}
                         </button>
+                        <button
+                            className={`ml-8 pb-4 text-center font-medium transition-all relative ${activeTab === 'chatbot'
+                                ? 'text-eco-primary-700'
+                                : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                            onClick={() => setActiveTab('chatbot')}
+                        >
+                            Asistente IA
+                            {activeTab === 'chatbot' && (
+                                <span className="absolute bottom-0 left-0 w-full h-1 bg-eco-primary-600 rounded-t-full" />
+                            )}
+                        </button>
                     </div>
 
                     {/* Content */}
@@ -539,6 +552,12 @@ const PlaceDetail: React.FC = () => {
                                 </div>
                             </div>
                         )}
+
+                        {activeTab === 'chatbot' && (
+                            <div className="animate-fade-in">
+                                <PlaceChatbot place={place} />
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -551,8 +570,8 @@ const PlaceDetail: React.FC = () => {
                     onConfirm={handleDeleteReview}
                     onCancel={() => setConfirmModal({ isOpen: false, reviewId: null })}
                 />
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 

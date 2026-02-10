@@ -189,8 +189,16 @@ export const placesService = {
         return response.data;
     },
 
+
     async toggleHideReview(id: number): Promise<any> {
         const response = await api.patch(`/admin/reviews/${id}/toggle-hide`);
         return response.data;
+    },
+
+    // 3.7 Chatbot AI
+    async chatWithPlace(placeId: number, message: string): Promise<{ response: string }> {
+        const response = await api.post<{ response: string }>(`/places/${placeId}/chat`, { message });
+        return response.data;
     }
 };
+
