@@ -3,12 +3,14 @@ import { Link, useLocation } from 'react-router-dom';
 import Logo from '../common/Logo';
 import AccessibilityMenu from '../common/AccessibilityMenu';
 import { authService } from '../../services/authService';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Header: React.FC = () => {
     const location = useLocation();
     const user = authService.getCurrentUser();
     const isAuthenticated = !!user;
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+    const { t } = useLanguage();
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -71,7 +73,7 @@ const Header: React.FC = () => {
                             : 'text-gray-600 hover:text-white hover:bg-eco-primary-600 hover:shadow-lg hover:-translate-y-0.5'
                             }`}
                     >
-                        Inicio
+                        {t('header.home')}
                     </Link>
 
                     {isAuthenticated ? (
@@ -83,7 +85,7 @@ const Header: React.FC = () => {
                                     : 'text-gray-600 hover:text-white hover:bg-eco-primary-600 hover:shadow-lg hover:-translate-y-0.5'
                                     }`}
                             >
-                                {user.role === 'admin' ? 'Panel Admin' : (user.role === 'partner' ? 'Panel Socio' : 'Mi Cuenta')}
+                                {user.role === 'admin' ? t('header.adminPanel') : (user.role === 'partner' ? t('header.partnerPanel') : t('header.myAccount'))}
                             </Link>
 
                             <div className="flex items-center gap-2">
@@ -98,7 +100,7 @@ const Header: React.FC = () => {
                                 onClick={handleLogout}
                                 className="px-4 py-2 rounded-full font-medium text-eco-accent-red hover:bg-red-50 transition-colors border border-transparent hover:border-red-100"
                             >
-                                Cerrar Sesión
+                                {t('header.logout')}
                             </button>
                         </>
                     ) : (
@@ -110,7 +112,7 @@ const Header: React.FC = () => {
                                     : 'text-gray-600 hover:text-white hover:bg-eco-primary-600 hover:shadow-lg hover:-translate-y-0.5'
                                     }`}
                             >
-                                Iniciar Sesión
+                                {t('header.login')}
                             </Link>
                             <Link
                                 to="/register"
@@ -119,7 +121,7 @@ const Header: React.FC = () => {
                                     : 'bg-gradient-to-r from-eco-primary-600 to-eco-primary-500 text-white hover:to-eco-primary-400 hover:-translate-y-0.5'
                                     }`}
                             >
-                                Registrarse
+                                {t('header.register')}
                             </Link>
                         </>
                     )}
@@ -128,15 +130,13 @@ const Header: React.FC = () => {
                 {/* Mobile Navigation Menu */}
                 <div className={`fixed inset-0 bg-white transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) z-40 flex flex-col pt-24 px-6 md:hidden ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>
                     <div className="flex flex-col gap-6">
-                        <div className="flex justify-end p-2">
-                            <AccessibilityMenu />
-                        </div>
+
                         <Link
                             to="/home"
                             onClick={() => setIsMenuOpen(false)}
                             className={`text-2xl font-display font-medium transition-colors ${isActive('/home') ? 'text-eco-primary-600' : 'text-gray-800'}`}
                         >
-                            Inicio
+                            {t('header.home')}
                         </Link>
 
                         {isAuthenticated ? (
@@ -146,7 +146,7 @@ const Header: React.FC = () => {
                                     onClick={() => setIsMenuOpen(false)}
                                     className={`text-2xl font-display font-medium transition-colors ${isActive('/dashboard') ? 'text-eco-primary-600' : 'text-gray-800'}`}
                                 >
-                                    {user.role === 'admin' ? 'Panel Admin' : (user.role === 'partner' ? 'Panel Socio' : 'Mi Cuenta')}
+                                    {user.role === 'admin' ? t('header.adminPanel') : (user.role === 'partner' ? t('header.partnerPanel') : t('header.myAccount'))}
                                 </Link>
                                 <div className="flex items-center gap-3 py-4 border-t border-gray-100">
                                     <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-lg">
@@ -163,7 +163,7 @@ const Header: React.FC = () => {
                                     }}
                                     className="text-left text-xl text-eco-accent-red font-medium py-2"
                                 >
-                                    Cerrar Sesión
+                                    {t('header.logout')}
                                 </button>
                             </>
                         ) : (
@@ -173,17 +173,18 @@ const Header: React.FC = () => {
                                     onClick={() => setIsMenuOpen(false)}
                                     className={`text-2xl font-display font-medium transition-colors ${isActive('/login') ? 'text-eco-primary-600' : 'text-gray-800'}`}
                                 >
-                                    Iniciar Sesión
+                                    {t('header.login')}
                                 </Link>
                                 <Link
                                     to="/register"
                                     onClick={() => setIsMenuOpen(false)}
                                     className="text-2xl font-display font-medium bg-gradient-to-r from-eco-primary-600 to-eco-primary-500 bg-clip-text text-transparent"
                                 >
-                                    Registrarse
+                                    {t('header.register')}
                                 </Link>
                             </>
                         )}
+                        <AccessibilityMenu isMobile={true} />
                     </div>
                 </div>
             </div>

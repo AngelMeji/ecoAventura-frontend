@@ -2,6 +2,8 @@ import React, { useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useLanguage } from '../../context/LanguageContext';
+import { getTranslatedPlace } from '../../translations/places';
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -54,6 +56,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
     onMarkerClick
 }) => {
     const mapRef = useRef<L.Map>(null);
+    const { t, language } = useLanguage();
 
     // Center of Risaralda, Colombia (Pereira)
     const center: [number, number] = [4.8143, -75.6946];
@@ -68,13 +71,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
         <div className="w-full h-[500px] rounded-xl overflow-hidden shadow-lg relative">
             {/* Legend */}
             <div className="absolute top-4 left-4 z-[400] bg-white rounded-lg shadow-md p-3">
-                <h4 className="text-sm font-semibold text-gray-800 mb-2">Leyenda</h4>
+                <h4 className="text-sm font-semibold text-gray-800 mb-2">{t('home.map.legend')}</h4>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                     <div className="w-4 h-4 bg-eco-teal-500 rounded-full border-2 border-white shadow"></div>
-                    <span>Destinos disponibles</span>
+                    <span>{t('home.map.available')}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                    Haz clic en los marcadores para ver detalles
+                    {t('home.map.hint')}
                 </p>
             </div>
 
@@ -90,40 +93,43 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {destinations.map((destination) => (
-                    <Marker
-                        key={destination.id}
-                        position={[Number((destination as any).latitude), Number((destination as any).longitude)]}
-                        icon={createCustomIcon()}
-                        eventHandlers={{
-                            click: () => handleMarkerClick(destination.id),
-                        }}
-                    >
-                        <Popup className="custom-popup">
-                            <div className="p-2 min-w-[200px]">
-                                <h3 className="font-bold text-gray-800 mb-1">
-                                    {destination.name}
-                                </h3>
-                                <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                    {destination.short_description}
-                                </p>
-                                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                                    <span className="px-2 py-1 bg-eco-teal-100 text-eco-teal-700 rounded-full">
-                                        {destination.category?.name || 'General'}
-                                    </span>
-                                    <span className="capitalize">{destination.difficulty}</span>
+                {destinations.map((rawDest) => {
+                    const destination = getTranslatedPlace(rawDest, language);
+                    return (
+                        <Marker
+                            key={destination.id}
+                            position={[Number((destination as any).latitude), Number((destination as any).longitude)]}
+                            icon={createCustomIcon()}
+                            eventHandlers={{
+                                click: () => handleMarkerClick(destination.id),
+                            }}
+                        >
+                            <Popup className="custom-popup">
+                                <div className="p-2 min-w-[200px]">
+                                    <h3 className="font-bold text-gray-800 mb-1">
+                                        {destination.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                        {destination.short_description}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                                        <span className="px-2 py-1 bg-eco-teal-100 text-eco-teal-700 rounded-full">
+                                            {destination.category?.name || 'General'}
+                                        </span>
+                                        <span className="capitalize">{destination.difficulty}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => window.location.href = `/place/${(destination as any).slug || destination.id}`}
+                                        className="text-eco-teal-600 hover:text-eco-teal-700 text-sm font-medium"
+                                        type="button"
+                                    >
+                                        {t('home.map.viewDetails')} →
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => window.location.href = `/place/${(destination as any).slug || destination.id}`}
-                                    className="text-eco-teal-600 hover:text-eco-teal-700 text-sm font-medium"
-                                    type="button"
-                                >
-                                    Ver detalles →
-                                </button>
-                            </div>
-                        </Popup>
-                    </Marker>
-                ))}
+                            </Popup>
+                        </Marker>
+                    );
+                })}
             </MapContainer>
         </div>
     );

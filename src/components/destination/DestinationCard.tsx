@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
+import { getTranslatedPlace } from '../../translations/places';
 
 
 // URL base para las imágenes (asumiendo que vienen relativas del backend)
@@ -12,10 +14,13 @@ interface DestinationCardProps {
 }
 
 const DestinationCard: React.FC<DestinationCardProps> = ({
-    destination,
+    destination: rawDestination,
     isHighlighted = false,
     onClick
 }) => {
+    const { t, language } = useLanguage();
+    const destination = getTranslatedPlace(rawDestination, language);
+
     // Obtener color por categoría (ajustar lógica si category es objeto o string)
     const getCategoryColor = (categoryName: string) => {
         const colors: Record<string, string> = {
@@ -41,7 +46,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
 
             // PRIORIDAD 2: Construir URL manualmente
             const path = firstImage.image_path;
-            
+
             if (path.startsWith('http')) return path;
 
             // Si es un asset local (ej: seed data)
@@ -61,11 +66,10 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
     return (
         <div
             onClick={onClick}
-            className={`group bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-xl hover:-translate-y-1 flex flex-col h-full ${
-                isHighlighted 
-                ? 'ring-4 ring-eco-accent/50 shadow-2xl scale-[1.02]' 
+            className={`group bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-xl hover:-translate-y-1 flex flex-col h-full ${isHighlighted
+                ? 'ring-4 ring-eco-accent/50 shadow-2xl scale-[1.02]'
                 : 'hover:border-eco-primary-200'
-            }`}
+                }`}
         >
             {/* Contenedor de imagen con aspect-ratio para evitar deformaciones */}
             <div className="relative aspect-video shrink-0 overflow-hidden bg-gray-100">
@@ -76,7 +80,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
-                
+
                 <div className="absolute top-4 right-4 z-10">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm border backdrop-blur-md bg-white/90 ${getCategoryColor(categoryName)}`}>
                         {categoryName}
@@ -101,14 +105,14 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                         <svg className="w-3.5 h-3.5 text-eco-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>{destination.duration || 'N/A'}</span>
+                        <span>{destination.duration || t('home.card.na')}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
                         <svg className="w-3.5 h-3.5 text-eco-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span className="capitalize">{destination.difficulty || 'N/A'}</span>
+                        <span className="capitalize">{destination.difficulty || t('home.card.na')}</span>
                     </div>
                 </div>
 
@@ -121,7 +125,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                     }}
                     className="w-full bg-eco-primary-600/90 hover:bg-eco-primary-700 text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center gap-2 group/btn"
                 >
-                    <span>Ver Detalles</span>
+                    <span>{t('home.card.viewDetails')}</span>
                     <svg className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

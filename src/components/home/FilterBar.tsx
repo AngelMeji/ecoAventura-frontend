@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface FilterBarProps {
     onSearchChange: (query: string) => void;
@@ -11,6 +12,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
     activeCategory
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const { t } = useLanguage();
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -41,7 +43,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder="Buscar destinos..."
+                    placeholder={t('home.filterBar.placeholder')}
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco-teal-500 focus:border-transparent transition-all"
                 />
             </div>

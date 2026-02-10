@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { Place } from '../../models/Place.model';
 import { authService } from '../../services/authService';
 import { placesService } from '../../services/placesService';
+import { useLanguage } from '../../context/LanguageContext';
+import { getTranslatedPlace } from '../../translations/places';
 
 // URL base para las imágenes (storage)
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
@@ -17,7 +19,10 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     isOpen,
     onClose
 }) => {
-    const [destination, setDestination] = useState<Place>(initialDestination);
+    const { t, language } = useLanguage(); // Get language from context
+    // Translate the initial destination immediately for the initial state
+    const [destination, setDestination] = useState<Place>(() => getTranslatedPlace(initialDestination, language));
+
     const [activeTab, setActiveTab] = useState<'info' | 'reviews'>('info');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [rating, setRating] = useState(0);
@@ -27,16 +32,21 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
     const user = authService.getCurrentUser();
 
+    // Re-translate when language changes or destination changes
+    useEffect(() => {
+        setDestination(getTranslatedPlace(initialDestination, language));
+    }, [initialDestination, language]);
+
     // Sincronizar estado local cuando cambia la prop inicial o se abre el modal
     useEffect(() => {
         if (isOpen) {
-            setDestination(initialDestination);
+            setDestination(getTranslatedPlace(initialDestination, language));
             setMessage(null);
             setRating(0);
             setComment('');
             setActiveTab('info');
         }
-    }, [initialDestination, isOpen]);
+    }, [isOpen]); // Removed initialDestination from dependencies here as it's handled above
 
     if (!isOpen) return null;
 
@@ -72,7 +82,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
         // Validación básica en frontend
         if (rating === 0) {
-            setMessage({ type: 'error', text: 'Por favor selecciona una calificación' });
+            setMessage({ type: 'error', text: t('home.modal.messages.selectRating') });
             return;
         }
 
@@ -85,7 +95,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             await placesService.createReview(destination.id, { rating, comment });
 
             // Éxito: Limpiar formulario y notificar
-            setMessage({ type: 'success', text: '¡Reseña enviada con éxito!' });
+            setMessage({ type: 'success', text: t('home.modal.messages.success') });
             setComment('');
             setRating(0);
 
@@ -106,11 +116,11 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                 if (validationErrors) {
                     msgText = Object.values(validationErrors).flat().join('\n');
                 } else {
-                    msgText = data.message || 'Error de validación';
+                    msgText = data.message || t('home.modal.messages.error');
                 }
                 setMessage({ type: 'error', text: msgText });
             } else {
-                setMessage({ type: 'error', text: error.message || 'Ocurrió un error al enviar la reseña.' });
+                setMessage({ type: 'error', text: error.message || t('home.modal.messages.error') });
             }
         } finally {
             setSubmitting(false);
@@ -120,7 +130,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     const handleToggleFavorite = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!user) {
-            setMessage({ type: 'error', text: 'Debes iniciar sesión para guardar favoritos' });
+            setMessage({ type: 'error', text: t('home.modal.messages.loginRequired') });
             return;
         }
 
@@ -155,7 +165,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     ? 'text-red-500 bg-red-50'
                                     : 'text-gray-400 hover:text-red-400 hover:bg-gray-100'
                                     }`}
-                                title={destination.is_favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
+                                title={destination.is_favorite ? t('home.modal.actions.removeFromFavorites') : t('home.modal.actions.addToFavorites')}
                             >
                                 <svg className="w-6 h-6" fill={destination.is_favorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -183,7 +193,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                             }`}
                     >
                         <span className="flex items-center justify-center gap-2">
-                            Info
+                            {t('home.modal.tabs.info')}
                         </span>
                     </button>
                     <button
@@ -194,7 +204,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                             }`}
                     >
                         <span className="flex items-center justify-center gap-2">
-                            Reseñas
+                            {t('home.modal.tabs.reviews')}
                         </span>
                     </button>
                 </div>
@@ -236,18 +246,18 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     {categoryName}
                                 </span>
                                 <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium capitalize">
-                                    {destination.difficulty || 'Dificultad N/A'}
+                                    {destination.difficulty || t('home.modal.info.difficulty_na')}
                                 </span>
                                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                                    {destination.duration || 'Duración N/A'}
+                                    {destination.duration || t('home.modal.info.duration_na')}
                                 </span>
                                 <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                                    {destination.best_season || 'Mejor temporada N/A'}
+                                    {destination.best_season || t('home.modal.info.season_na')}
                                 </span>
                             </div>
 
                             <div>
-                                <h3 className="text-xl font-bold text-eco-primary-700 mb-2">Descripción</h3>
+                                <h3 className="text-xl font-bold text-eco-primary-700 mb-2">{t('home.modal.info.description')}</h3>
                                 <p className="text-gray-600 leading-relaxed">
                                     {destination.description}
                                 </p>
@@ -255,10 +265,10 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
                             {/* Location */}
                             <div className="bg-eco-primary-50 rounded-xl p-4 border border-eco-primary-100">
-                                <h4 className="font-bold text-eco-primary-800">Ubicación</h4>
+                                <h4 className="font-bold text-eco-primary-800">{t('home.modal.info.location')}</h4>
                                 <p className="text-gray-600 text-sm mt-1">{destination.address}</p>
                                 <p className="text-gray-500 text-xs mt-1 font-mono">
-                                    Coordenadas: {destination.latitude}, {destination.longitude}
+                                    {t('home.modal.info.coordinates')}: {destination.latitude}, {destination.longitude}
                                 </p>
                             </div>
                         </div>
@@ -270,7 +280,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     <div className="flex items-center gap-2">
                                         <span className="text-3xl font-bold text-gray-800">{currentRating.toFixed(1)}</span>
                                     </div>
-                                    <p className="text-gray-500 text-sm mt-1">{reviewCount} reseñas</p>
+                                    <p className="text-gray-500 text-sm mt-1">{reviewCount} {t('home.modal.reviews.reviewsCount')}</p>
                                 </div>
                             </div>
 
@@ -279,9 +289,9 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                 {user ? (
                                     <form onSubmit={handleSubmitReview} className="space-y-4">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-                                            <h4 className="font-bold text-gray-800">Escribe una Reseña</h4>
+                                            <h4 className="font-bold text-gray-800">{t('home.modal.reviews.title')}</h4>
                                             <div className="flex items-center gap-1 bg-white px-4 py-2 rounded-full border border-gray-200">
-                                                <span className="text-sm text-gray-500 mr-2">Calificación:</span>
+                                                <span className="text-sm text-gray-500 mr-2">{t('home.modal.reviews.ratingLabel')}</span>
                                                 {[1, 2, 3, 4, 5].map((star) => (
                                                     <button
                                                         key={star}
@@ -310,7 +320,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                         <textarea
                                             value={comment}
                                             onChange={(e) => setComment(e.target.value)}
-                                            placeholder="Comparte tu experiencia..."
+                                            placeholder={t('home.modal.reviews.placeholder')}
                                             className="w-full p-4 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-eco-primary-400 focus:border-eco-primary-400 outline-none transition-all resize-y min-h-[100px]"
                                             rows={3}
                                         />
@@ -321,7 +331,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                                 disabled={rating === 0 || submitting}
                                                 className="bg-eco-primary-600 text-white px-8 py-2 rounded-xl font-bold hover:bg-eco-primary-700 transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                {submitting ? 'Enviando...' : 'Publicar Reseña'}
+                                                {submitting ? t('home.modal.actions.submitting') : t('home.modal.actions.submitReview')}
                                             </button>
                                         </div>
                                     </form>
@@ -330,7 +340,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                         <div className="bg-yellow-100 p-2 rounded-full flex-shrink-0">
                                             <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                                         </div>
-                                        <p className="font-medium text-sm">Inicia sesión para compartir tu experiencia.</p>
+                                        <p className="font-medium text-sm">{t('home.modal.reviews.loginToReview')}</p>
                                     </div>
                                 )}
                             </div>
@@ -338,7 +348,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                             {/* Reviews List */}
                             <div className="space-y-6">
                                 <h4 className="text-xl font-bold text-gray-800 border-b border-gray-100 pb-4">
-                                    Opiniones de otros viajeros ({destination.reviews?.length || 0})
+                                    {t('home.modal.reviews.usersReviewsTitle')} ({destination.reviews?.length || 0})
                                 </h4>
 
                                 {destination.reviews && destination.reviews.length > 0 ? (
@@ -351,7 +361,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                                             {(rev.user?.name || 'U')[0].toUpperCase()}
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-gray-900 text-sm">{rev.user?.name || 'Anónimo'}</p>
+                                                            <p className="font-bold text-gray-900 text-sm">{rev.user?.name || t('home.modal.reviews.anonymous')}</p>
                                                             <div className="flex text-yellow-400 text-xs">
                                                                 {[...Array(5)].map((_, i) => (
                                                                     <span key={i}>{i < rev.rating ? '★' : '☆'}</span>
@@ -361,14 +371,14 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                                     </div>
                                                 </div>
                                                 <p className={`text-sm leading-relaxed ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
-                                                    {rev.is_hidden ? 'Este comentario ha sido ocultado por moderación.' : rev.comment}
+                                                    {rev.is_hidden ? t('home.modal.reviews.hiddenComment') : rev.comment}
                                                 </p>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <p className="text-gray-500 italic text-sm">Aún no hay reseñas. ¡Sé el primero!</p>
+                                        <p className="text-gray-500 italic text-sm">{t('home.modal.reviews.noReviews')}</p>
                                     </div>
                                 )}
                             </div>

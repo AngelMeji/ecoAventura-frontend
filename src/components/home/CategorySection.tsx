@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface CategoryStat {
     name: string;
@@ -19,13 +20,15 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     activeCategory,
     onCategoryChange
 }) => {
+    const { t } = useLanguage();
+
     return (
         <div className="mb-10">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Explorar por Categorías
+                {t('home.categories.title')}
             </h2>
             <p className="text-gray-600 mb-6">
-                Descubre destinos organizados por tipo de experiencia
+                {t('home.categories.subtitle')}
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -54,7 +57,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         </h3>
 
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>{category.count} {category.count === 1 ? 'lugar' : 'lugares'}</span>
+                            <span>{category.count} {category.count === 1 ? t('home.categories.place_one') : t('home.categories.place_other')}</span>
                         </div>
                     </button>
                 ))}

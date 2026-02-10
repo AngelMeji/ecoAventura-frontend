@@ -8,6 +8,7 @@ import { DestinationController } from '../controllers/Destination.controller';
 import type { Place } from '../models/Place.model'; // Usamos el nuevo modelo Place
 import DestinationModal from '../components/destination/DestinationModal';
 import Footer from '../components/layout/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * Vista principal - Home
@@ -21,6 +22,7 @@ const Home: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
+    const { t } = useLanguage();
 
     // Estados para las secciones (stats y destacados)
     const [categoryStats, setCategoryStats] = useState<any[]>([]);
@@ -124,9 +126,9 @@ const Home: React.FC = () => {
                 </div>
                 <div>
                     <h2 className="text-3xl font-display font-bold text-gray-800">
-                        Mapa de Destinos
+                        {t('home.map.title')}
                     </h2>
-                    <p className="text-gray-500">Ubica tu próxima experiencia</p>
+                    <p className="text-gray-500">{t('home.map.subtitle')}</p>
                 </div>
             </div>
 
@@ -148,11 +150,11 @@ const Home: React.FC = () => {
                 </div>
                 <div>
                     <h2 className="text-3xl font-display font-bold text-gray-800">
-                        {searchQuery ? 'Resultados de Búsqueda' : (loading ? 'Buscando destinos...' : 'Todos los Destinos')}
+                        {searchQuery ? t('home.grid.searchResults') : (loading ? t('home.grid.searching') : t('home.grid.allDestinations'))}
                     </h2>
                     {!loading && (
                         <p className="text-gray-500">
-                            {destinations.length} {destinations.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
+                            {destinations.length} {destinations.length === 1 ? t('home.grid.found_one') : t('home.grid.found_other')}
                         </p>
                     )}
                 </div>
@@ -161,7 +163,7 @@ const Home: React.FC = () => {
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-eco-primary-600 mb-4"></div>
-                    <p className="text-gray-500">Cargando experiencias...</p>
+                    <p className="text-gray-500">{t('home.grid.loading')}</p>
                 </div>
             ) : (
                 destinations.length === 0 ? (
@@ -169,8 +171,8 @@ const Home: React.FC = () => {
                         <div className="text-eco-primary-200 mb-4 flex justify-center">
                             <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">No encontramos destinos</h3>
-                        <p className="text-gray-500">Intenta con otra búsqueda o categoría</p>
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">{t('home.grid.noResultsTitle')}</h3>
+                        <p className="text-gray-500">{t('home.grid.noResultsDesc')}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -206,19 +208,19 @@ const Home: React.FC = () => {
                     {/* Green gradient fade from left (text side) to transparent right (image side) */}
                     <div className="absolute inset-0 bg-gradient-to-r from-eco-primary-900 via-eco-primary-900/70 to-transparent"></div>
                     <div className="relative px-8 py-20 md:px-12 md:py-24 text-white max-w-2xl">
-                        <span className="text-eco-accent font-bold tracking-wider uppercase mb-2 block drop-shadow-md">Descubre Risaralda</span>
+                        <span className="text-eco-accent font-bold tracking-wider uppercase mb-2 block drop-shadow-md">{t('home.hero.subtitle')}</span>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 drop-shadow-lg">
-                            Explora Paraísos <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-400 to-red-400">Ecoturísticos</span>
+                            {t('home.hero.title')} <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-400 to-red-400">{t('home.hero.highlight')}</span>
                         </h1>
                         <p className="text-lg md:text-xl text-gray-100 mb-8 leading-relaxed drop-shadow-md font-medium">
-                            Sumérgete en la magia de la biodiversidad. Encuentra los destinos más hermosos y sostenibles para tu próxima aventura en la naturaleza.
+                            {t('home.hero.description')}
                         </p>
                         <button
                             onClick={() => document.getElementById('destinations-grid')?.scrollIntoView({ behavior: 'smooth' })}
                             className="px-8 py-4 bg-eco-accent hover:bg-eco-accent-hover text-eco-primary-900 font-bold rounded-full transition-all hover:scale-105 shadow-lg flex items-center gap-2"
                         >
-                            Comenzar Aventura
+                            {t('home.hero.cta')}
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                         </button>
                     </div>
