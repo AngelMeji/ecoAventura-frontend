@@ -201,9 +201,10 @@ const Home: React.FC = () => {
 
             <div className="rounded-2xl overflow-hidden shadow-lg border-4 border-white ring-1 ring-gray-100">
                 <InteractiveMap
-                    destinations={destinations as any[]}
+                    destinations={allDestinations as any[]}
                     onMarkerClick={handleMarkerClick}
                     highlightedDestination={highlightedDestination}
+                    shouldAutoFit={activeCategory !== 'Todos' || !!searchQuery}
                 />
             </div>
         </div>
