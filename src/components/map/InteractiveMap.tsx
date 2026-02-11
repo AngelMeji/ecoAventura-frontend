@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -78,7 +77,6 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 }) => {
     const mapRef = useRef<L.Map>(null);
     const { t, language } = useLanguage();
-    const navigate = useNavigate();
 
     // State for managing hover interaction with delay
     const [activeId, setActiveId] = React.useState<number | null>(null);
@@ -169,7 +167,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                                         onMouseLeave={handleMouseLeave}
                                         onClick={(e) => {
                                             e.stopPropagation(); // Prevent map click
-                                            navigate(`/place/${(destination as any).slug || destination.id}`);
+                                            handleMarkerClick(destination.id);
                                         }}
                                     >
                                         <h3 className="font-bold text-gray-800 text-sm whitespace-nowrap flex items-center gap-1">

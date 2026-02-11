@@ -9,6 +9,8 @@ import type { Place } from '../models/Place.model'; // Usamos el nuevo modelo Pl
 import DestinationModal from '../components/destination/DestinationModal';
 import Footer from '../components/layout/Footer';
 import { useLanguage } from '../context/LanguageContext';
+import { authService } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Vista principal - Home
@@ -23,6 +25,7 @@ const Home: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
     const { t } = useLanguage();
+    const navigate = useNavigate();
 
     // Estados para las secciones (stats y destacados)
     const [categoryStats, setCategoryStats] = useState<any[]>([]);
@@ -87,29 +90,45 @@ const Home: React.FC = () => {
         }
     };
 
-    const handleMarkerClick = (destinationId: number) => {
-        setHighlightedDestination(destinationId);
+    const handleMarkerClick = async (destinationId: number) => {
+        if (authService.isAuthenticated()) {
+            try {
+                const destination = await DestinationController.getDestinationById(destinationId);
+                if (destination) {
+                    setSelectedDestination(destination);
+                    setIsModalOpen(true);
+                }
+            } catch (error) {
+                console.error('Error al abrir modal desde el mapa:', error);
+            }
+        } else {
+            setHighlightedDestination(destinationId);
 
-        // Scroll to the corresponding card
-        const cardElement = document.getElementById(`destination-${destinationId}`);
-        if (cardElement) {
-            cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Scroll to the corresponding card
+            const cardElement = document.getElementById(`destination-${destinationId}`);
+            if (cardElement) {
+                cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            setTimeout(() => {
+                setHighlightedDestination(null);
+            }, 3000);
         }
-
-        setTimeout(() => {
-            setHighlightedDestination(null);
-        }, 3000);
     };
 
     const handleCardClick = async (destinationId: number) => {
-        try {
-            const destination = await DestinationController.getDestinationById(destinationId);
-            if (destination) {
-                setSelectedDestination(destination);
-                setIsModalOpen(true);
+        if (authService.isAuthenticated()) {
+            navigate(`/place/${destinationId}`);
+        } else {
+            try {
+                const destination = await DestinationController.getDestinationById(destinationId);
+                if (destination) {
+                    setSelectedDestination(destination);
+                    setIsModalOpen(true);
+                }
+            } catch (error) {
+                console.error('Error al abrir detalle:', error);
             }
-        } catch (error) {
-            console.error('Error al abrir detalle:', error);
         }
     };
 
