@@ -212,7 +212,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                         {user && (
                             <button
                                 onClick={handleToggleFavorite}
-                                className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${destination.is_favorite
+                                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shrink-0 ${destination.is_favorite
                                     ? 'text-red-500 bg-red-50'
                                     : 'text-gray-400 hover:text-red-400 hover:bg-gray-100'
                                     }`}

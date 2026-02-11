@@ -27,9 +27,20 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 {t('home.categories.title')}
             </h2>
-            <p className="text-gray-600 mb-6">
-                {t('home.categories.subtitle')}
-            </p>
+            <div className="flex justify-between items-center mb-6">
+                <p className="text-gray-600">
+                    {t('home.categories.subtitle')}
+                </p>
+                {activeCategory !== 'Todos' && (
+                    <button
+                        onClick={() => onCategoryChange('Todos')}
+                        className="px-4 py-2 bg-eco-accent text-eco-primary-900 rounded-full text-sm font-bold shadow-sm hover:shadow-md hover:scale-105 transition-all flex items-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        {t('home.categories.reset') || 'Ver todos'}
+                    </button>
+                )}
+            </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {categories.map((category) => (

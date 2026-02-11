@@ -379,7 +379,8 @@ const PlaceForm: React.FC = () => {
                                 value={shortDesc}
                                 onChange={e => setShortDesc(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all bg-gray-50 focus:bg-white"
-                                placeholder="Resumen breve para tarjetas (máx 150 caracteres)"
+                                maxLength={1000}
+                                placeholder="Resumen breve para tarjetas (máx 1000 caracteres)"
                             />
                         </div>
 
@@ -390,7 +391,8 @@ const PlaceForm: React.FC = () => {
                                 onChange={e => setDescription(e.target.value)}
                                 rows={5}
                                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-eco-primary-500 focus:border-eco-primary-500 outline-none transition-all bg-gray-50 focus:bg-white resize-y"
-                                placeholder="Cuenta la historia completa del lugar, cómo llegar, qué esperar..."
+                                maxLength={5000}
+                                placeholder="Cuenta la historia completa del lugar, cómo llegar, qué esperar... (máx 5000 caracteres)"
                             ></textarea>
                         </div>
 

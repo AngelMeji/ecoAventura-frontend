@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLanguage } from '../../context/LanguageContext';
@@ -46,10 +47,30 @@ const createCustomIcon = () => {
 };
 
 interface InteractiveMapProps {
-    destinations: any[]; // Loosened for build
+    destinations: any[];
     onMarkerClick?: (destinationId: number) => void;
     highlightedDestination?: number | null;
 }
+
+// Component helper to update map bounds
+const MapBoundsUpdater: React.FC<{ destinations: any[] }> = ({ destinations }) => {
+    const map = useMap();
+
+    React.useEffect(() => {
+        if (destinations.length > 0) {
+            try {
+                const bounds = L.latLngBounds(destinations.map(d => [Number(d.latitude), Number(d.longitude)]));
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            } catch (e) {
+                console.error("Error updating map bounds:", e);
+            }
+        }
+    }, [destinations, map]);
+
+    return null;
+};
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({
     destinations,
@@ -57,6 +78,11 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 }) => {
     const mapRef = useRef<L.Map>(null);
     const { t, language } = useLanguage();
+    const navigate = useNavigate();
+
+    // State for managing hover interaction with delay
+    const [activeId, setActiveId] = React.useState<number | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Center of Risaralda, Colombia (Pereira)
     const center: [number, number] = [4.8143, -75.6946];
@@ -65,6 +91,20 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
         if (onMarkerClick) {
             onMarkerClick(destinationId);
         }
+    };
+
+    const handleMouseEnter = (id: number) => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+        setActiveId(id);
+    };
+
+    const handleMouseLeave = () => {
+        timeoutRef.current = setTimeout(() => {
+            setActiveId(null);
+        }, 500); // 500ms delay
     };
 
     return (
@@ -88,6 +128,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                 className="w-full h-full"
                 ref={mapRef}
             >
+                <MapBoundsUpdater destinations={destinations} />
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -95,6 +136,8 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 
                 {destinations.map((rawDest) => {
                     const destination = getTranslatedPlace(rawDest, language);
+                    const isActive = activeId === destination.id;
+
                     return (
                         <Marker
                             key={destination.id}
@@ -102,31 +145,40 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                             icon={createCustomIcon()}
                             eventHandlers={{
                                 click: () => handleMarkerClick(destination.id),
+                                mouseover: () => handleMouseEnter(destination.id),
+                                mouseout: handleMouseLeave
                             }}
                         >
-                            <Popup className="custom-popup">
-                                <div className="p-2 min-w-[200px]">
-                                    <h3 className="font-bold text-gray-800 mb-1">
-                                        {destination.name}
-                                    </h3>
-                                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                        {destination.short_description}
-                                    </p>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                                        <span className="px-2 py-1 bg-eco-teal-100 text-eco-teal-700 rounded-full">
-                                            {destination.category?.name || 'General'}
-                                        </span>
-                                        <span className="capitalize">{destination.difficulty}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => window.location.href = `/place/${(destination as any).slug || destination.id}`}
-                                        className="text-eco-teal-600 hover:text-eco-teal-700 text-sm font-medium"
-                                        type="button"
+                            {isActive && (
+                                <Tooltip
+                                    direction="top"
+                                    offset={[0, -5]}
+                                    opacity={1}
+                                    permanent={true}
+                                    interactive={true}
+                                    className="custom-tooltip z-[1000]"
+                                >
+                                    <div
+                                        className="p-2 cursor-pointer hover:bg-gray-50 rounded transition-colors"
+                                        onMouseEnter={() => {
+                                            if (timeoutRef.current) {
+                                                clearTimeout(timeoutRef.current);
+                                                timeoutRef.current = null;
+                                            }
+                                        }}
+                                        onMouseLeave={handleMouseLeave}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent map click
+                                            navigate(`/place/${(destination as any).slug || destination.id}`);
+                                        }}
                                     >
-                                        {t('home.map.viewDetails')} →
-                                    </button>
-                                </div>
-                            </Popup>
+                                        <h3 className="font-bold text-gray-800 text-sm whitespace-nowrap flex items-center gap-1">
+                                            {destination.name}
+                                            <svg className="w-3 h-3 text-eco-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </h3>
+                                    </div>
+                                </Tooltip>
+                            )}
                         </Marker>
                     );
                 })}

@@ -254,7 +254,7 @@ const PlaceDetail: React.FC = () => {
                                         console.error('Error toggling favorite', error);
                                     }
                                 }}
-                                className={`p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${place.is_favorite
+                                className={`w-12 h-12 flex items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-110 shrink-0 ${place.is_favorite
                                     ? 'bg-white text-red-500 shadow-red-500/30'
                                     : 'bg-white/70 backdrop-blur-md text-gray-700 hover:bg-white hover:text-red-500'
                                     }`}

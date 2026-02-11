@@ -50,6 +50,7 @@ export const translations = {
             categories: {
                 title: 'Explorar por Categorías',
                 subtitle: 'Descubre destinos organizados por tipo de experiencia',
+                reset: 'Restablecer',
                 place_one: 'lugar',
                 place_other: 'lugares',
                 names: {
@@ -398,6 +399,7 @@ export const translations = {
             categories: {
                 title: 'Explore by Category',
                 subtitle: 'Discover destinations organized by experience type',
+                reset: 'Reset',
                 place_one: 'place',
                 place_other: 'places',
                 names: {
