@@ -8,6 +8,7 @@ export interface PlaceFilters {
     search?: string;
     featured?: number; // 1 o 0
     user_id?: number | string;
+    per_page?: number;
 }
 
 export const placesService = {
@@ -20,6 +21,7 @@ export const placesService = {
         if (filters.search) params.append('search', filters.search);
         if (filters.featured !== undefined) params.append('featured', filters.featured.toString());
         if (filters.user_id) params.append('user_id', filters.user_id.toString());
+        if (filters.per_page) params.append('per_page', filters.per_page.toString());
 
         const response = await api.get<PaginatedResponse<Place>>(`/places?${params.toString()}`);
         return response.data;

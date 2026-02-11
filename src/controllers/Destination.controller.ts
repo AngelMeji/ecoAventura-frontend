@@ -1,5 +1,5 @@
 import { placesService } from '../services/placesService';
-import type { Place } from '../models/Place.model';
+import type { Place, PaginatedResponse } from '../models/Place.model';
 
 /**
  * DestinationController (Refactorizado)
@@ -8,30 +8,27 @@ import type { Place } from '../models/Place.model';
 export class DestinationController {
 
     /**
-     * Obtiene todos los destinos desde el backend
+     * Obtiene todos los destinos desde el backend con paginación
      */
-    static async getAllDestinations(): Promise<Place[]> {
-        const response = await placesService.getAll();
-        return response.data;
+    static async getAllDestinations(page: number = 1, perPage: number = 12): Promise<PaginatedResponse<Place>> {
+        return await placesService.getAll({ page, per_page: perPage });
     }
 
     /**
-     * Obtiene destinos filtrados por categoría
+     * Obtiene destinos filtrados por categoría con paginación
      */
-    static async getDestinationsByCategory(categorySlug: string): Promise<Place[]> {
+    static async getDestinationsByCategory(categorySlug: string, page: number = 1, perPage: number = 12): Promise<PaginatedResponse<Place>> {
         if (categorySlug === 'Todos' || categorySlug === '') {
-            return this.getAllDestinations();
+            return this.getAllDestinations(page, perPage);
         }
-        const response = await placesService.getAll({ category: categorySlug });
-        return response.data;
+        return await placesService.getAll({ category: categorySlug, page, per_page: perPage });
     }
 
     /**
-     * Busca destinos por texto
+     * Busca destinos por texto con paginación
      */
-    static async searchDestinations(query: string): Promise<Place[]> {
-        const response = await placesService.getAll({ search: query });
-        return response.data;
+    static async searchDestinations(query: string, page: number = 1, perPage: number = 12): Promise<PaginatedResponse<Place>> {
+        return await placesService.getAll({ search: query, page, per_page: perPage });
     }
 
     /**
@@ -73,7 +70,7 @@ export class DestinationController {
         try {
             // Obtenemos las categorías directamente del backend
             const backendCategories = await placesService.getCategories();
-            
+
             // Si el backend no devuelve nada o hay error, devolvemos array vacío
             if (!backendCategories || !Array.isArray(backendCategories)) {
                 return [];

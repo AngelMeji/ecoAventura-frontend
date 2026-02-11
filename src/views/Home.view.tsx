@@ -5,7 +5,7 @@ import FilterBar from '../components/home/FilterBar';
 import Header from '../components/layout/Header';
 import CategorySection from '../components/home/CategorySection';
 import { DestinationController } from '../controllers/Destination.controller';
-import type { Place } from '../models/Place.model'; // Usamos el nuevo modelo Place
+import type { Place, PaginatedResponse } from '../models/Place.model'; // Usamos el nuevo modelo Place
 import DestinationModal from '../components/destination/DestinationModal';
 import Footer from '../components/layout/Footer';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
  * Muestra el mapa interactivo y los destinos ecoturísticos cargados del backend
  */
 const Home: React.FC = () => {
+    const [allDestinations, setAllDestinations] = useState<Place[]>([]);
     const [destinations, setDestinations] = useState<Place[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('Todos');
@@ -24,11 +25,13 @@ const Home: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [paginationMeta, setPaginationMeta] = useState<any>(null);
+    const [categoryStats, setCategoryStats] = useState<any[]>([]);
     const { t } = useLanguage();
     const navigate = useNavigate();
 
-    // Estados para las secciones (stats y destacados)
-    const [categoryStats, setCategoryStats] = useState<any[]>([]);
+    const ITEMS_PER_PAGE = 12;
 
     // Cargar datos al inicio
     useEffect(() => {
@@ -37,8 +40,23 @@ const Home: React.FC = () => {
 
     // Cargar datos cuando cambian los filtros
     useEffect(() => {
+        setCurrentPage(1);
         fetchDestinations();
     }, [activeCategory, searchQuery]);
+
+    // Actualizar destinos visibles cuando cambia la página o la lista total
+    useEffect(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        setDestinations(allDestinations.slice(startIndex, endIndex));
+
+        setPaginationMeta({
+            current_page: currentPage,
+            last_page: Math.ceil(allDestinations.length / ITEMS_PER_PAGE),
+            total: allDestinations.length,
+            per_page: ITEMS_PER_PAGE
+        });
+    }, [currentPage, allDestinations]);
 
     const loadData = async () => {
         setLoading(true);
@@ -57,19 +75,49 @@ const Home: React.FC = () => {
     const fetchDestinations = async () => {
         setLoading(true);
         try {
-            let result: Place[];
-            if (searchQuery) {
-                result = await DestinationController.searchDestinations(searchQuery);
-            } else {
-                result = await DestinationController.getDestinationsByCategory(activeCategory);
+            let allFetched: Place[] = [];
+            let pageToFetch = 1;
+            let hasMore = true;
+
+            while (hasMore) {
+                let response: PaginatedResponse<Place>;
+                // Intentamos pedir 100, pero si el servidor nos ignora y da 10, seguiremos pidiendo páginas
+                if (searchQuery) {
+                    response = await DestinationController.searchDestinations(searchQuery, pageToFetch, 100);
+                } else {
+                    response = await DestinationController.getDestinationsByCategory(activeCategory, pageToFetch, 100);
+                }
+
+                // Evitar duplicados si el backend no pagina bien o devuelve lo mismo
+                const newItems = response.data.filter(newItem =>
+                    !allFetched.some(existingItem => existingItem.id === newItem.id)
+                );
+
+                allFetched = [...allFetched, ...newItems];
+
+                // Si la página actual es menor a la última devuelta por el backend
+                if (response.current_page < response.last_page) {
+                    pageToFetch++;
+                } else {
+                    hasMore = false;
+                }
             }
-            setDestinations(result);
+
+            setAllDestinations(allFetched);
         } catch (error) {
             console.error('Error buscando destinos:', error);
-            // Fallback vacio o manejar error
-            setDestinations([]);
+            setAllDestinations([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        // Scroll to grid top
+        const gridElement = document.getElementById('destinations-grid');
+        if (gridElement) {
+            gridElement.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -194,20 +242,60 @@ const Home: React.FC = () => {
                         <p className="text-gray-500">{t('home.grid.noResultsDesc')}</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {destinations.map((destination) => (
-                            <div
-                                key={destination.id}
-                                id={`destination-${destination.id}`}
-                            >
-                                <DestinationCard
-                                    destination={destination as any}
-                                    isHighlighted={highlightedDestination === destination.id}
-                                    onClick={() => handleCardClick(destination.id)}
-                                />
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-8">
+                            {destinations.map((destination) => (
+                                <div
+                                    key={destination.id}
+                                    id={`destination-${destination.id}`}
+                                >
+                                    <DestinationCard
+                                        destination={destination as any}
+                                        isHighlighted={highlightedDestination === destination.id}
+                                        onClick={() => handleCardClick(destination.id)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {paginationMeta && paginationMeta.last_page > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-2">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                    aria-label="Página anterior"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: paginationMeta.last_page }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-10 h-10 rounded-xl font-bold transition-all shadow-sm ${currentPage === page
+                                                ? 'bg-eco-primary-600 text-white'
+                                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === paginationMeta.last_page}
+                                    className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                    aria-label="Página siguiente"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </button>
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )
             )}
         </div>
