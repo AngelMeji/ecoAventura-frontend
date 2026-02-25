@@ -60,10 +60,8 @@ const PlaceDetail: React.FC = () => {
 
             // V2: El backend ya devuelve 'is_favorite' en el objeto Place
             // No es necesaria la verificación manual
-            console.log(`Lugar cargado: ${loadedPlace.name}, Favorito: ${loadedPlace.is_favorite}`);
 
             setPlace(loadedPlace);
-            console.log('📸 Place Images:', loadedPlace.images);
         } catch (error) {
             console.error('Error cargando lugar:', error);
         } finally {
@@ -223,24 +221,24 @@ const PlaceDetail: React.FC = () => {
                             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-between p-4 transition-opacity duration-300 z-30">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1); }}
-                                    className="bg-white/80 hover:bg-white p-3 rounded-full text-gray-800 transition-all transform hover:scale-110 shadow-xl border border-white/20"
+                                    className="bg-white/80 hover:bg-white p-2 md:p-3 rounded-full text-gray-800 transition-all transform hover:scale-110 shadow-xl border border-white/20"
                                     aria-label="Imagen anterior"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                                    <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                                 </button>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1); }}
-                                    className="bg-white/80 hover:bg-white p-3 rounded-full text-gray-800 transition-all transform hover:scale-110 shadow-xl border border-white/20"
+                                    className="bg-white/80 hover:bg-white p-2 md:p-3 rounded-full text-gray-800 transition-all transform hover:scale-110 shadow-xl border border-white/20"
                                     aria-label="Siguiente imagen"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+                                    <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
                         )}
 
                         {/* Image Counter Badge */}
                         {images.length > 1 && (
-                            <div className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full text-sm font-medium z-30">
+                            <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 bg-black/50 backdrop-blur-md text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-xs md:text-sm font-medium z-30">
                                 {currentImageIndex + 1} / {images.length}
                             </div>
                         )}
@@ -273,24 +271,24 @@ const PlaceDetail: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                            <div className="flex items-center gap-3 mb-3">
-                                <span className="px-3 py-1 bg-eco-primary-500/80 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 text-white">
+                            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                                <span className="px-2 py-0.5 md:px-3 md:py-1 bg-eco-primary-500/80 backdrop-blur-md rounded-full text-[10px] md:text-xs font-semibold uppercase tracking-wider">
                                     {place.category?.name}
                                 </span>
                                 {(place.average_rating || 0) > 0 && (
-                                    <div className="flex items-center gap-1 bg-yellow-400/90 backdrop-blur-sm text-black px-2 py-1 rounded-full text-xs font-bold">
+                                    <div className="flex items-center gap-1 bg-yellow-400/90 backdrop-blur-sm text-black px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold">
                                         <span>★</span>
                                         <span>{place.average_rating}</span>
                                     </div>
                                 )}
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-bold font-display leading-tight mb-2">
+                            <h1 className="text-2xl md:text-5xl font-bold font-display leading-tight mb-1 md:mb-2 text-shadow-sm">
                                 {place.name}
                             </h1>
-                            <div className="flex items-center gap-2 text-white/90 text-lg">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                <p>{place.address}</p>
+                            <div className="flex items-center gap-1 md:gap-2 text-white/90 text-sm md:text-lg">
+                                <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <p className="truncate max-w-[80vw] md:max-w-none">{place.address}</p>
                             </div>
                         </div>
                     </div>
@@ -302,7 +300,7 @@ const PlaceDetail: React.FC = () => {
                             <div className="max-w-3xl mx-auto">
                                 <div className="mb-10">
                                     <h3 className="text-2xl font-bold text-gray-800 mb-4">Información del Lugar</h3>
-                                    <p className="text-gray-600 text-lg leading-relaxed">
+                                    <p className="text-gray-600 text-lg leading-relaxed break-words">
                                         {place.short_description || place.description?.substring(0, 200) + '...'}
                                     </p>
                                 </div>
@@ -368,10 +366,10 @@ const PlaceDetail: React.FC = () => {
                             </div>
 
                             {/* Content */}
-                            <div className="p-8 bg-white min-h-[300px]">
+                            <div className="p-4 md:p-8 bg-white min-h-[300px]">
                                 {activeTab === 'info' && (
                                     <div className="animate-fade-in">
-                                        <p className="text-gray-600 text-lg leading-relaxed mb-10 whitespace-pre-line">
+                                        <p className="text-gray-600 text-lg leading-relaxed mb-10 whitespace-pre-line break-words">
                                             {place.description}
                                         </p>
 
@@ -576,7 +574,7 @@ const PlaceDetail: React.FC = () => {
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                <p className={`leading-relaxed text-sm ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
+                                                                <p className={`leading-relaxed text-sm break-words ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
                                                                     {rev.is_hidden ? 'Este comentario ha sido ocultado por moderación.' : rev.comment}
                                                                 </p>
                                                             </>

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import InteractiveMap from '../../components/map/InteractiveMap';
 import DestinationCard from '../../components/destination/DestinationCard';
 import FilterBar from '../../components/home/FilterBar';
 import Header from '../../components/layout/Header';
 import CategorySection from '../../components/home/CategorySection';
 import { DestinationController } from '../../controllers/Destination.controller';
-import type { Place } from '../../models/Place.model';
+import type { Place, PaginatedResponse } from '../../models/Place.model';
 import DestinationModal from '../../components/destination/DestinationModal';
 
 /**
@@ -14,15 +14,35 @@ import DestinationModal from '../../components/destination/DestinationModal';
  */
 const Home: React.FC = () => {
     const [destinations, setDestinations] = useState<Place[]>([]);
+    const [allDestinations, setAllDestinations] = useState<Place[]>([]);
+    const [mapDestinations, setMapDestinations] = useState<Place[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [paginationMeta, setPaginationMeta] = useState<any>(null);
+    const [categoryStats, setCategoryStats] = useState<any[]>([]);
     const [activeCategory, setActiveCategory] = useState('Todos');
     const [highlightedDestination, setHighlightedDestination] = useState<number | null>(null);
+
+    const ITEMS_PER_PAGE = 12;
+
+    // Actualizar destinos visibles cuando cambia la página o la lista total
+    useEffect(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        setDestinations(allDestinations.slice(startIndex, endIndex));
+
+        setPaginationMeta({
+            current_page: currentPage,
+            last_page: Math.ceil(allDestinations.length / ITEMS_PER_PAGE),
+            total: allDestinations.length,
+            per_page: ITEMS_PER_PAGE
+        });
+    }, [currentPage, allDestinations]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
 
     // Estados para las secciones
-    const [categoryStats, setCategoryStats] = useState<any[]>([]);
 
     // Cargar datos al inicio
     useEffect(() => {
@@ -50,17 +70,30 @@ const Home: React.FC = () => {
 
     const fetchDestinations = async () => {
         try {
-            let result: Place[];
+            let result: PaginatedResponse<Place>;
+            // Fetch a large number of items for client-side pagination/filtering
+            // This is temporary until server-side pagination is fully integrated with the UI
+            const PER_PAGE_LIMIT = 1000;
+
             if (searchQuery) {
-                result = await DestinationController.searchDestinations(searchQuery);
+                result = await DestinationController.searchDestinations(searchQuery, 1, PER_PAGE_LIMIT);
             } else {
-                result = await DestinationController.getDestinationsByCategory(activeCategory);
+                result = await DestinationController.getDestinationsByCategory(activeCategory, 1, PER_PAGE_LIMIT);
             }
-            setDestinations(result);
+
+            // The controller returns a PaginatedResponse, we need .data
+            // If the controller was hacked to return array, we check that too
+            const items = result.data || (Array.isArray(result) ? result : []);
+
+            setAllDestinations(items); // Store all for client-side pagination
+
+            // Also update map destinations directly with all items
+            setMapDestinations(items);
+
         } catch (error) {
             console.error('Error buscando destinos:', error);
-            // Fallback vacio o manejar error
-            setDestinations([]);
+            setAllDestinations([]);
+            setMapDestinations([]);
         }
     };
 
@@ -79,19 +112,28 @@ const Home: React.FC = () => {
         }
     };
 
-    const handleMarkerClick = (destinationId: number) => {
-        setHighlightedDestination(destinationId);
-
-        // Scroll to the corresponding card
-        const cardElement = document.getElementById(`destination-${destinationId}`);
-        if (cardElement) {
-            cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        // Scroll to grid top
+        const gridElement = document.getElementById('destinations-grid');
+        if (gridElement) {
+            gridElement.scrollIntoView({ behavior: 'smooth' });
         }
-
-        setTimeout(() => {
-            setHighlightedDestination(null);
-        }, 3000);
     };
+
+    const handleMarkerClick = useCallback(async (destinationId: number) => {
+        try {
+            const destination = await DestinationController.getDestinationById(destinationId);
+            if (destination) {
+                setSelectedDestination(destination);
+                setIsModalOpen(true);
+            } else {
+                console.warn('⚠️ Destination is null or undefined');
+            }
+        } catch (error) {
+            console.error('❌ Error al abrir modal desde el mapa:', error);
+        }
+    }, []);
 
     const handleCardClick = async (destinationId: number) => {
         try {
@@ -166,7 +208,7 @@ const Home: React.FC = () => {
                         <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
                             <p className="text-eco-text-light text-xl">No se encontraron destinos que coincidan con tu búsqueda.</p>
                         </div>
-                    ) : (
+                    ) : (<>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {destinations.map((destination) => (
                                 <div
@@ -181,21 +223,60 @@ const Home: React.FC = () => {
                                 </div>
                             ))}
                         </div>
-                    )}
+
+                        {/* Pagination Controls */}
+                        {paginationMeta && paginationMeta.last_page > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-2">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                    aria-label="Página anterior"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: paginationMeta.last_page }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-10 h-10 rounded-xl font-bold transition-all shadow-sm ${currentPage === page
+                                                ? 'bg-eco-primary-600 text-white'
+                                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === paginationMeta.last_page}
+                                    className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                    aria-label="Página siguiente"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </button>
+                            </div>
+                        )}
+                    </>)}
                 </div>
 
                 {/* Map Section - Aparece después del grid cuando hay búsqueda */}
                 <div className="mb-12 animate-fade-in-up" style={{ animationDelay: searchQuery ? '0.3s' : '0.3s' }}>
                     <div className="flex items-center gap-2 mb-6">
                         <h2 className="text-3xl font-bold text-eco-primary-900 font-display">
-                            Mapa de Destinos
+                            Mapa de Destinos (V2)
                         </h2>
                     </div>
                     <div className="rounded-2xl overflow-hidden shadow-lg border border-eco-primary-100">
                         <InteractiveMap
-                            destinations={destinations as any[]}
+                            destinations={mapDestinations as any[]}
                             onMarkerClick={handleMarkerClick}
                             highlightedDestination={highlightedDestination}
+                            shouldAutoFit={false}
                         />
                     </div>
                 </div>

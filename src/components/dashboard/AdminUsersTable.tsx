@@ -27,6 +27,7 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
+    const [totalUsers, setTotalUsers] = useState(0);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -48,10 +49,13 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }
                     setUsers(data.data);
                     setCurrentPage(data.current_page);
                     setLastPage(data.last_page);
+                    setTotalUsers(data.total || 0);
                 } else if (Array.isArray(data)) {
                     setUsers(data);
+                    setTotalUsers(data.length);
                 } else {
                     setUsers([]);
+                    setTotalUsers(0);
                 }
             })
             .catch(err => console.error(err))
@@ -79,7 +83,8 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }
             onConfirm: async () => {
                 try {
                     await placesService.deleteUser(id);
-                    setUsers(prev => prev.filter(u => u.id !== id));
+                    // Refresh current page
+                    loadUsers(currentPage);
                     onNotify({ type: 'success', message: 'Usuario eliminado correctamente' });
                 } catch (error) {
                     onNotify({ type: 'error', message: 'Error eliminando usuario' });
@@ -99,7 +104,7 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }
             await placesService.updateUser(editingUser.id, editingUser);
             onNotify({ type: 'success', message: 'Usuario actualizado correctamente' });
             setIsEditOpen(false);
-            loadUsers();
+            loadUsers(currentPage);
         } catch (error) {
             onNotify({ type: 'error', message: 'Error actualizando usuario' });
         }
@@ -294,60 +299,54 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }
 
 
 
-            {/* Pagination Controls */}
-            {
-                lastPage > 1 && (
-                    <div className="flex justify-between items-center px-4 py-3 bg-white border-t border-gray-200 sm:px-6 mt-4 rounded-lg shadow-sm">
-                        <div className="flex-1 flex justify-between sm:hidden">
-                            <button
-                                onClick={handlePrevPage}
-                                disabled={currentPage === 1}
-                                className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                Anterior
-                            </button>
-                            <button
-                                onClick={handleNextPage}
-                                disabled={currentPage === lastPage}
-                                className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                Siguiente
-                            </button>
-                        </div>
-                        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p className="text-sm text-gray-700">
-                                    Página <span className="font-medium">{currentPage}</span> de <span className="font-medium">{lastPage}</span>
-                                </p>
-                            </div>
-                            <div>
-                                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                    <button
-                                        onClick={handlePrevPage}
-                                        disabled={currentPage === 1}
-                                        className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        <span className="sr-only">Anterior</span>
-                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        onClick={handleNextPage}
-                                        disabled={currentPage === lastPage}
-                                        className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        <span className="sr-only">Siguiente</span>
-                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </nav>
-                            </div>
-                        </div>
+            {/* Advanced Pagination Controls */}
+            {lastPage > 1 && (
+                <div className="p-6 border-t border-gray-100 bg-gray-50/30 flex flex-col md:flex-row items-center justify-between gap-4 mt-4 rounded-xl shadow-sm">
+                    <div className="text-sm text-gray-500">
+                        Mostrando página <span className="font-bold text-gray-700">{currentPage}</span> de <span className="font-bold text-gray-700">{lastPage}</span>
+                        <span className="ml-1 text-xs">({totalUsers} usuarios en total)</span>
                     </div>
-                )
-            }
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handlePrevPage}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                        >
+                            Anterior
+                        </button>
+                        <div className="hidden sm:flex items-center bg-gray-100 rounded-xl p-1">
+                            {Array.from({ length: lastPage }, (_, i) => i + 1)
+                                .filter(p => {
+                                    // Show first, last, and pages around current
+                                    return p === 1 || p === lastPage || Math.abs(p - currentPage) <= 1;
+                                })
+                                .map((p, index, array) => (
+                                    <React.Fragment key={p}>
+                                        {index > 0 && array[index - 1] !== p - 1 && (
+                                            <span className="px-2 text-gray-400">...</span>
+                                        )}
+                                        <button
+                                            onClick={() => loadUsers(p)}
+                                            className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${currentPage === p
+                                                ? 'bg-eco-primary-600 text-white shadow-md scale-110'
+                                                : 'text-gray-600 hover:bg-white hover:text-eco-primary-600'
+                                                }`}
+                                        >
+                                            {p}
+                                        </button>
+                                    </React.Fragment>
+                                ))}
+                        </div>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={currentPage === lastPage}
+                            className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Edit Modal */}
             <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Editar Usuario">

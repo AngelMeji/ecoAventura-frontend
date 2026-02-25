@@ -18,6 +18,16 @@ const Dashboard: React.FC = () => {
     const [stats, setStats] = useState<any>(null);
     const [pendingPlaces, setPendingPlaces] = useState<Place[]>([]);
     const [allPlaces, setAllPlaces] = useState<Place[]>([]);
+    const [adminPagination, setAdminPagination] = useState<{
+        currentPage: number;
+        lastPage: number;
+        total: number;
+    }>({ currentPage: 1, lastPage: 1, total: 0 });
+    const [pendingPagination, setPendingPagination] = useState<{
+        currentPage: number;
+        lastPage: number;
+        total: number;
+    }>({ currentPage: 1, lastPage: 1, total: 0 });
     const [partnerPlaces, setPartnerPlaces] = useState<Place[]>([]);
     const [favorites, setFavorites] = useState<Place[]>([]);
     const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; message: string } | null>(null);
@@ -34,16 +44,13 @@ const Dashboard: React.FC = () => {
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            console.log('Loading dashboard for role:', user.role);
             if (user.role === 'admin') {
                 const data = await placesService.getAdminDashboard();
                 setStats(data?.stats || {});
-                const pendingResponse = await placesService.getPendingPlaces();
-                setPendingPlaces(pendingResponse.data || []);
+                await loadPendingPlaces(1);
 
                 try {
-                    const allResponse = await placesService.getAdminAllPlaces();
-                    setAllPlaces(allResponse.data || []);
+                    await loadAdminPlaces(1);
                 } catch (e) {
                     console.warn('Backend missing getAdminAllPlaces or error fetching:', e);
                 }
@@ -73,10 +80,8 @@ const Dashboard: React.FC = () => {
                 // 2. Fallback: Fetch all usando /api/places?user_id=X (siempre intentar si está vacío)
                 if (pPlaces.length === 0) {
                     try {
-                        console.log('🔄 Obteniendo lugares del partner usando fallback endpoint...');
                         const allResp: any = await placesService.getAll({ user_id: user.id });
                         pPlaces = Array.isArray(allResp) ? allResp : allResp.data || [];
-                        console.log(`✅ Lugares del partner obtenidos: ${pPlaces.length}`);
                     } catch (e) {
                         console.error('❌ Fallback partner fetch failed:', e);
                     }
@@ -97,19 +102,10 @@ const Dashboard: React.FC = () => {
 
                 if (favsResult.status === 'fulfilled') {
                     const favsResponse = favsResult.value;
-                    console.log('📦 Raw favorites response:', favsResponse);
 
                     const favList = Array.isArray(favsResponse)
                         ? favsResponse
                         : (favsResponse?.data && Array.isArray(favsResponse.data) ? favsResponse.data : []);
-
-                    console.log('⭐ Processed favorites list:', favList);
-                    console.log('⭐ Favorites count:', favList.length);
-
-                    if (favList.length > 0) {
-                        console.log('⭐ First favorite sample:', favList[0]);
-                        console.log('⭐ First favorite images:', favList[0].images);
-                    }
 
                     setFavorites(favList);
                 } else {
@@ -122,6 +118,36 @@ const Dashboard: React.FC = () => {
             setStats({});
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadAdminPlaces = async (page: number) => {
+        try {
+            const response = await placesService.getAdminAllPlaces(page);
+            setAllPlaces(response.data || []);
+            setAdminPagination({
+                currentPage: response.current_page,
+                lastPage: response.last_page,
+                total: response.total
+            });
+        } catch (error) {
+            console.error('Error loading admin places:', error);
+            setAllPlaces([]);
+        }
+    };
+
+    const loadPendingPlaces = async (page: number) => {
+        try {
+            const response = await placesService.getPendingPlaces(page);
+            setPendingPlaces(response.data || []);
+            setPendingPagination({
+                currentPage: response.current_page,
+                lastPage: response.last_page,
+                total: response.total
+            });
+        } catch (error) {
+            console.error('Error loading pending places:', error);
+            setPendingPlaces([]);
         }
     };
 
@@ -143,6 +169,11 @@ const Dashboard: React.FC = () => {
                     await placesService.approve(id);
                     setAlert({ type: 'success', message: t('home.dashboard.messages.approveSuccess') });
                     setPendingPlaces(prev => prev.filter(p => p.id !== id));
+                    // Refresh current admin page if we are on admin view
+                    if (user.role === 'admin') {
+                        loadAdminPlaces(adminPagination.currentPage);
+                    }
+                    await loadPendingPlaces(pendingPagination.currentPage);
                     loadDashboardData();
                 } catch (error) {
                     setAlert({ type: 'error', message: t('home.dashboard.messages.approveError') });
@@ -258,12 +289,19 @@ const Dashboard: React.FC = () => {
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                             {[
-                                { label: t('home.dashboard.stats.totalUsers'), value: stats?.total_users || 0, bgClass: 'bg-blue-50', textClass: 'text-blue-600', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-                                { label: t('home.dashboard.stats.totalPlaces'), value: stats?.total_places || 0, bgClass: 'bg-green-50', textClass: 'text-green-600', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-                                { label: t('home.dashboard.stats.pendingPlaces'), value: stats?.pending_places || 0, bgClass: 'bg-yellow-50', textClass: 'text-yellow-600', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-                                { label: t('home.dashboard.stats.totalReviews'), value: stats?.reviews_count || 0, bgClass: 'bg-purple-50', textClass: 'text-purple-600', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' }
+                                { label: t('home.dashboard.stats.totalUsers'), value: stats?.total_users || 0, bgClass: 'bg-blue-50', textClass: 'text-blue-600', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', section: 'users' },
+                                { label: t('home.dashboard.stats.totalPlaces'), value: stats?.total_places || 0, bgClass: 'bg-green-50', textClass: 'text-green-600', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z', section: 'all-places' },
+                                { label: t('home.dashboard.stats.pendingPlaces'), value: stats?.pending_places || 0, bgClass: 'bg-yellow-50', textClass: 'text-yellow-600', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', section: 'pending' },
+                                { label: t('home.dashboard.stats.totalReviews'), value: stats?.reviews_count || 0, bgClass: 'bg-purple-50', textClass: 'text-purple-600', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z', section: 'reviews' }
                             ].map((stat, idx) => (
-                                <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1 group">
+                                <div
+                                    key={idx}
+                                    onClick={() => {
+                                        const element = document.getElementById(stat.section);
+                                        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }}
+                                    className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1 group cursor-pointer"
+                                >
                                     <div className={`p-3 rounded-xl ${stat.bgClass} w-fit mb-4 group-hover:scale-110 transition-transform`}>
                                         <svg className={`w-6 h-6 ${stat.textClass}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} /></svg>
                                     </div>
@@ -317,8 +355,31 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+                            {/* Admin Partner Requests Management */}
+                            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
+                                <div className="p-6 border-b border-gray-100 bg-teal-50/50 flex justify-between items-center">
+                                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                        <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                        Solicitudes de Socios
+                                    </h2>
+                                    <span className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Gestión</span>
+                                </div>
+                                <div className="p-6 flex flex-col items-center text-center">
+                                    <p className="text-gray-600 mb-6 max-w-lg">
+                                        Administra las solicitudes de usuarios que desean convertirse en socios. Revisa sus propuestas y aprueba o rechaza sus peticiones.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate('/admin/partner-requests')}
+                                        className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-teal-500/30 flex items-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                        Gestionar Solicitudes
+                                    </button>
+                                </div>
+                            </div>
+
                             {/* Pending Places Table */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                            <div id="pending" className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                                 <div className="p-6 border-b border-gray-100 bg-yellow-50/50">
                                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -367,6 +428,10 @@ const Dashboard: React.FC = () => {
                                                                                 await placesService.reject(place.id);
                                                                                 setAlert({ type: 'success', message: t('home.dashboard.messages.rejectSuccess') });
                                                                                 setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                                                if (user.role === 'admin') {
+                                                                                    loadAdminPlaces(adminPagination.currentPage);
+                                                                                }
+                                                                                await loadPendingPlaces(pendingPagination.currentPage);
                                                                                 loadDashboardData();
                                                                             } catch (e) {
                                                                                 setAlert({ type: 'error', message: t('home.dashboard.messages.rejectError') });
@@ -392,6 +457,10 @@ const Dashboard: React.FC = () => {
                                                                                 await placesService.needsFix(place.id);
                                                                                 setAlert({ type: 'success', message: t('home.dashboard.messages.changesSuccess') });
                                                                                 setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                                                if (user.role === 'admin') {
+                                                                                    loadAdminPlaces(adminPagination.currentPage);
+                                                                                }
+                                                                                await loadPendingPlaces(pendingPagination.currentPage);
                                                                                 loadDashboardData();
                                                                             } catch (e) {
                                                                                 setAlert({ type: 'error', message: t('home.dashboard.messages.changesError') });
@@ -461,6 +530,10 @@ const Dashboard: React.FC = () => {
                                                                         await placesService.reject(place.id);
                                                                         setAlert({ type: 'success', message: 'Lugar rechazado correctamente' });
                                                                         setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                                        if (user.role === 'admin') {
+                                                                            loadAdminPlaces(adminPagination.currentPage);
+                                                                        }
+                                                                        await loadPendingPlaces(pendingPagination.currentPage);
                                                                         loadDashboardData();
                                                                     } catch (e) {
                                                                         setAlert({ type: 'error', message: 'Error al rechazar el lugar' });
@@ -484,6 +557,10 @@ const Dashboard: React.FC = () => {
                                                                         await placesService.needsFix(place.id);
                                                                         setAlert({ type: 'success', message: 'Solicitud de cambios enviada correctamente' });
                                                                         setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                                        if (user.role === 'admin') {
+                                                                            loadAdminPlaces(adminPagination.currentPage);
+                                                                        }
+                                                                        await loadPendingPlaces(pendingPagination.currentPage);
                                                                         loadDashboardData();
                                                                     } catch (e) {
                                                                         setAlert({ type: 'error', message: 'Error al enviar la solicitud' });
@@ -500,11 +577,36 @@ const Dashboard: React.FC = () => {
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* Pending Places Pagination */}
+                                    {pendingPagination.lastPage > 1 && (
+                                        <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
+                                            <div className="text-xs text-gray-500">
+                                                Página <span className="font-bold">{pendingPagination.currentPage}</span> de <span className="font-bold">{pendingPagination.lastPage}</span> ({pendingPagination.total} pendientes)
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => loadPendingPlaces(pendingPagination.currentPage - 1)}
+                                                    disabled={pendingPagination.currentPage === 1}
+                                                    className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    Anterior
+                                                </button>
+                                                <button
+                                                    onClick={() => loadPendingPlaces(pendingPagination.currentPage + 1)}
+                                                    disabled={pendingPagination.currentPage === pendingPagination.lastPage}
+                                                    className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </>)}
                             </div>
 
                             {/* ALL Places Table (Management) */}
-                            <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                            <div id="all-places" className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                                 <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                                     <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-eco-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -553,6 +655,7 @@ const Dashboard: React.FC = () => {
                                                                             else if (newStatus === 'needs_fix') await placesService.needsFix(place.id);
                                                                             else if (newStatus === 'pending') await placesService.setPending(place.id);
                                                                             setAlert({ type: 'success', message: 'Estado actualizado correctamente' });
+                                                                            loadAdminPlaces(adminPagination.currentPage);
                                                                             loadDashboardData();
                                                                         } catch (error) {
                                                                             setAlert({ type: 'error', message: 'Error cambiando el estado' });
@@ -584,6 +687,7 @@ const Dashboard: React.FC = () => {
                                                                         try {
                                                                             await placesService.delete(place.id);
                                                                             setAlert({ type: 'success', message: 'Lugar eliminado correctamente' });
+                                                                            loadAdminPlaces(adminPagination.currentPage);
                                                                             loadDashboardData();
                                                                         } catch (e) {
                                                                             setAlert({ type: 'error', message: 'Error eliminando lugar' });
@@ -641,6 +745,7 @@ const Dashboard: React.FC = () => {
                                                                         else if (newStatus === 'needs_fix') await placesService.needsFix(place.id);
                                                                         else if (newStatus === 'pending') await placesService.setPending(place.id);
                                                                         setAlert({ type: 'success', message: 'Estado actualizado correctamente' });
+                                                                        await loadAdminPlaces(adminPagination.currentPage);
                                                                         loadDashboardData();
                                                                     } catch (error) {
                                                                         setAlert({ type: 'error', message: 'Error al cambiar el estado' });
@@ -680,6 +785,7 @@ const Dashboard: React.FC = () => {
                                                                 try {
                                                                     await placesService.delete(place.id);
                                                                     setAlert({ type: 'success', message: 'Lugar eliminado correctamente' });
+                                                                    await loadAdminPlaces(adminPagination.currentPage);
                                                                     loadDashboardData();
                                                                 } catch (e) {
                                                                     setAlert({ type: 'error', message: 'Error eliminando lugar' });
@@ -696,10 +802,58 @@ const Dashboard: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
+
+                                {/* Admin Places Pagination UI */}
+                                {adminPagination.lastPage > 1 && (
+                                    <div className="p-6 border-t border-gray-100 bg-gray-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <div className="text-sm text-gray-500">
+                                            Mostrando página <span className="font-bold text-gray-700">{adminPagination.currentPage}</span> de <span className="font-bold text-gray-700">{adminPagination.lastPage}</span>
+                                            <span className="ml-1 text-xs">({adminPagination.total} lugares en total)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => loadAdminPlaces(adminPagination.currentPage - 1)}
+                                                disabled={adminPagination.currentPage === 1}
+                                                className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                            >
+                                                Anterior
+                                            </button>
+                                            <div className="flex items-center bg-gray-100 rounded-xl p-1">
+                                                {Array.from({ length: adminPagination.lastPage }, (_, i) => i + 1)
+                                                    .filter(p => {
+                                                        // Show first, last, and pages around current
+                                                        return p === 1 || p === adminPagination.lastPage || Math.abs(p - adminPagination.currentPage) <= 1;
+                                                    })
+                                                    .map((p, index, array) => (
+                                                        <React.Fragment key={p}>
+                                                            {index > 0 && array[index - 1] !== p - 1 && (
+                                                                <span className="px-2 text-gray-400">...</span>
+                                                            )}
+                                                            <button
+                                                                onClick={() => loadAdminPlaces(p)}
+                                                                className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${adminPagination.currentPage === p
+                                                                    ? 'bg-eco-primary-600 text-white shadow-md scale-110'
+                                                                    : 'text-gray-600 hover:bg-white hover:text-eco-primary-600'}`}
+                                                            >
+                                                                {p}
+                                                            </button>
+                                                        </React.Fragment>
+                                                    ))}
+                                            </div>
+                                            <button
+                                                onClick={() => loadAdminPlaces(adminPagination.currentPage + 1)}
+                                                disabled={adminPagination.currentPage === adminPagination.lastPage}
+                                                className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                                            >
+                                                Siguiente
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Admin Users Table Component */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                            <div id="users" className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                                 <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -716,7 +870,7 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             {/* Admin Reviews Table Component */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                            <div id="reviews" className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                                 <div className="p-6 border-b border-gray-100 bg-purple-50/50 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
@@ -938,7 +1092,7 @@ const Dashboard: React.FC = () => {
                                                     )}
                                                 </div>
 
-                                                {place.average_rating > 0 && (
+                                                {place.average_rating !== undefined && place.average_rating > 0 && (
                                                     <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
                                                         <span className="text-yellow-500 text-xs">★</span>
                                                         <span className="text-xs font-bold text-gray-800">{place.average_rating}</span>

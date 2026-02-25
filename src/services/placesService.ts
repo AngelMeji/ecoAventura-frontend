@@ -76,9 +76,7 @@ export const placesService = {
 
     // Favoritos
     async getFavorites(page: number = 1): Promise<PaginatedResponse<Place>> {
-        console.log('🔍 Fetching favorites from API...');
         const response = await api.get<PaginatedResponse<Place>>(`/favorites?page=${page}`);
-        console.log('📥 Favorites API response:', response.data);
         return response.data;
     },
 
@@ -95,7 +93,6 @@ export const placesService = {
         try {
             const response = await api.get('/categories');
             const data = response.data;
-            console.log('API /categories Response:', data); // Debug log requested by user context
 
             // Handle various response structures
             if (Array.isArray(data)) return data;

@@ -105,10 +105,8 @@ const Profile: React.FC = () => {
                 data = formData;
             }
 
-            const response: any = await authService.updateProfile(data);
 
-            // DEBUG: Ver qué devuelve el backend
-            console.log('📋 Respuesta del backend:', response);
+            const response: any = await authService.updateProfile(data);
 
             // Verificar éxito según formato V2: { success: true, message: "...", user: {...} }
             if (response && response.success === true) {

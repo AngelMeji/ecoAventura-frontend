@@ -1,16 +1,19 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
 import { appRoutes } from './routes/app.routes';
 import { LanguageProvider } from './context/LanguageContext';
+import BackToTop from './components/common/BackToTop';
+
+const AppRoutes = () => {
+  const element = useRoutes(appRoutes);
+  return element;
+};
 
 function App() {
   return (
     <LanguageProvider>
       <Router>
-        <Routes>
-          {appRoutes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
-          ))}
-        </Routes>
+        <AppRoutes />
+        <BackToTop />
       </Router>
     </LanguageProvider>
   );

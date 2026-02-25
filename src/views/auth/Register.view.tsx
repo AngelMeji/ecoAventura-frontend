@@ -65,7 +65,6 @@ const Register: React.FC = () => {
 
         try {
             const response = await authService.register(formData);
-            console.log('Registration successful:', response);
             setConfirmModal({
                 isOpen: true,
                 title: '¡Registro Exitoso!',

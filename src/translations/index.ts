@@ -293,7 +293,93 @@ export const translations = {
                 }
             },
             footer: {
-                rights: 'Todos los derechos reservados.'
+                rights: 'Todos los derechos reservados.',
+                privacy: 'Privacidad',
+                cookies: 'Cookies'
+            },
+            privacy: {
+                title: 'Política de Privacidad',
+                lastUpdated: 'Última actualización',
+                intro: {
+                    title: 'Introducción',
+                    content: 'En EcoAventura, respetamos tu privacidad y nos comprometemos a proteger tus datos personales. Esta política explica cómo recopilamos, usamos y protegemos tu información.'
+                },
+                dataCollection: {
+                    title: 'Información que Recopilamos',
+                    intro: 'Recopilamos la siguiente información cuando utilizas nuestros servicios:',
+                    items: {
+                        name: 'Nombre y datos de contacto',
+                        email: 'Dirección de correo electrónico',
+                        profile: 'Información de perfil y preferencias',
+                        reviews: 'Reseñas y comentarios que publicas'
+                    }
+                },
+                dataUse: {
+                    title: 'Cómo Usamos tu Información',
+                    items: {
+                        service: 'Proporcionar y mejorar nuestros servicios',
+                        communication: 'Comunicarnos contigo sobre actualizaciones y ofertas',
+                        improvement: 'Analizar el uso de la plataforma para mejorar la experiencia',
+                        security: 'Mantener la seguridad y prevenir fraudes'
+                    }
+                },
+                dataProtection: {
+                    title: 'Protección de Datos',
+                    content: 'Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos personales contra acceso no autorizado, pérdida o alteración.'
+                },
+                userRights: {
+                    title: 'Tus Derechos',
+                    items: {
+                        access: 'Acceder a tus datos personales',
+                        correction: 'Corregir información inexacta',
+                        deletion: 'Solicitar la eliminación de tus datos',
+                        portability: 'Obtener una copia de tus datos'
+                    }
+                },
+                contact: {
+                    title: 'Contacto',
+                    content: 'Si tienes preguntas sobre esta política de privacidad, contáctanos a través de nuestro formulario de contacto.'
+                }
+            },
+            cookies: {
+                title: 'Política de Cookies',
+                lastUpdated: 'Última actualización',
+                intro: {
+                    title: 'Introducción',
+                    content: 'Esta política explica cómo EcoAventura utiliza cookies y tecnologías similares en nuestra plataforma.'
+                },
+                whatAre: {
+                    title: '¿Qué son las Cookies?',
+                    content: 'Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas un sitio web. Nos ayudan a mejorar tu experiencia y proporcionar funcionalidades personalizadas.'
+                },
+                types: {
+                    title: 'Tipos de Cookies que Utilizamos',
+                    essential: {
+                        title: 'Cookies Esenciales',
+                        content: 'Necesarias para el funcionamiento básico del sitio, como mantener tu sesión activa.'
+                    },
+                    functional: {
+                        title: 'Cookies Funcionales',
+                        content: 'Recuerdan tus preferencias, como el idioma seleccionado y configuraciones de accesibilidad.'
+                    },
+                    analytics: {
+                        title: 'Cookies de Análisis',
+                        content: 'Nos ayudan a entender cómo los usuarios interactúan con nuestra plataforma para mejorar la experiencia.'
+                    }
+                },
+                management: {
+                    title: 'Gestión de Cookies',
+                    content: 'Puedes controlar y gestionar las cookies de las siguientes maneras:',
+                    items: {
+                        browser: 'Configurar tu navegador para rechazar o eliminar cookies',
+                        preferences: 'Usar nuestro panel de preferencias de cookies',
+                        thirdParty: 'Desactivar cookies de terceros en la configuración de tu navegador'
+                    }
+                },
+                contact: {
+                    title: 'Contacto',
+                    content: 'Si tienes preguntas sobre nuestra política de cookies, no dudes en contactarnos.'
+                }
             },
 
         },
@@ -694,6 +780,95 @@ export const translations = {
                 successTitle: 'Email Sent!',
                 defaultSuccess: 'Recovery link sent. Check your email.',
                 defaultError: 'Error sending link.'
+            }
+        },
+        footer: {
+            rights: 'All rights reserved.',
+            privacy: 'Privacy',
+            cookies: 'Cookies'
+        },
+        privacy: {
+            title: 'Privacy Policy',
+            lastUpdated: 'Last updated',
+            intro: {
+                title: 'Introduction',
+                content: 'At EcoAventura, we respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.'
+            },
+            dataCollection: {
+                title: 'Information We Collect',
+                intro: 'We collect the following information when you use our services:',
+                items: {
+                    name: 'Name and contact information',
+                    email: 'Email address',
+                    profile: 'Profile information and preferences',
+                    reviews: 'Reviews and comments you post'
+                }
+            },
+            dataUse: {
+                title: 'How We Use Your Information',
+                items: {
+                    service: 'Provide and improve our services',
+                    communication: 'Communicate with you about updates and offers',
+                    improvement: 'Analyze platform usage to improve experience',
+                    security: 'Maintain security and prevent fraud'
+                }
+            },
+            dataProtection: {
+                title: 'Data Protection',
+                content: 'We implement technical and organizational security measures to protect your personal data against unauthorized access, loss, or alteration.'
+            },
+            userRights: {
+                title: 'Your Rights',
+                items: {
+                    access: 'Access your personal data',
+                    correction: 'Correct inaccurate information',
+                    deletion: 'Request deletion of your data',
+                    portability: 'Obtain a copy of your data'
+                }
+            },
+            contact: {
+                title: 'Contact',
+                content: 'If you have questions about this privacy policy, contact us through our contact form.'
+            }
+        },
+        cookies: {
+            title: 'Cookies Policy',
+            lastUpdated: 'Last updated',
+            intro: {
+                title: 'Introduction',
+                content: 'This policy explains how EcoAventura uses cookies and similar technologies on our platform.'
+            },
+            whatAre: {
+                title: 'What are Cookies?',
+                content: 'Cookies are small text files stored on your device when you visit a website. They help us improve your experience and provide personalized features.'
+            },
+            types: {
+                title: 'Types of Cookies We Use',
+                essential: {
+                    title: 'Essential Cookies',
+                    content: 'Necessary for basic site functionality, such as keeping your session active.'
+                },
+                functional: {
+                    title: 'Functional Cookies',
+                    content: 'Remember your preferences, such as selected language and accessibility settings.'
+                },
+                analytics: {
+                    title: 'Analytics Cookies',
+                    content: 'Help us understand how users interact with our platform to improve the experience.'
+                }
+            },
+            management: {
+                title: 'Cookie Management',
+                content: 'You can control and manage cookies in the following ways:',
+                items: {
+                    browser: 'Configure your browser to reject or delete cookies',
+                    preferences: 'Use our cookie preferences panel',
+                    thirdParty: 'Disable third-party cookies in your browser settings'
+                }
+            },
+            contact: {
+                title: 'Contact',
+                content: 'If you have questions about our cookie policy, feel free to contact us.'
             }
         }
     }

@@ -43,12 +43,6 @@ const ResetPassword: React.FC = () => {
             password_confirmation: passwordConfirmation
         };
 
-        // DEBUG: Mostrar qué se está enviando
-        console.log('🔍 Datos que se enviarán al backend:', resetData);
-        console.log('📧 Email:', email);
-        console.log('🔑 Token:', token);
-        console.log('🔒 Password length:', password.length);
-
         try {
             await authService.resetPassword(resetData);
             setStatus('success');

@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom';
 
 // Layouts
 import AuthLayout from '../components/layout/AuthLayout';
+import MainLayout from '../components/layout/MainLayout';
+
 
 // Views
 import Home from '../views/Home.view';
@@ -14,6 +16,13 @@ import PlaceForm from '../views/places/PlaceForm.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
 import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';
+import Terms from '../views/static/Terms.view';
+import About from '../views/static/About.view';
+import PrivacyPolicy from '../views/static/PrivacyPolicy.view';
+import CookiesPolicy from '../views/static/CookiesPolicy.view';
+import PartnerRequest from '../views/partner/PartnerRequest.view';
+import PartnerRequestsView from '../views/admin/PartnerRequests.view';
+
 
 /**
  * Configuración de rutas de la aplicación
@@ -78,5 +87,36 @@ export const appRoutes: RouteObject[] = [
                 <ResetPassword />
             </AuthLayout>
         )
+    },
+    {
+        element: <MainLayout />,
+        children: [
+            {
+                path: '/terms',
+                element: <Terms />
+            },
+            {
+                path: '/about',
+                element: <About />
+            },
+            {
+                path: '/privacy',
+                element: <PrivacyPolicy />
+            },
+            {
+                path: '/cookies',
+                element: <CookiesPolicy />
+            },
+            {
+                path: '/partner-request',
+                element: <PartnerRequest />
+            },
+            {
+                path: '/admin/partner-requests',
+                element: <PartnerRequestsView />
+            }
+        ]
     }
+
+
 ];

@@ -30,7 +30,6 @@ const Login: React.FC = () => {
 
         try {
             const response = await authService.login(credentials);
-            console.log('Login successful:', response);
 
             // Handle Remember Me persistence
             if (credentials.remember) {

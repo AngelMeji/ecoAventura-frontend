@@ -139,28 +139,15 @@ const Home: React.FC = () => {
     };
 
     const handleMarkerClick = async (destinationId: number) => {
-        if (authService.isAuthenticated()) {
-            try {
-                const destination = await DestinationController.getDestinationById(destinationId);
-                if (destination) {
-                    setSelectedDestination(destination);
-                    setIsModalOpen(true);
-                }
-            } catch (error) {
-                console.error('Error al abrir modal desde el mapa:', error);
+        // Abrir modal para TODOS los usuarios (con o sin login)
+        try {
+            const destination = await DestinationController.getDestinationById(destinationId);
+            if (destination) {
+                setSelectedDestination(destination);
+                setIsModalOpen(true);
             }
-        } else {
-            setHighlightedDestination(destinationId);
-
-            // Scroll to the corresponding card
-            const cardElement = document.getElementById(`destination-${destinationId}`);
-            if (cardElement) {
-                cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            setTimeout(() => {
-                setHighlightedDestination(null);
-            }, 3000);
+        } catch (error) {
+            console.error('Error al abrir modal desde el mapa:', error);
         }
     };
 
@@ -204,7 +191,7 @@ const Home: React.FC = () => {
                     destinations={allDestinations as any[]}
                     onMarkerClick={handleMarkerClick}
                     highlightedDestination={highlightedDestination}
-                    shouldAutoFit={activeCategory !== 'Todos' || !!searchQuery}
+                    shouldAutoFit={false}
                 />
             </div>
         </div>

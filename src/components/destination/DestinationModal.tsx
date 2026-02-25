@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Place } from '../../models/Place.model';
 import { authService } from '../../services/authService';
 import { placesService } from '../../services/placesService';
@@ -21,6 +22,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     onClose
 }) => {
     const { t, language } = useLanguage();
+    const navigate = useNavigate();
 
     // Unwrap the initial destination if it comes from a Laravel Resource (nested in data)
     const getUnwrappedDestination = (dest: any) => dest?.data || dest;
@@ -254,7 +256,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
                         <div className="mb-8 max-w-lg">
                             <h3 className="text-xl font-bold text-gray-800 mb-2">{t('home.modal.info.description')}</h3>
-                            <p className="text-gray-600 leading-relaxed">
+                            <p className="text-gray-600 leading-relaxed break-words">
                                 {destination.short_description || destination.description?.substring(0, 150) + '...'}
                             </p>
                         </div>
@@ -367,7 +369,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
                                     <div>
                                         <h3 className="text-xl font-bold text-eco-primary-700 mb-2">{t('home.modal.info.description')}</h3>
-                                        <p className="text-gray-600 leading-relaxed">
+                                        <p className="text-gray-600 leading-relaxed break-words">
                                             {destination.description}
                                         </p>
                                     </div>
@@ -379,6 +381,20 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                         <p className="text-gray-500 text-xs mt-1 font-mono">
                                             {t('home.modal.info.coordinates')}: {destination.latitude}, {destination.longitude}
                                         </p>
+                                    </div>
+
+                                    {/* Botón Más detalles - solo para usuarios logueados */}
+                                    <div className="flex justify-center pt-2">
+                                        <button
+                                            onClick={() => {
+                                                onClose();
+                                                navigate(`/place/${destination.id}`);
+                                            }}
+                                            className="inline-flex items-center gap-2 bg-eco-primary-600 text-white px-8 py-3 rounded-full font-bold hover:bg-eco-primary-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                        >
+                                            Más detalles
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
@@ -542,7 +558,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                <p className={`text-sm leading-relaxed ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
+                                                                <p className={`text-sm leading-relaxed break-words ${rev.is_hidden ? 'italic text-gray-400' : 'text-gray-600'}`}>
                                                                     {rev.is_hidden ? t('home.modal.reviews.hiddenComment') : rev.comment}
                                                                 </p>
                                                             </>

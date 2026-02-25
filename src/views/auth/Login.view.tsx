@@ -23,7 +23,6 @@ const Login: React.FC = () => {
 
         try {
             const response = await authService.login(credentials);
-            console.log('Login successful:', response);
             // Redirigir según rol
             if (response.user.role === 'admin' || response.user.role === 'partner') {
                 window.location.href = '/dashboard';

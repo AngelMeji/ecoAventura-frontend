@@ -52,7 +52,6 @@ const Register: React.FC = () => {
 
         try {
             const response = await authService.register(formData);
-            console.log('Registration successful:', response);
 
             alert(`¡Bienvenido ${response.user.name}! Tu cuenta ha sido creada exitosamente.`);
             navigate('/login');
