@@ -9,7 +9,7 @@ interface FilterBarProps {
 
 const FilterBar: React.FC<FilterBarProps> = ({
     onSearchChange,
-    activeCategory
+    activeCategory: _activeCategory
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const { t } = useLanguage();

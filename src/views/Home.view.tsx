@@ -21,7 +21,7 @@ const Home: React.FC = () => {
     const [destinations, setDestinations] = useState<Place[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('Todos');
-    const [highlightedDestination, setHighlightedDestination] = useState<number | null>(null);
+    const [highlightedDestination] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
@@ -86,8 +86,7 @@ const Home: React.FC = () => {
         }
     };
 
-    // Alias para claridad
-    const fetchDestinations = () => fetchPage(currentPage);
+    // fetchPage(currentPage) can be called directly where needed
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);

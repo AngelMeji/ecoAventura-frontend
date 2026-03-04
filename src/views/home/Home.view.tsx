@@ -21,7 +21,7 @@ const Home: React.FC = () => {
     const [paginationMeta, setPaginationMeta] = useState<any>(null);
     const [categoryStats, setCategoryStats] = useState<any[]>([]);
     const [activeCategory, setActiveCategory] = useState('Todos');
-    const [highlightedDestination, setHighlightedDestination] = useState<number | null>(null);
+    const [highlightedDestination] = useState<number | null>(null);
 
     const ITEMS_PER_PAGE = 12;
 

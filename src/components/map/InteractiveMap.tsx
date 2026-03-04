@@ -83,7 +83,7 @@ const MapBoundsUpdater: React.FC<{ destinations: any[]; shouldAutoFit?: boolean 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({
     destinations,
     onMarkerClick,
-    highlightedDestination,
+    highlightedDestination: _highlightedDestination,
     shouldAutoFit = false
 }) => {
     const mapRef = useRef<L.Map>(null);
