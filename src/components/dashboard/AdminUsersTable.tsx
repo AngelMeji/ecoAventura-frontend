@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { placesService } from '../../services/placesService';
 
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+
 // Simple Modal Component
 const Modal = ({ isOpen, onClose, title, children }: any) => {
     if (!isOpen) return null;
@@ -197,7 +199,7 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, 
                                                     onError={(e) => {
                                                         const target = e.target as HTMLImageElement;
                                                         if (!target.src.includes('storage')) {
-                                                            target.src = `http://localhost:8000/storage/${u.avatar}`;
+                                                            target.src = `${STORAGE_URL}/${u.avatar}`;
                                                         }
                                                     }}
                                                 />

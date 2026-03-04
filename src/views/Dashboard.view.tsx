@@ -10,6 +10,8 @@ import Alert from '../components/common/Alert';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useLanguage } from '../context/LanguageContext';
 
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
     const navigate = useNavigate();
@@ -229,7 +231,7 @@ const Dashboard: React.FC = () => {
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     if (!target.src.includes('storage')) {
-                                        target.src = `http://localhost:8000/storage/${user.avatar}`;
+                                        target.src = `${STORAGE_URL}/${user.avatar}`;
                                     }
                                 }}
                             />
@@ -628,7 +630,7 @@ const Dashboard: React.FC = () => {
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-10 h-10 rounded bg-gray-200 overflow-hidden">
                                                                 {place.images && place.images[0] && (
-                                                                    <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
+                                                                    <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `${STORAGE_URL}/${place.images[0].image_path}`} className="w-full h-full object-cover" />
                                                                 )}
                                                             </div>
                                                             <div>
@@ -717,7 +719,7 @@ const Dashboard: React.FC = () => {
                                             <div className="flex gap-3">
                                                 <div className="w-16 h-16 rounded bg-gray-200 overflow-hidden flex-shrink-0">
                                                     {place.images && place.images[0] && (
-                                                        <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
+                                                        <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `${STORAGE_URL}/${place.images[0].image_path}`} className="w-full h-full object-cover" />
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -945,7 +947,7 @@ const Dashboard: React.FC = () => {
                                                             <div className="flex items-center gap-3">
                                                                 <div className="w-12 h-12 rounded bg-gray-200 overflow-hidden">
                                                                     {place.images && place.images[0] && (
-                                                                        <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
+                                                                        <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `${STORAGE_URL}/${place.images[0].image_path}`} className="w-full h-full object-cover" />
                                                                     )}
                                                                 </div>
                                                                 <div>
@@ -988,7 +990,7 @@ const Dashboard: React.FC = () => {
                                                 <div className="flex gap-3">
                                                     <div className="w-16 h-16 rounded bg-gray-200 overflow-hidden flex-shrink-0">
                                                         {place.images && place.images[0] && (
-                                                            <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `http://localhost:8000/storage/${place.images[0].image_path}`} className="w-full h-full object-cover" />
+                                                            <img src={place.images[0].image_path.startsWith('http') ? place.images[0].image_path : `${STORAGE_URL}/${place.images[0].image_path}`} className="w-full h-full object-cover" />
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">

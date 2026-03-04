@@ -4,6 +4,8 @@ import { authService } from '../services/authService';
 import Header from '../components/layout/Header';
 import { useLanguage } from '../context/LanguageContext';
 
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+
 const Profile: React.FC = () => {
     const { t } = useLanguage();
     const user = authService.getCurrentUser();
@@ -239,7 +241,7 @@ const Profile: React.FC = () => {
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     if (!target.src.includes('storage') && !profileData.avatarFile) {
-                                                        target.src = `http://localhost:8000/storage/${profileData.avatar}`;
+                                                        target.src = `${STORAGE_URL}/${profileData.avatar}`;
                                                     }
                                                 }}
                                             />
