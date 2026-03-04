@@ -22,19 +22,33 @@ interface Review {
 
 interface AdminReviewsTableProps {
     onNotify: (alert: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void;
+    initialReviews?: any;
 }
 
-const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify }) => {
+const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initialReviews }) => {
     const [reviews, setReviews] = useState<Review[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialReviews);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
     const [totalReviews, setTotalReviews] = useState(0);
     const [toggling, setToggling] = useState<number | null>(null);
 
     useEffect(() => {
-        loadReviews();
-    }, []);
+        if (initialReviews) {
+            if (initialReviews.data && Array.isArray(initialReviews.data)) {
+                setReviews(initialReviews.data);
+                setCurrentPage(initialReviews.current_page || 1);
+                setLastPage(initialReviews.last_page || 1);
+                setTotalReviews(initialReviews.total || 0);
+            } else if (Array.isArray(initialReviews)) {
+                setReviews(initialReviews);
+                setTotalReviews(initialReviews.length);
+            }
+            setLoading(false);
+        } else {
+            loadReviews();
+        }
+    }, [initialReviews]);
 
     const loadReviews = async (page: number = 1) => {
         setLoading(true);
@@ -47,6 +61,7 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify }) => {
                 setTotalReviews(data.total || 0);
             } else if (Array.isArray(data)) {
                 setReviews(data);
+                setTotalReviews(data.length);
             } else {
                 setReviews([]);
             }

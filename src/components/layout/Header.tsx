@@ -34,8 +34,8 @@ const Header: React.FC = () => {
     React.useEffect(() => {
         if (isAuthenticated) {
             loadNotifications();
-            // Poll every 30 seconds
-            const interval = setInterval(loadNotifications, 30000);
+            // Poll every 2 minutes (reducido desde 30s para no saturar el servidor)
+            const interval = setInterval(loadNotifications, 120000);
             return () => clearInterval(interval);
         }
     }, [isAuthenticated]);

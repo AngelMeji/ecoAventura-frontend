@@ -20,11 +20,12 @@ const Modal = ({ isOpen, onClose, title, children }: any) => {
 interface AdminUsersTableProps {
     onNotify: (alert: { type: 'success' | 'error' | 'warning' | 'info'; message: string }) => void;
     onConfirm: (config: { title: string; message: string; onConfirm: () => void; type?: 'danger' | 'warning' | 'info' | 'success' }) => void;
+    initialUsers?: any;
 }
 
-const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }) => {
+const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, initialUsers }) => {
     const [users, setUsers] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialUsers);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
     const [totalUsers, setTotalUsers] = useState(0);
@@ -37,14 +38,26 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm }
     const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     useEffect(() => {
-        loadUsers();
-    }, []);
+        if (initialUsers) {
+            if (initialUsers.data && Array.isArray(initialUsers.data)) {
+                setUsers(initialUsers.data);
+                setCurrentPage(initialUsers.current_page || 1);
+                setLastPage(initialUsers.last_page || 1);
+                setTotalUsers(initialUsers.total || 0);
+            } else if (Array.isArray(initialUsers)) {
+                setUsers(initialUsers);
+                setTotalUsers(initialUsers.length);
+            }
+            setLoading(false);
+        } else {
+            loadUsers();
+        }
+    }, [initialUsers]);
 
     const loadUsers = (page: number = 1) => {
         setLoading(true);
         placesService.getAllUsers(page)
             .then((data: any) => {
-                // Support both standard array and paginated response
                 if (data.data && Array.isArray(data.data)) {
                     setUsers(data.data);
                     setCurrentPage(data.current_page);

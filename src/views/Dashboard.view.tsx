@@ -45,15 +45,13 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         try {
             if (user.role === 'admin') {
-                const data = await placesService.getAdminDashboard();
-                setStats(data?.stats || {});
-                await loadPendingPlaces(1);
-
-                try {
-                    await loadAdminPlaces(1);
-                } catch (e) {
-                    console.warn('Backend missing getAdminAllPlaces or error fetching:', e);
-                }
+                // Paralelo: las 3 peticiones al mismo tiempo en vez de secuencial
+                const [dashData] = await Promise.all([
+                    placesService.getAdminDashboard(),
+                    loadPendingPlaces(1),
+                    loadAdminPlaces(1),
+                ]);
+                setStats(dashData?.stats || {});
 
             } else if (user.role === 'partner') {
                 // Intentar obtener dashboard del partner
@@ -865,6 +863,7 @@ const Dashboard: React.FC = () => {
                                     <AdminUsersTable
                                         onNotify={(a) => setAlert(a)}
                                         onConfirm={(c) => setModal(c)}
+                                        initialUsers={(stats as any)?.recent_users}
                                     />
                                 </div>
                             </div>
@@ -878,9 +877,7 @@ const Dashboard: React.FC = () => {
                                     </h2>
                                     <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Comentarios</span>
                                 </div>
-                                <div className="p-0">
-                                    <AdminReviewsTable onNotify={(a) => setAlert(a)} />
-                                </div>
+                                <AdminReviewsTable onNotify={setAlert} initialReviews={(stats as any)?.recent_reviews} />
                             </div>
                         </div>
                     </div>

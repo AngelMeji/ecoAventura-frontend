@@ -33,36 +33,24 @@ const Home: React.FC = () => {
 
     const ITEMS_PER_PAGE = 12;
 
-    // Cargar datos al inicio
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    // Cargar datos cuando cambian los filtros
+    // Un solo efecto que maneja tanto el montaje inicial como los cambios de filtro
     useEffect(() => {
         setCurrentPage(1);
-        fetchDestinations();
+        loadData(1);
     }, [activeCategory, searchQuery]);
 
-    // Actualizar destinos visibles cuando cambia la página o la lista total
+    // Actualizar destinos visibles cuando cambia la página (sin cambiar filtros)
     useEffect(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        setDestinations(allDestinations.slice(startIndex, endIndex));
+        if (currentPage > 1) {
+            fetchPage(currentPage);
+        }
+    }, [currentPage]);
 
-        setPaginationMeta({
-            current_page: currentPage,
-            last_page: Math.ceil(allDestinations.length / ITEMS_PER_PAGE),
-            total: allDestinations.length,
-            per_page: ITEMS_PER_PAGE
-        });
-    }, [currentPage, allDestinations]);
-
-    const loadData = async () => {
+    const loadData = async (page = 1) => {
         setLoading(true);
         try {
             await Promise.all([
-                fetchDestinations(),
+                fetchPage(page),
                 DestinationController.getCategoryStats().then(setCategoryStats),
             ]);
         } catch (error) {
@@ -72,45 +60,34 @@ const Home: React.FC = () => {
         }
     };
 
-    const fetchDestinations = async () => {
+    // Fetch una sola página del backend (paginación real del servidor)
+    const fetchPage = async (page: number) => {
         setLoading(true);
         try {
-            let allFetched: Place[] = [];
-            let pageToFetch = 1;
-            let hasMore = true;
-
-            while (hasMore) {
-                let response: PaginatedResponse<Place>;
-                // Intentamos pedir 100, pero si el servidor nos ignora y da 10, seguiremos pidiendo páginas
-                if (searchQuery) {
-                    response = await DestinationController.searchDestinations(searchQuery, pageToFetch, 100);
-                } else {
-                    response = await DestinationController.getDestinationsByCategory(activeCategory, pageToFetch, 100);
-                }
-
-                // Evitar duplicados si el backend no pagina bien o devuelve lo mismo
-                const newItems = response.data.filter(newItem =>
-                    !allFetched.some(existingItem => existingItem.id === newItem.id)
-                );
-
-                allFetched = [...allFetched, ...newItems];
-
-                // Si la página actual es menor a la última devuelta por el backend
-                if (response.current_page < response.last_page) {
-                    pageToFetch++;
-                } else {
-                    hasMore = false;
-                }
+            let response: PaginatedResponse<Place>;
+            if (searchQuery) {
+                response = await DestinationController.searchDestinations(searchQuery, page, ITEMS_PER_PAGE);
+            } else {
+                response = await DestinationController.getDestinationsByCategory(activeCategory, page, ITEMS_PER_PAGE);
             }
-
-            setAllDestinations(allFetched);
+            setDestinations(response.data);
+            setAllDestinations(response.data);
+            setPaginationMeta({
+                current_page: response.current_page,
+                last_page: response.last_page,
+                total: response.total,
+                per_page: response.per_page ?? ITEMS_PER_PAGE
+            });
         } catch (error) {
             console.error('Error buscando destinos:', error);
-            setAllDestinations([]);
+            setDestinations([]);
         } finally {
             setLoading(false);
         }
     };
+
+    // Alias para claridad
+    const fetchDestinations = () => fetchPage(currentPage);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
