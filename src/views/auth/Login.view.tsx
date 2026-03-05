@@ -105,7 +105,7 @@ const Login: React.FC = () => {
                         <input type="checkbox" className="w-4 h-4 text-eco-teal-500 border-gray-300 rounded focus:ring-eco-teal-500" />
                         <span className="ml-2 text-gray-600">{t('auth.login.rememberMe')}</span>
                     </label>
-                    <a href="#" className="auth-link text-sm">
+                    <a href="/forgot-password" className="auth-link text-sm">
                         {t('auth.login.forgotPassword')}
                     </a>
                 </div>
