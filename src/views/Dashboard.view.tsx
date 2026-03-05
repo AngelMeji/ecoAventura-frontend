@@ -101,13 +101,7 @@ const Dashboard: React.FC = () => {
                 }
 
                 if (favsResult.status === 'fulfilled') {
-                    const favsResponse = favsResult.value;
-
-                    const favList = Array.isArray(favsResponse)
-                        ? favsResponse
-                        : (favsResponse?.data && Array.isArray(favsResponse.data) ? favsResponse.data : []);
-
-                    setFavorites(favList);
+                    setFavorites(favsResult.value);
                 } else {
                     console.error('❌ Favorites fetch failed:', favsResult.reason);
                     setFavorites([]);

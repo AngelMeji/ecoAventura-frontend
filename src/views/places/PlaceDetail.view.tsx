@@ -37,15 +37,13 @@ const PlaceDetail: React.FC = () => {
     const user = authService.getCurrentUser();
 
     useEffect(() => {
-        // If we have passed data from dashboard (e.g. pending place), use it to avoid 404
         const statePlace = location.state?.placeData;
         if (statePlace) {
+            // Show statePlace immediately for fast render, but always reload from
+            // the API so is_favorite (and other live data) reflects current state
             setPlace(statePlace);
             setLoading(false);
-            // Optionally refresh in background if approved, but for pending we stick with state
-            if (statePlace.status !== 'pending') {
-                // loadPlace(statePlace.slug || statePlace.id); // Maybe refresh?
-            }
+            loadPlace(statePlace.slug || statePlace.id);
         } else if (id) {
             loadPlace(id);
         }
@@ -58,8 +56,17 @@ const PlaceDetail: React.FC = () => {
             // Manejar respuesta envuelta de Laravel Resource (data.data)
             const loadedPlace = data.data || data;
 
-            // V2: El backend ya devuelve 'is_favorite' en el objeto Place
-            // No es necesaria la verificación manual
+            // V2: El backend en rutas públicas no parsea Bearer tokens de Sanctum
+            // de forma fiable si no usa middleware. Hacemos check manual si hay usuario.
+            if (user) {
+                try {
+                    const favorites = await placesService.getFavorites();
+                    const isFav = favorites.some((f: Place) => f.id === loadedPlace.id);
+                    loadedPlace.is_favorite = isFav;
+                } catch (e) {
+                    console.error('Error verificando favoritos:', e);
+                }
+            }
 
             setPlace(loadedPlace);
         } catch (error) {

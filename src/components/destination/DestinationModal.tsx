@@ -58,14 +58,23 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     // Sincronizar estado local cuando cambia la prop inicial o se abre el modal
     useEffect(() => {
         if (isOpen) {
-            setDestination(getTranslatedPlace(getUnwrappedDestination(initialDestination), language));
+            const initialDest = getTranslatedPlace(getUnwrappedDestination(initialDestination), language);
+            setDestination(initialDest);
             setMessage(null);
             setRating(0);
             setComment('');
             setActiveTab('info');
             setEditingReviewId(null);
+
+            // Fetch favorites manually since public routes miss Bearer tokens
+            if (user) {
+                placesService.getFavorites().then(favorites => {
+                    const isFav = favorites.some((f: Place) => f.id === initialDest.id);
+                    setDestination(prev => ({ ...prev, is_favorite: isFav }));
+                }).catch(e => console.error('Error fetching favorites for modal', e));
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialDestination, language, user]);
 
     if (!isOpen) return null;
 

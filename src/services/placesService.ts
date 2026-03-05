@@ -75,9 +75,9 @@ export const placesService = {
     },
 
     // Favoritos
-    async getFavorites(page: number = 1): Promise<PaginatedResponse<Place>> {
-        const response = await api.get<PaginatedResponse<Place>>(`/favorites?page=${page}`);
-        return response.data;
+    async getFavorites(): Promise<Place[]> {
+        const response = await api.get<Place[]>('/favorites');
+        return Array.isArray(response.data) ? response.data : [];
     },
 
     async addFavorite(placeId: number): Promise<void> {
