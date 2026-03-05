@@ -270,7 +270,7 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, 
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement;
                                                 if (!target.src.includes('storage')) {
-                                                    target.src = `http://localhost:8000/storage/${u.avatar}`;
+                                                    target.src = `${STORAGE_URL}/${u.avatar}`;
                                                 }
                                             }}
                                         />
