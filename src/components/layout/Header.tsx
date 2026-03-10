@@ -141,7 +141,7 @@ const Header: React.FC = () => {
                                                         </div>
                                                         <div>
                                                             <p className="font-bold text-gray-800 text-sm">Solicitudes Pendientes</p>
-                                                            <p className="text-xs text-gray-500 mt-1">ienes {notifications.count} nuevas solicitudes de socios.</p>
+                                                            <p className="text-xs text-gray-500 mt-1">Tienes {notifications.count} nuevas solicitudes de socios.</p>
                                                         </div>
                                                     </div>
                                                 </Link>
