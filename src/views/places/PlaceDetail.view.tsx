@@ -532,7 +532,25 @@ const PlaceDetail: React.FC = () => {
                                                                                     loadPlace(place.id.toString());
                                                                                     setMessage({ type: 'success', text: 'Reseña actualizada con éxito' });
                                                                                 })
-                                                                                .catch(() => setMessage({ type: 'error', text: 'Error actualizando' }));
+                                                                                .catch((error: any) => {
+                                                                                    if (error.response?.status === 422) {
+                                                                                        const data = error.response.data;
+                                                                                        const validationErrors = data.errors;
+                                                                                        let msgText = '';
+
+                                                                                        if (validationErrors && typeof validationErrors === 'object') {
+                                                                                            msgText = Object.values(validationErrors).flat().join('\n');
+                                                                                        } else if (data.message) {
+                                                                                            msgText = typeof data.message === 'string' ? data.message : JSON.stringify(data.message);
+                                                                                        } else {
+                                                                                            msgText = 'Error de validación';
+                                                                                        }
+                                                                                        setMessage({ type: 'error', text: msgText });
+                                                                                    } else {
+                                                                                        const serverMsg = error.response?.data?.message || error.message || 'Error actualizando';
+                                                                                        setMessage({ type: 'error', text: typeof serverMsg === 'string' ? serverMsg : JSON.stringify(serverMsg) });
+                                                                                    }
+                                                                                });
                                                                         }}
                                                                         className="px-4 py-2 bg-eco-primary-600 text-white rounded-lg text-sm font-medium hover:bg-eco-primary-700"
                                                                     >
