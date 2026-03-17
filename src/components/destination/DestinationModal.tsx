@@ -169,20 +169,27 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
         } catch (error: any) {
             console.error('Error updating review:', error);
-            if (error.response && error.response.status === 422) {
+            
+            // Check for specific validation errors from Laravel first
+            if (error.response?.status === 422) {
                 const data = error.response.data;
                 const validationErrors = data.errors;
                 let msgText = '';
 
-                if (validationErrors) {
+                if (validationErrors && typeof validationErrors === 'object') {
+                    // Si errors es un objeto, sacamos los valores [{ field: [...] }]
                     msgText = Object.values(validationErrors).flat().join('\n');
+                } else if (data.message) {
+                    // Si el backend mandó el mensaje directamente en data.message
+                    msgText = typeof data.message === 'string' ? data.message : JSON.stringify(data.message);
                 } else {
-                    msgText = data.message || t('home.modal.messages.error');
+                    msgText = t('home.modal.messages.error');
                 }
                 setMessage({ type: 'error', text: msgText });
             } else {
-                const serverMsg = error.response?.data?.message || error.message;
-                setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
+                // Generic or unhandled error fallback
+                const serverMsg = error.response?.data?.message || error.message || t('home.modal.messages.error');
+                setMessage({ type: 'error', text: typeof serverMsg === 'string' ? serverMsg : JSON.stringify(serverMsg) });
             }
         } finally {
             setSubmitting(false);
