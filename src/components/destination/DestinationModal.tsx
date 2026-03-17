@@ -169,8 +169,21 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
         } catch (error: any) {
             console.error('Error updating review:', error);
-            const serverMsg = error.response?.data?.message || error.message;
-            setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
+            if (error.response && error.response.status === 422) {
+                const data = error.response.data;
+                const validationErrors = data.errors;
+                let msgText = '';
+
+                if (validationErrors) {
+                    msgText = Object.values(validationErrors).flat().join('\n');
+                } else {
+                    msgText = data.message || t('home.modal.messages.error');
+                }
+                setMessage({ type: 'error', text: msgText });
+            } else {
+                const serverMsg = error.response?.data?.message || error.message;
+                setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
+            }
         } finally {
             setSubmitting(false);
         }
