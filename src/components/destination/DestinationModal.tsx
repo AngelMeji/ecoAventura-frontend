@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Place } from '../../models/Place.model';
 import { authService } from '../../services/authService';
@@ -48,7 +48,10 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         reviewId: number | null;
     }>({ isOpen: false, reviewId: null });
 
+    // Memoize user to avoid infinite re-render loops — getCurrentUser() returns
+    // a new object reference on every render, so we stabilize on the user ID.
     const user = authService.getCurrentUser();
+    const userId = useMemo(() => user?.id ?? null, [user?.id]);
 
     // Re-translate when language changes or destination changes
     useEffect(() => {
@@ -67,14 +70,14 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setEditingReviewId(null);
 
             // Fetch favorites manually since public routes miss Bearer tokens
-            if (user) {
+            if (userId) {
                 placesService.getFavorites().then(favorites => {
                     const isFav = favorites.some((f: Place) => f.id === initialDest.id);
                     setDestination(prev => ({ ...prev, is_favorite: isFav }));
                 }).catch(e => console.error('Error fetching favorites for modal', e));
             }
         }
-    }, [isOpen, initialDestination, language, user]);
+    }, [isOpen, initialDestination, language, userId]);
 
     if (!isOpen) return null;
 
@@ -228,9 +231,9 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                         {user && (
                             <button
                                 onClick={handleToggleFavorite}
-                                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shrink-0 ${destination.is_favorite
-                                    ? 'text-red-500 bg-red-50'
-                                    : 'text-gray-400 hover:text-red-400 hover:bg-gray-100'
+                                className={`p-2 transition-colors rounded-full hover:bg-gray-100 ${destination.is_favorite
+                                        ? 'text-red-500 hover:text-red-600'
+                                        : 'text-gray-400 hover:text-red-400'
                                     }`}
                                 title={destination.is_favorite ? t('home.modal.actions.removeFromFavorites') : t('home.modal.actions.addToFavorites')}
                             >
