@@ -70,7 +70,8 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setEditingReviewId(null);
 
             // Fetch favorites manually since public routes miss Bearer tokens
-            if (userId) {
+            // Only fetch if is_favorite is not already set (optimize)
+            if (userId && initialDest.is_favorite === undefined) {
                 placesService.getFavorites().then(favorites => {
                     const isFav = favorites.some((f: Place) => f.id === initialDest.id);
                     setDestination(prev => ({ ...prev, is_favorite: isFav }));
