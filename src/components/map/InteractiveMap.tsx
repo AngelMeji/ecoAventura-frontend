@@ -119,13 +119,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
     return (
         <div className="w-full h-[500px] rounded-xl overflow-hidden shadow-lg relative">
             {/* Legend */}
-            <div className="absolute top-4 left-4 z-[400] bg-white rounded-lg shadow-md p-3">
-                <h4 className="text-sm font-semibold text-gray-800 mb-2">{t('home.map.legend')}</h4>
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <div className="w-4 h-4 bg-eco-teal-500 rounded-full border-2 border-white shadow"></div>
+            <div className="absolute top-2 right-2 md:top-4 md:right-4 z-[400] bg-white/90 backdrop-blur-sm md:bg-white rounded-lg shadow-md p-2 md:p-3 max-w-[150px] md:max-w-[200px] pointer-events-none">
+                <h4 className="text-xs md:text-sm font-semibold text-gray-800 mb-1 md:mb-2">{t('home.map.legend')}</h4>
+                <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs text-gray-600">
+                    <div className="w-3 h-3 md:w-4 md:h-4 bg-eco-teal-500 rounded-full border border-white shadow"></div>
                     <span>{t('home.map.available')}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="hidden md:block text-xs text-gray-500 mt-2">
                     {t('home.map.hint')}
                 </p>
             </div>
@@ -133,8 +133,9 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
             <MapContainer
                 center={center}
                 zoom={13}
-                scrollWheelZoom={true}
-                className="w-full h-full"
+                scrollWheelZoom={false}
+                dragging={!L.Browser.mobile}
+                className="w-full h-full z-0"
                 ref={mapRef}
             >
                 <MapBoundsUpdater destinations={destinations} shouldAutoFit={shouldAutoFit} />
