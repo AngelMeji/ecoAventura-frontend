@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ConfirmationModalProps {
     isOpen: boolean;
@@ -21,6 +21,23 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     cancelText = 'Cancelar',
     type = 'danger'
 }) => {
+    useEffect(() => {
+        if (isOpen) {
+            const currentCount = parseInt(document.body.dataset.modalCount || '0', 10);
+            document.body.dataset.modalCount = (currentCount + 1).toString();
+            document.body.style.overflow = 'hidden';
+
+            return () => {
+                const newCount = parseInt(document.body.dataset.modalCount || '0', 10) - 1;
+                document.body.dataset.modalCount = newCount.toString();
+                if (newCount <= 0) {
+                    document.body.style.overflow = 'unset';
+                    document.body.dataset.modalCount = '0';
+                }
+            };
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const colors = {

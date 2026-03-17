@@ -58,6 +58,24 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         setDestination(getTranslatedPlace(getUnwrappedDestination(initialDestination), language));
     }, [initialDestination, language]);
 
+    // Bloquear el scroll de fondo cuando el modal esté abierto
+    useEffect(() => {
+        if (isOpen) {
+            const currentCount = parseInt(document.body.dataset.modalCount || '0', 10);
+            document.body.dataset.modalCount = (currentCount + 1).toString();
+            document.body.style.overflow = 'hidden';
+
+            return () => {
+                const newCount = parseInt(document.body.dataset.modalCount || '0', 10) - 1;
+                document.body.dataset.modalCount = newCount.toString();
+                if (newCount <= 0) {
+                    document.body.style.overflow = 'unset';
+                    document.body.dataset.modalCount = '0';
+                }
+            };
+        }
+    }, [isOpen]);
+
     // Sincronizar estado local cuando cambia la prop inicial o se abre el modal
     useEffect(() => {
         if (isOpen) {
