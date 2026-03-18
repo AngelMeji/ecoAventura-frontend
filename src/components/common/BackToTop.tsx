@@ -9,16 +9,20 @@ const BackToTop: React.FC = () => {
     const isAdminRoute = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname.includes('/admin/');
 
     useEffect(() => {
-        const toggleVisibility = () => {
-            if (window.scrollY > 300) {
-                setIsVisible(true);
-            } else {
-                setIsVisible(false);
+        let isTicking = false;
+
+        const handleScroll = () => {
+            if (!isTicking) {
+                window.requestAnimationFrame(() => {
+                    setIsVisible(window.scrollY > 300);
+                    isTicking = false;
+                });
+                isTicking = true;
             }
         };
 
-        window.addEventListener('scroll', toggleVisibility);
-        return () => window.removeEventListener('scroll', toggleVisibility);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const scrollToTop = () => {

@@ -66,14 +66,18 @@ const MapBoundsUpdater: React.FC<{ destinations: any[]; shouldAutoFit?: boolean 
 
     React.useEffect(() => {
         if (destinations.length > 0 && shouldAutoFit) {
-            try {
-                const bounds = L.latLngBounds(destinations.map(d => [Number(d.latitude), Number(d.longitude)]));
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [50, 50] });
+            const timeoutId = setTimeout(() => {
+                try {
+                    const bounds = L.latLngBounds(destinations.map(d => [Number(d.latitude), Number(d.longitude)]));
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    }
+                } catch (e) {
+                    console.error("Error updating map bounds:", e);
                 }
-            } catch (e) {
-                console.error("Error updating map bounds:", e);
-            }
+            }, 100); // Small delay to prevent synchronous forced reflows
+            
+            return () => clearTimeout(timeoutId);
         }
     }, [destinations, map, shouldAutoFit]);
 

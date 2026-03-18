@@ -41,6 +41,24 @@ const Home: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
+    const [isMapVisible, setIsMapVisible] = useState(false);
+    const mapContainerRef = React.useRef<HTMLDivElement>(null);
+
+    // Lazy load map when it enters the viewport (with 300px margin)
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsMapVisible(true);
+                observer.disconnect();
+            }
+        }, { rootMargin: '300px' });
+
+        if (mapContainerRef.current) {
+            observer.observe(mapContainerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     // Estados para las secciones
 
@@ -265,19 +283,26 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Map Section - Aparece después del grid cuando hay búsqueda */}
-                <div className="mb-12 animate-fade-in-up" style={{ animationDelay: searchQuery ? '0.3s' : '0.3s' }}>
+                <div ref={mapContainerRef} className="mb-12 animate-fade-in-up" style={{ animationDelay: searchQuery ? '0.3s' : '0.3s' }}>
                     <div className="flex items-center gap-2 mb-6">
                         <h2 className="text-3xl font-bold text-eco-primary-900 font-display">
                             Mapa de Destinos (V2)
                         </h2>
                     </div>
-                    <div className="rounded-2xl overflow-hidden shadow-lg border border-eco-primary-100">
-                        <InteractiveMap
-                            destinations={mapDestinations as any[]}
-                            onMarkerClick={handleMarkerClick}
-                            highlightedDestination={highlightedDestination}
-                            shouldAutoFit={false}
-                        />
+                    <div className="rounded-2xl overflow-hidden shadow-lg border border-eco-primary-100 min-h-[500px]">
+                        {isMapVisible ? (
+                            <InteractiveMap
+                                destinations={mapDestinations as any[]}
+                                onMarkerClick={handleMarkerClick}
+                                highlightedDestination={highlightedDestination}
+                                shouldAutoFit={false}
+                            />
+                        ) : (
+                            <div className="w-full h-[500px] flex flex-col items-center justify-center bg-gray-50/50 animate-pulse text-eco-text-light">
+                                <svg className="w-12 h-12 mb-4 text-eco-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>Cargando mapa...</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
