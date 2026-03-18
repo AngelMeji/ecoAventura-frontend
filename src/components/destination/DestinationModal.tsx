@@ -6,9 +6,9 @@ import { placesService } from '../../services/placesService';
 import { useLanguage } from '../../context/LanguageContext';
 import { getTranslatedPlace } from '../../translations/places';
 import ConfirmationModal from '../common/ConfirmationModal';
+import { getOptimizedImageUrl } from '../../utils/imageUtils';
 
 // URL base para las imágenes (storage)
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
 
 interface DestinationModalProps {
     destination: Place;
@@ -103,16 +103,6 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
     const images = destination.images && destination.images.length > 0
         ? destination.images
         : [{ id: 0, image_path: '/assets/images/placeholder.jpg' }];
-
-    const getFullImageUrl = (path: string) => {
-        if (!path) return '/assets/images/placeholder.jpg';
-        if (path.startsWith('http')) return path;
-        // Si la ruta comienza con 'assets/', asumimos que es un recurso local del frontend
-        if (path.startsWith('assets/') || path.startsWith('/assets/')) {
-            return path.startsWith('/') ? path : `/${path}`;
-        }
-        return `${STORAGE_URL}/${path}`;
-    };
 
     const nextImage = () => {
         setCurrentImageIndex((prev) =>
@@ -298,7 +288,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                         {/* Image (Single) */}
                         <div className="w-full h-80 md:h-96 rounded-2xl overflow-hidden mb-6 relative shadow-md flex-shrink-0">
                             <img
-                                src={images[0] ? (images[0].full_url || getFullImageUrl(images[0].image_path)) : 'https://via.placeholder.com/800x600?text=No+Image'}
+                                src={images[0] ? (images[0].full_url ? getOptimizedImageUrl(images[0].full_url) : getOptimizedImageUrl(images[0].image_path)) : getOptimizedImageUrl('/assets/images/placeholder.jpg')}
                                 alt={`${destination.name}`}
                                 className="w-full h-full object-cover"
                             />
@@ -364,7 +354,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     {/* Carousel */}
                                     <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden group">
                                         <img
-                                            src={images[currentImageIndex].full_url || getFullImageUrl(images[currentImageIndex].image_path)}
+                                            src={images[currentImageIndex].full_url ? getOptimizedImageUrl(images[currentImageIndex].full_url) : getOptimizedImageUrl(images[currentImageIndex].image_path)}
                                             alt={`${destination.name}`}
                                             className="w-full h-full object-cover transition-transform duration-500"
                                         />

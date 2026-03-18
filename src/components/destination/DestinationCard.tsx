@@ -1,11 +1,11 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { getTranslatedPlace } from '../../translations/places';
+import { getOptimizedImageUrl } from '../../utils/imageUtils';
 
 
 // URL base para las imágenes (asumiendo que vienen relativas del backend)
 // Si VITE_API_URL es http://localhost:8000/api, las imagenes estan en http://localhost:8000/storage/
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
 
 interface DestinationCardProps {
     destination: any;
@@ -34,32 +34,9 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
         return colors[categoryName] || 'bg-gray-100 text-gray-800 border-gray-200';
     };
 
-    // Helper para obtener URL de imagen (Backend V2 compatible)
-    const getImageUrl = () => {
-        if (destination.images && destination.images.length > 0 && destination.images[0]) {
-            const firstImage = destination.images[0];
-
-            // PRIORIDAD 1: full_url del backend V2
-            if (firstImage.full_url) {
-                return firstImage.full_url;
-            }
-
-            // PRIORIDAD 2: Construir URL manualmente
-            const path = firstImage.image_path;
-
-            if (path.startsWith('http')) return path;
-
-            // Si es un asset local (ej: seed data)
-            if (path.startsWith('assets/') || path.startsWith('/assets/')) {
-                return path.startsWith('/') ? path : `/${path}`;
-            }
-
-            // Si es storage backend
-            const constructedUrl = `${STORAGE_URL}/${path}`;
-            return constructedUrl;
-        }
-        return '/assets/images/placeholder.jpg'; // Cambiar a ruta local
-    };
+    const imageUrl = destination.images && destination.images.length > 0 && destination.images[0] 
+        ? getOptimizedImageUrl(destination.images[0].full_url || destination.images[0].image_path)
+        : getOptimizedImageUrl('/assets/images/placeholder.jpg');
 
     const categoryName = destination.category?.name || 'General';
 
@@ -74,7 +51,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             {/* Contenedor de imagen con aspect-ratio para evitar deformaciones */}
             <div className="relative aspect-video shrink-0 overflow-hidden bg-gray-100">
                 <img
-                    src={getImageUrl()}
+                    src={imageUrl}
                     alt={destination.name}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

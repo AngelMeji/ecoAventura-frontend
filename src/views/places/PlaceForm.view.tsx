@@ -6,8 +6,7 @@ import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+import { getOptimizedImageUrl } from '../../utils/imageUtils';
 
 interface ImagePreview {
     id?: number; // Solo para imágenes existentes
@@ -95,7 +94,7 @@ const PlaceForm: React.FC = () => {
             if (place.images && place.images.length > 0) {
                 const existingImages: ImagePreview[] = place.images.map((img: PlaceImage) => ({
                     id: img.id,
-                    url: img.image_path.startsWith('http') ? img.image_path : `${STORAGE_URL}/${img.image_path}`,
+                    url: img.full_url ? getOptimizedImageUrl(img.full_url) : getOptimizedImageUrl(img.image_path),
                     isPrimary: img.is_primary || false,
                     isExisting: true
                 }));

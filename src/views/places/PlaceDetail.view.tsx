@@ -7,8 +7,7 @@ import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import PlaceChatbot from '../../components/places/PlaceChatbot';
-
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+import { getOptimizedImageUrl } from '../../utils/imageUtils';
 
 const PlaceDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -134,17 +133,6 @@ const PlaceDetail: React.FC = () => {
         }
     };
 
-    const getFullImageUrl = (path: string) => {
-        if (!path) return '/assets/images/placeholder.jpg'; // Placeholder local seguro
-        if (path.startsWith('http')) return path;
-        // Si la ruta comienza con 'assets/', asumimos que es un recurso local del frontend
-        if (path.startsWith('assets/') || path.startsWith('/assets/')) {
-            return path.startsWith('/') ? path : `/${path}`;
-        }
-        // De lo contrario, es una imagen subida al backend (storage)
-        return `${STORAGE_URL}/${path}`;
-    };
-
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-eco-bg flex-col gap-4">
@@ -218,7 +206,7 @@ const PlaceDetail: React.FC = () => {
                     {/* Header Image / Carousel */}
                     <div className="relative h-[400px] md:h-[500px] bg-gray-200 group">
                         <img
-                            src={images[currentImageIndex].full_url || getFullImageUrl(images[currentImageIndex].image_path)}
+                            src={images[currentImageIndex].full_url ? getOptimizedImageUrl(images[currentImageIndex].full_url) : getOptimizedImageUrl(images[currentImageIndex].image_path)}
                             alt={place.name}
                             className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                         />
