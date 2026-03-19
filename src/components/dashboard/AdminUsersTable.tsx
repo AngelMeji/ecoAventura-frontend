@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { placesService } from '../../services/placesService';
 
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 // Simple Modal Component
 const Modal = ({ isOpen, onClose, title, children }: any) => {

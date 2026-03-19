@@ -11,7 +11,7 @@ import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useLanguage } from '../context/LanguageContext';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();

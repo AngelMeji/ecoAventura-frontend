@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Header from '../../components/layout/Header';
 
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 const Profile: React.FC = () => {
     const user = authService.getCurrentUser();

@@ -4,7 +4,7 @@ import { authService } from '../services/authService';
 import Header from '../components/layout/Header';
 import { useLanguage } from '../context/LanguageContext';
 
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 const Profile: React.FC = () => {
     const { t } = useLanguage();
