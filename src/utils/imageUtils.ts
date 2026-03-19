@@ -1,4 +1,4 @@
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace('/api', '/storage') || 'http://localhost:8000/storage';
+const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 export const getOptimizedImageUrl = (path: string | undefined | null): string => {
     if (!path) return '/assets/images/placeholder.jpg';
