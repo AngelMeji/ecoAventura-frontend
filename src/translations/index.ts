@@ -397,7 +397,9 @@ export const translations = {
                 loading: 'Iniciando sesión...',
                 noAccount: '¿No tienes cuenta?',
                 register: 'Regístrate',
-                error: 'Error al iniciar sesión'
+                error: 'Error al iniciar sesión',
+                googleError: 'Error al iniciar sesión con Google',
+                orDivider: 'o'
             },
             register: {
                 title: 'Crear Cuenta',
@@ -411,6 +413,7 @@ export const translations = {
                 login: 'Inicia sesión',
                 success: '¡Bienvenido {name}! Tu cuenta ha sido creada exitosamente.',
                 error: 'Error al registrar',
+                googleError: 'Error al registrar con Google',
                 validation: {
                     nameRequired: 'El nombre es requerido',
                     emailRequired: 'El correo electrónico es requerido',
@@ -746,7 +749,9 @@ export const translations = {
                 loading: 'Logging in...',
                 noAccount: 'Don\'t have an account?',
                 register: 'Register',
-                error: 'Error logging in'
+                error: 'Error logging in',
+                googleError: 'Error logging in with Google',
+                orDivider: 'or'
             },
             register: {
                 title: 'Create Account',
@@ -760,6 +765,7 @@ export const translations = {
                 login: 'Login',
                 success: 'Welcome {name}! Your account has been created successfully.',
                 error: 'Error registering',
+                googleError: 'Error registering with Google',
                 validation: {
                     nameRequired: 'Name is required',
                     emailRequired: 'Email is required',

@@ -4,6 +4,7 @@ import { authService } from '../../services/authService';
 import { useLanguage } from '../../context/LanguageContext';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import type { RegisterData } from '../../models/User.model';
+import { GoogleLogin } from '@react-oauth/google';
 
 /**
  * Vista de Registro
@@ -19,6 +20,9 @@ const Register: React.FC = () => {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [resending, setResending] = useState(false);
+    const [resendMessage, setResendMessage] = useState('');
     const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string }>({
         isOpen: false,
         title: '',
@@ -64,18 +68,27 @@ const Register: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await authService.register(formData);
-            setConfirmModal({
-                isOpen: true,
-                title: '¡Registro Exitoso!',
-                message: t('auth.register.success').replace('{name}', response.user.name)
-            });
+            await authService.register(formData);
+            setIsRegistered(true);
         } catch (err: any) {
             setErrors({
                 general: err.message || t('auth.register.error'),
             });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleResend = async () => {
+        setResending(true);
+        setResendMessage('');
+        try {
+            const response = await authService.resendVerification(formData.email);
+            setResendMessage(response.message);
+        } catch (err: any) {
+            setErrors({ general: err.message });
+        } finally {
+            setResending(false);
         }
     };
 
@@ -91,6 +104,74 @@ const Register: React.FC = () => {
             });
         }
     };
+
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        if (!credentialResponse.credential) {
+            setErrors({ general: t('auth.login.googleError') });
+            return;
+        }
+
+        setErrors({});
+        setLoading(true);
+
+        try {
+            const response = await authService.googleLogin(credentialResponse.credential);
+            setConfirmModal({
+                isOpen: true,
+                title: '¡Registro Exitoso!',
+                message: t('auth.register.success').replace('{name}', response.user.name)
+            });
+        } catch (err: any) {
+            setErrors({
+                general: err.message || t('auth.login.googleError'),
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (isRegistered) {
+        return (
+            <div className="auth-card max-w-md w-full mx-auto p-8 bg-white rounded-2xl shadow-xl text-center">
+                <div className="flex justify-center mb-6">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
+                        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Revisa tu correo</h2>
+                <p className="text-gray-600 mb-6">
+                    Te hemos enviado un enlace de confirmación a <br/>
+                    <strong className="text-gray-900">{formData.email}</strong>. <br/><br/>
+                    Por favor, haz clic en el enlace para activar tu cuenta. No podrás iniciar sesión hasta que lo hagas.
+                </p>
+                
+                {errors.general && (
+                    <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm">
+                        {errors.general}
+                    </div>
+                )}
+                
+                {resendMessage && (
+                    <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-4 text-sm">
+                        {resendMessage}
+                    </div>
+                )}
+
+                <button 
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="w-full bg-blue-50 text-blue-600 font-semibold py-3 rounded-xl hover:bg-blue-100 transition duration-300 disabled:opacity-50"
+                >
+                    {resending ? 'Enviando...' : 'Reenviar correo'}
+                </button>
+                <div className="mt-6">
+                    <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">Volver a Inicio de Sesión</Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="auth-card">
@@ -114,6 +195,28 @@ const Register: React.FC = () => {
                     {errors.general}
                 </div>
             )}
+
+            <div className="mb-6 flex justify-center w-full">
+                <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => {
+                        setErrors({ general: t('auth.login.googleError') });
+                    }}
+                    text="continue_with"
+                    width="100%"
+                />
+            </div>
+
+            <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">
+                        {t('auth.login.orDivider') || 'o'}
+                    </span>
+                </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

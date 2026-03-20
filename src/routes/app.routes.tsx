@@ -16,6 +16,7 @@ import PlaceForm from '../views/places/PlaceForm.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
 import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';
+import VerifyEmail from '../views/auth/VerifyEmail.view';
 import Terms from '../views/static/Terms.view';
 import About from '../views/static/About.view';
 import PrivacyPolicy from '../views/static/PrivacyPolicy.view';
@@ -85,6 +86,14 @@ export const appRoutes: RouteObject[] = [
         element: (
             <AuthLayout>
                 <ResetPassword />
+            </AuthLayout>
+        )
+    },
+    {
+        path: '/verify-email',
+        element: (
+            <AuthLayout>
+                <VerifyEmail />
             </AuthLayout>
         )
     },

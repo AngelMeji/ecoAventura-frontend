@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { authService } from '../../services/authService';
 import { useLanguage } from '../../context/LanguageContext';
+import { authService } from '../../services/authService';
 import type { LoginCredentials } from '../../models/User.model';
+import { GoogleLogin } from '@react-oauth/google';
 
 /**
  * Vista de Login
@@ -44,6 +45,29 @@ const Login: React.FC = () => {
         });
     };
 
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        if (!credentialResponse.credential) {
+            setError(t('auth.login.googleError'));
+            return;
+        }
+
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await authService.googleLogin(credentialResponse.credential);
+            if (response.user.role === 'admin' || response.user.role === 'partner') {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/home';
+            }
+        } catch (err: any) {
+            setError(err.message || t('auth.login.googleError'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="auth-card">
             <div className="flex justify-center mb-6">
@@ -66,6 +90,28 @@ const Login: React.FC = () => {
                     {error}
                 </div>
             )}
+
+            <div className="mb-6 flex justify-center w-full">
+                <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => {
+                        setError(t('auth.login.googleError'));
+                    }}
+                    text="continue_with"
+                    width="100%"
+                />
+            </div>
+
+            <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">
+                        {t('auth.login.orDivider') || 'o'}
+                    </span>
+                </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

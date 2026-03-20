@@ -69,6 +69,25 @@ export const authService = {
         }
     },
 
+    // Iniciar Sesión con Google
+    async googleLogin(credential: string): Promise<AuthResponse> {
+        try {
+            const response = await api.post<AuthResponse>('/auth/google', { credential });
+            if (response.data.token) {
+                localStorage.setItem('auth_token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+            }
+            return response.data;
+        } catch (error) {
+            console.error('Google Login error:', error);
+            if (axios.isAxiosError(error) && error.response?.data) {
+                // Return API error specific message if available
+                throw new Error(error.response.data.message || 'Error de autenticación con Google');
+            }
+            throw new Error('Error de comunicación con el servidor para Google Login');
+        }
+    },
+
     // Registrar usuario
     async register(data: RegisterData): Promise<AuthResponse> {
         try {
@@ -157,6 +176,34 @@ export const authService = {
     getCurrentUser(): User | null {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
+    },
+
+    // Verificar Correo Electrónico
+    async verifyEmail(url: string): Promise<{message: string}> {
+        try {
+            const response = await api.get<{message: string}>(url);
+            return response.data;
+        } catch (error) {
+            console.error('Verify email error:', error);
+            if (axios.isAxiosError(error) && error.response?.data) {
+                throw new Error(error.response.data.message || 'Error al validar el correo electrónico');
+            }
+            throw new Error('Error de conexión con el servidor al verificar');
+        }
+    },
+
+    // Reenviar Correo de Verificación
+    async resendVerification(email: string): Promise<{message: string}> {
+        try {
+            const response = await api.post<{message: string}>('/email/resend', { email });
+            return response.data;
+        } catch (error) {
+            console.error('Resend verification error:', error);
+            if (axios.isAxiosError(error) && error.response?.data) {
+                throw new Error(error.response.data.message || 'Error al reenviar el correo');
+            }
+            throw new Error('Error de conexión con el servidor al reenviar verificación');
+        }
     }
 };
 
