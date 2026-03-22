@@ -1,0 +1,22 @@
+﻿
+> ecoformativo@0.0.0 test
+> vitest --run src/components/layout/
+
+
+[1m[46m RUN [49m[22m [36mv4.1.0 [39m[90mC:/Users/Karen/Desktop/Angel-proyecto/ecoAventura-frontend[39m
+
+ [32mÔ£ô[39m src/components/layout/Footer.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 305[2mms[22m[39m
+ [31mÔØ»[39m src/components/layout/Header.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 408[2mms[22m[39m
+[31m     [31m├ù[31m renders the logo and navigation links[39m[32m 190[2mms[22m[39m
+     [32mÔ£ô[39m shows Login and Register links when user is not authenticated[32m 33[2mms[22m[39m
+     [32mÔ£ô[39m shows user name and logout button when user IS authenticated[32m 38[2mms[22m[39m
+     [32mÔ£ô[39m shows admin panel label when user role is admin[32m 31[2mms[22m[39m
+     [32mÔ£ô[39m shows partner panel label when user role is partner[32m 27[2mms[22m[39m
+     [32mÔ£ô[39m clears localStorage on logout button click[32m 40[2mms[22m[39m
+     [32mÔ£ô[39m toggles the mobile menu on hamburger click[32m 40[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 10:59:08
+[2m   Duration [22m 5.43s[2m (transform 383ms, setup 1.00s, import 1.38s, tests 713ms, environment 5.47s)[22m
+
