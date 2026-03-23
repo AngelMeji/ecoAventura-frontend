@@ -33,7 +33,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react-swc": "^4.2.1",
-    "@vitest/ui": "^4.1.0",
+    "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.22",
     "eslint": "^9.39.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -45,6 +45,6 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.3",
     "vite": "^7.2.2",
-    "vitest": "^4.1.0"
+    "vitest": "^4.0.18"
   }
 }
