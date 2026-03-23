@@ -76,7 +76,7 @@ const MapBoundsUpdater: React.FC<{ destinations: any[]; shouldAutoFit?: boolean 
                     console.error("Error updating map bounds:", e);
                 }
             }, 100); // Small delay to prevent synchronous forced reflows
-            
+
             return () => clearTimeout(timeoutId);
         }
     }, [destinations, map, shouldAutoFit]);
