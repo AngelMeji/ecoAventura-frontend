@@ -399,6 +399,7 @@ export const translations = {
                 register: 'Regístrate',
                 error: 'Error al iniciar sesión',
                 googleError: 'Error al iniciar sesión con Google',
+                continueWithGoogle: 'Continuar con Google',
                 orDivider: 'o'
             },
             register: {
@@ -751,6 +752,7 @@ export const translations = {
                 register: 'Register',
                 error: 'Error logging in',
                 googleError: 'Error logging in with Google',
+                continueWithGoogle: 'Continue with Google',
                 orDivider: 'or'
             },
             register: {

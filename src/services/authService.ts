@@ -70,9 +70,10 @@ export const authService = {
     },
 
     // Iniciar Sesión con Google
-    async googleLogin(credential: string): Promise<AuthResponse> {
+    async googleLogin(token: string, type: 'credential' | 'access_token' = 'credential', intent?: 'register' | 'login'): Promise<AuthResponse> {
         try {
-            const response = await api.post<AuthResponse>('/auth/google', { credential });
+            const payload = type === 'access_token' ? { access_token: token, intent } : { credential: token, intent };
+            const response = await api.post<AuthResponse>('/auth/google', payload);
             if (response.data.token) {
                 localStorage.setItem('auth_token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
