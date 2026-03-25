@@ -59,13 +59,58 @@ El proyecto sigue una arquitectura modular basada en componentes y servicios par
 
 ---
 
-## 🚀 Guía de Despliegue - EcoAventura (Dockploy)
+## 🚀 Guía de Despliegue - EcoAventura (Dokploy)
 
-Este proyecto está configurado para un despliegue automático y eficiente utilizando **Dockploy**.
+Este proyecto está diseñado para ser desplegado de manera automatizada utilizando **Dokploy** (un PaaS autohospedado similar a Vercel/Heroku) sobre infraestructura de **DigitalOcean**.
 
 ### 🏗️ Infraestructura y Dominios
-- **Dominio**: El dominio actual está gestionado en **Namecheap**. *Si la organización cuenta con un dominio diferente, debe actualizar los registros DNS correspondientes.*
-- **Hosting**: El servidor está alojado en **DigitalOcean**, el cual se conecta y gestiona íntegramente a través de **Dockploy** para simplificar la administración.
+- **Dominio**: Gestionado en **Namecheap**.
+- **Hosting**: Servidor (VPS) en **DigitalOcean**.
+- **Orquestación**: **Dokploy** para la gestión de contenedores y CI/CD.
+
+---
+
+### 🛠️ Guía Paso a Paso para la Configuración
+
+Si desea implementar esta plataforma para una nueva organización, siga estos pasos detallados:
+
+#### 1. Preparación del Servidor (DigitalOcean)
+1. **Crear un Droplet**: Inicie un Droplet en DigitalOcean con las siguientes especificaciones mínimas:
+   - **SO**: Ubuntu 22.04 LTS o superior.
+   - **Plan**: Mínimo 2GB de RAM y 1 CPU (30GB+ de disco).
+2. **Configurar Firewall**: En el panel de DigitalOcean, asegúrese de que los siguientes puertos estén **Abiertos**:
+   - `80` (HTTP) y `443` (HTTPS) para el tráfico web.
+   - `3000` (Temporalmente) para acceder al panel inicial de Dokploy.
+   - `22` (SSH) para administración.
+
+#### 2. Instalación de Dokploy
+1. Conéctese a su servidor vía SSH:
+   ```bash
+   ssh root@tu-ip-servidor
+   ```
+2. Ejecute el comando de instalación oficial de Dokploy:
+   ```bash
+   curl -sSL https://dokploy.com/install.sh | sh
+   ```
+3. Una vez finalizado, acceda a la interfaz web en `http://tu-ip-servidor:3000` y cree su cuenta de administrador.
+
+#### 3. Configuración del Dominio (Namecheap)
+1. Inicie sesión en **Namecheap** y vaya a la sección **Advanced DNS**.
+2. Cree un **A Record**:
+   - **Host**: `@` (o el subdominio deseado, ej: `app`).
+   - **Value**: La dirección IP de su Droplet de DigitalOcean.
+   - **TTL**: Automatic.
+3. (Opcional) Cree un registro similar para el backend (ej: `api`).
+
+#### 4. Vinculación de Aplicaciones en Dokploy
+1. **Crear Proyecto**: En el panel de Dokploy, cree un nuevo proyecto llamado "EcoAventura".
+2. **Despliegue de Aplicaciones**:
+   - Conecte su cuenta de GitHub/GitLab.
+   - Seleccione el repositorio `ecoAventura-frontend` (y el de backend).
+   - **Variables de Entorno**: Configure las variables mencionadas en la sección [Variables de Entorno](#-variables-de-entorno).
+3. **Configurar Dominio**: En la pestaña "Domains" de su aplicación en Dokploy, ingrese su dominio (ej: `tu-organizacion.com`) y active **HTTPS (Let's Encrypt)**. Dokploy gestionará automáticamente los certificados SSL.
+
+---
 
 ### 🔄 Flujo de CI/CD (Despliegue Automático)
 
