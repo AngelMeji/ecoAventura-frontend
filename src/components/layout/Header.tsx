@@ -32,6 +32,25 @@ const Header: React.FC = () => {
 
     const [notifications, setNotifications] = React.useState<{ type: 'admin' | 'user'; count?: number; notifications?: any[] } | null>(null);
     const [isNotifOpen, setIsNotifOpen] = React.useState(false);
+    const notificationsRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+                setIsNotifOpen(false);
+            }
+        };
+
+        if (isNotifOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isNotifOpen]);
 
     React.useEffect(() => {
         if (isAuthenticated) {
@@ -111,7 +130,7 @@ const Header: React.FC = () => {
 
                     {isAuthenticated && (
                         /* Notification Bell */
-                        <div className="relative">
+                        <div className="relative" ref={notificationsRef}>
                             <button
                                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                                 className="p-2 rounded-full hover:bg-gray-100 text-gray-600 focus:outline-none relative"

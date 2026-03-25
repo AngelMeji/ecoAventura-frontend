@@ -87,6 +87,13 @@ const Dashboard: React.FC = () => {
                     }
                 }
                 setPartnerPlaces(pPlaces);
+                // Obtener favoritos para el socio también
+                try {
+                    const favs = await placesService.getFavorites();
+                    setFavorites(Array.isArray(favs) ? favs : []);
+                } catch (e) {
+                    setFavorites([]);
+                }
             } else {
                 // Lógica para el Dashboard de Usuario (Optimizado V2) - Paralelizado
                 const [dashboardResult, favsResult] = await Promise.allSettled([
@@ -264,6 +271,18 @@ const Dashboard: React.FC = () => {
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                                         {t('home.dashboard.welcome.createPlace')}
+                                    </button>
+                                )}
+                                {(user.role === 'partner' || user.role === 'user') && (
+                                    <button
+                                        onClick={() => {
+                                            const el = document.getElementById('favorites-section');
+                                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className="bg-red-500/10 hover:bg-red-500/20 text-red-100 px-6 py-2 rounded-full text-sm font-bold border border-red-500/20 transition-all hover:scale-105 flex items-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
+                                        Sitios Fav
                                     </button>
                                 )}
                             </div>
@@ -1029,8 +1048,8 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Favorites List */}
-                        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                        {/* Favorites List - Solo Users */}
+                        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100" id="favorites-section">
                             <div className="p-6 border-b border-gray-100">
                                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                     <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
@@ -1092,8 +1111,6 @@ const Dashboard: React.FC = () => {
                                                     {place.name || 'Lugar sin nombre'}
                                                 </h3>
                                                 <div className="flex items-center gap-1.5 text-gray-500">
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                    <p className="text-xs truncate">{place.address || 'Sin dirección'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1101,6 +1118,78 @@ const Dashboard: React.FC = () => {
                                 </div>
                             )}
                         </div>
+                    </div>
+                )}
+                
+                {/* --- FAVORITES SECTION FOR PARTNERS --- */}
+                {user.role === 'partner' && (
+                    <div className="mt-8 bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100" id="favorites-section">
+                        <div className="p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
+                                {t('home.dashboard.user.myFavorites')}
+                            </h2>
+                        </div>
+                        {favorites.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <p className="text-gray-400 text-lg mb-4">{t('home.dashboard.user.noFavoritesYet')}</p>
+                                <button onClick={() => navigate('/home')} className="text-eco-primary-600 font-bold hover:underline">{t('home.dashboard.user.exploreMap')}</button>
+                            </div>
+                        ) : (
+                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {favorites.map(place => (
+                                    <div
+                                        key={place.id}
+                                        className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                                        onClick={() => navigate(`/place/${place.slug || place.id}`)}
+                                    >
+                                        <div className="aspect-video bg-gray-100 relative overflow-hidden">
+                                            <img
+                                                src={getOptimizedImageUrl(
+                                                    (place.images && place.images.length > 0 && place.images[0])
+                                                        ? (place.images[0].full_url || place.images[0].image_path)
+                                                        : '/logo_Ecoaventura_fondo.jpeg'
+                                                )}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                alt={place.name}
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    if (!target.src.includes('logo_Ecoaventura')) {
+                                                        target.src = '/logo_Ecoaventura_fondo.jpeg';
+                                                    }
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
+                                                <div className="bg-white/90 backdrop-blur-sm w-8 h-8 flex items-center justify-center rounded-full text-red-500 shadow-md">
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" /></svg>
+                                                </div>
+                                                {place.category?.name && (
+                                                    <div className="bg-eco-primary-600 text-white px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm text-center">
+                                                        {place.category.name}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {place.average_rating !== undefined && place.average_rating > 0 && (
+                                                <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                                    <span className="text-yellow-500 text-xs">★</span>
+                                                    <span className="text-xs font-bold text-gray-800">{place.average_rating}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-5">
+                                            <h3 className="font-display font-bold text-gray-800 group-hover:text-eco-primary-600 transition-colors mb-1 truncate">
+                                                {place.name || 'Lugar sin nombre'}
+                                            </h3>
+                                            <div className="flex items-center gap-1.5 text-gray-500">
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                <p className="text-xs truncate">{place.address || 'Sin dirección'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </main>

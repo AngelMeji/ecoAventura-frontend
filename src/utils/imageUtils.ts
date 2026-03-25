@@ -34,3 +34,65 @@ export const getOptimizedImageUrl = (path: string | undefined | null): string =>
 
     return `${STORAGE_URL}/${cleanPath}`;
 };
+
+/**
+ * Comprime y redimensiona una imagen en el cliente antes de enviarla al servidor.
+ * Evita la sobrecarga de memoria en el backend y los envíos lentos al cargar imágenes 4K.
+ */
+export const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        // Solo comprimir imágenes
+        if (!file.type.startsWith('image/')) {
+            resolve(file);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                // Solo redimensionar si es más grande que el máximo
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                // Usar canvas para redimensionar y comprimir
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    resolve(file); // Fallback: enviar original si no hay soporte de canvas
+                    return;
+                }
+
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Exportar como WebP si es posible, o JPEG
+                // Para simplificar y mantener la compatibilidad transparente con FormData,
+                // mantenemos el mismo nombre pero podemos cambiar a webp/jpeg.
+                const outFormat = 'image/webp'; // WebP reduce mucho más el tamaño
+                
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        // Crear un nuevo File con el blob comprimido
+                        const newFilename = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+                        const compressedFile = new File([blob], newFilename, { type: outFormat });
+                        resolve(compressedFile);
+                    } else {
+                        resolve(file); // Fallback en caso de error
+                    }
+                }, outFormat, quality);
+            };
+            img.onerror = (e) => reject(e);
+        };
+        reader.onerror = (e) => reject(e);
+    });
+};

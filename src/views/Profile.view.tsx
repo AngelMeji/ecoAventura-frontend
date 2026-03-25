@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import Header from '../components/layout/Header';
 import { useLanguage } from '../context/LanguageContext';
-import { getOptimizedImageUrl } from '../utils/imageUtils';
+import { getOptimizedImageUrl, compressImage } from '../utils/imageUtils';
 import SafeImage from '../components/common/SafeImage';
 
 const Profile: React.FC = () => {
@@ -75,14 +75,16 @@ const Profile: React.FC = () => {
         setIsDragging(false);
     };
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
 
         const files = e.dataTransfer.files;
         if (files && files[0] && files[0].type.startsWith('image/')) {
-            setProfileData({ ...profileData, avatarFile: files[0] });
+            // Comprimir imagen pesada localmente antes de guardar (previene crashes de 4K)
+            const compressedFile = await compressImage(files[0]);
+            setProfileData({ ...profileData, avatarFile: compressedFile });
         }
     };
 
@@ -289,9 +291,10 @@ const Profile: React.FC = () => {
                                                 type="file"
                                                 accept="image/*"
                                                 className="hidden"
-                                                onChange={(e) => {
+                                                onChange={async (e) => {
                                                     if (e.target.files?.[0]) {
-                                                        setProfileData({ ...profileData, avatarFile: e.target.files[0] });
+                                                        const compressedFile = await compressImage(e.target.files[0]);
+                                                        setProfileData({ ...profileData, avatarFile: compressedFile });
                                                     }
                                                 }}
                                             />
