@@ -11,32 +11,39 @@ const SafeImage: React.FC<SafeImageProps> = ({
     ...props 
 }) => {
     const [currentSrc, setCurrentSrc] = useState(src);
-    const [attempts, setAttempts] = useState(0);
+    const [urlsToTry, setUrlsToTry] = useState<string[]>([]);
+    const [hasFailed, setHasFailed] = useState(false);
 
     useEffect(() => {
-        setCurrentSrc(src);
-        setAttempts(0);
-    }, [src]);
-
-    const handleError = () => {
-        if (!currentSrc || typeof currentSrc !== 'string') {
+        if (!src) {
             setCurrentSrc(fallbackSrc);
             return;
         }
+        
+        // Ensure src is a string
+        const srcString = String(src);
+        const base = srcString.replace(/\.[^.]+$/, '');
+        const currentExt = srcString.match(/\.[^.]+$/)?.[0]?.toLowerCase() || '';
+        
+        // Sequence of extensions to try, skipping the one it already has
+        const exts = ['.webp', '.jpg', '.png', '.jpeg', '.JPG', '.PNG', '.JPEG'];
+        const fallbackUrls = exts
+            .filter(ext => ext !== currentExt)
+            .map(ext => `${base}${ext}`);
+        
+        setUrlsToTry(fallbackUrls);
+        setCurrentSrc(srcString);
+        setHasFailed(false);
+    }, [src, fallbackSrc]);
 
-        // Strategy to cycle through common image extensions if one fails
-        if (attempts === 0 && currentSrc.match(/\.webp$/i)) {
-            setCurrentSrc(currentSrc.replace(/\.webp$/i, '.jpg'));
-            setAttempts(1);
-        } else if (attempts === 1 && currentSrc.match(/\.jpg$/i)) {
-            setCurrentSrc(currentSrc.replace(/\.jpg$/i, '.png'));
-            setAttempts(2);
-        } else if (attempts === 2 && currentSrc.match(/\.png$/i)) {
-            setCurrentSrc(currentSrc.replace(/\.png$/i, '.jpeg'));
-            setAttempts(3);
-        } else {
-            // If all attempts failed or none matched, revert to fallback
+    const handleError = () => {
+        if (urlsToTry.length > 0) {
+            const nextUrl = urlsToTry[0];
+            setUrlsToTry(urlsToTry.slice(1));
+            setCurrentSrc(nextUrl);
+        } else if (currentSrc !== fallbackSrc && !hasFailed) {
             setCurrentSrc(fallbackSrc);
+            setHasFailed(true); // Prevent infinite loop if fallback also fails
         }
     };
 

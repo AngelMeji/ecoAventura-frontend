@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { getTranslatedPlace } from '../../translations/places';
 import { getOptimizedImageUrl } from '../../utils/imageUtils';
+import SafeImage from '../common/SafeImage';
 
 
 // URL base para las imágenes (asumiendo que vienen relativas del backend)
@@ -50,7 +51,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
         >
             {/* Contenedor de imagen con aspect-ratio para evitar deformaciones */}
             <div className="relative aspect-video shrink-0 overflow-hidden bg-gray-100">
-                <img
+                <SafeImage
                     src={imageUrl}
                     alt={destination.name}
                     loading="lazy"

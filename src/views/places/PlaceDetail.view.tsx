@@ -8,6 +8,7 @@ import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import PlaceChatbot from '../../components/places/PlaceChatbot';
 import { getOptimizedImageUrl } from '../../utils/imageUtils';
+import SafeImage from '../../components/common/SafeImage';
 
 const PlaceDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -205,7 +206,7 @@ const PlaceDetail: React.FC = () => {
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                     {/* Header Image / Carousel */}
                     <div className="relative h-[400px] md:h-[500px] bg-gray-200 group">
-                        <img
+                        <SafeImage
                             src={images[currentImageIndex].full_url ? getOptimizedImageUrl(images[currentImageIndex].full_url) : getOptimizedImageUrl(images[currentImageIndex].image_path)}
                             alt={place.name}
                             className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"

@@ -4,6 +4,8 @@ import Logo from '../common/Logo';
 import AccessibilityMenu from '../common/AccessibilityMenu';
 import { authService } from '../../services/authService';
 import { useLanguage } from '../../context/LanguageContext';
+import SafeImage from '../common/SafeImage';
+import { getOptimizedImageUrl } from '../../utils/imageUtils';
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -215,8 +217,16 @@ const Header: React.FC = () => {
                             </Link>
 
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-sm">
-                                    {user?.name?.charAt(0).toUpperCase()}
+                                <div className="w-8 h-8 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-sm overflow-hidden border border-eco-primary-200 shrink-0">
+                                    {user?.full_avatar || user?.avatar ? (
+                                        <SafeImage
+                                            src={user.full_avatar || getOptimizedImageUrl(user.avatar)}
+                                            alt={user.name}
+                                            className="w-full h-full object-cover rounded-full"
+                                        />
+                                    ) : (
+                                        user?.name?.charAt(0).toUpperCase()
+                                    )}
                                 </div>
                                 <span className="text-sm font-medium text-gray-700">
                                     {user?.name}
@@ -275,8 +285,16 @@ const Header: React.FC = () => {
                                     {user.role === 'admin' ? t('header.adminPanel') : (user.role === 'partner' ? t('header.partnerPanel') : t('header.myAccount'))}
                                 </Link>
                                 <div className="flex items-center gap-3 py-4 border-t border-gray-100">
-                                    <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-lg">
-                                        {user?.name?.charAt(0).toUpperCase()}
+                                    <div className="w-10 h-10 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-lg overflow-hidden border border-eco-primary-200 shrink-0">
+                                        {user?.full_avatar || user?.avatar ? (
+                                            <SafeImage
+                                                src={user.full_avatar || getOptimizedImageUrl(user.avatar)}
+                                                alt={user.name}
+                                                className="w-full h-full object-cover rounded-full"
+                                            />
+                                        ) : (
+                                            user?.name?.charAt(0).toUpperCase()
+                                        )}
                                     </div>
                                     <span className="text-lg font-medium text-gray-700">
                                         {user?.name}

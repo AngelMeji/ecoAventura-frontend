@@ -7,6 +7,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { getTranslatedPlace } from '../../translations/places';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { getOptimizedImageUrl } from '../../utils/imageUtils';
+import SafeImage from '../common/SafeImage';
 
 // URL base para las imágenes (storage)
 
@@ -287,7 +288,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                     <div className="flex-1 overflow-y-auto p-6 custom-scrollbar flex flex-col items-center text-center">
                         {/* Image (Single) */}
                         <div className="w-full h-80 md:h-96 rounded-2xl overflow-hidden mb-6 relative shadow-md flex-shrink-0">
-                            <img
+                            <SafeImage
                                 src={images[0] ? (images[0].full_url ? getOptimizedImageUrl(images[0].full_url) : getOptimizedImageUrl(images[0].image_path)) : getOptimizedImageUrl('/assets/images/placeholder.jpg')}
                                 alt={`${destination.name}`}
                                 className="w-full h-full object-cover"
@@ -353,7 +354,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                 <div className="space-y-6">
                                     {/* Carousel */}
                                     <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden group">
-                                        <img
+                                        <SafeImage
                                             src={images[currentImageIndex].full_url ? getOptimizedImageUrl(images[currentImageIndex].full_url) : getOptimizedImageUrl(images[currentImageIndex].image_path)}
                                             alt={`${destination.name}`}
                                             className="w-full h-full object-cover transition-transform duration-500"
