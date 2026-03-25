@@ -146,6 +146,26 @@ const Profile: React.FC = () => {
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validación: Reglas de la contraseña
+        const newPassword = passwordData.password;
+        if (newPassword.length < 8 || newPassword.length > 12) {
+            setMsg({ type: 'error', text: t('auth.register.validation.passwordMin') });
+            return;
+        } else if (!/[A-Z]/.test(newPassword)) {
+            setMsg({ type: 'error', text: t('auth.register.validation.passwordUpper') });
+            return;
+        } else if (!/[a-z]/.test(newPassword)) {
+            setMsg({ type: 'error', text: t('auth.register.validation.passwordLower') });
+            return;
+        } else if (!/\d/.test(newPassword)) {
+            setMsg({ type: 'error', text: t('auth.register.validation.passwordNumber') });
+            return;
+        } else if (!/[\W_]/.test(newPassword)) {
+            setMsg({ type: 'error', text: t('auth.register.validation.passwordSymbol') });
+            return;
+        }
+
         if (passwordData.password !== passwordData.password_confirmation) {
             setMsg({ type: 'error', text: t('home.profile.messages.passwordMismatch') });
             return;
