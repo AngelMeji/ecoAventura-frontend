@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useLanguage } from '../context/LanguageContext';
 import type { RegisterData } from '../models/User.model';
 
 /**
  * Vista de Registro
  */
 const Register: React.FC = () => {
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [formData, setFormData] = useState<RegisterData>({
         name: '',
@@ -20,18 +22,27 @@ const Register: React.FC = () => {
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
-        // Removed client-side required checks as per user request (backend handles them)
-
         if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'El correo electrónico no es válido';
+            newErrors.email = t('auth.register.validation.emailInvalid');
         }
 
-        if (formData.password && formData.password.length < 6) {
-            newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+        if (formData.password) {
+            const password = formData.password;
+            if (password.length < 8 || password.length > 12) {
+                newErrors.password = t('auth.register.validation.passwordMin');
+            } else if (!/[A-Z]/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordUpper');
+            } else if (!/[a-z]/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordLower');
+            } else if (!/\d/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordNumber');
+            } else if (!/[\W_]/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordSymbol');
+            }
         }
 
-        if (formData.password !== formData.password_confirmation) {
-            newErrors.password_confirmation = 'Las contraseñas no coinciden';
+        if (formData.password && formData.password !== formData.password_confirmation) {
+            newErrors.password_confirmation = t('auth.register.validation.passwordMismatch');
         }
 
         setErrors(newErrors);
@@ -94,10 +105,10 @@ const Register: React.FC = () => {
             </div>
 
             <h2 className="text-3xl font-display font-bold text-center text-gray-800 mb-2">
-                Crear Cuenta
+                {t('auth.register.title')}
             </h2>
             <p className="text-center text-gray-500 mb-8 font-light">
-                Únete a la comunidad de EcoTurismo
+                {t('auth.register.subtitle')}
             </p>
 
             {errors.general && (
@@ -110,7 +121,7 @@ const Register: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="block text-sm font-bold text-gray-700 mb-1 pl-1">
-                        Nombre Completo
+                        {t('auth.register.name')}
                     </label>
                     <input
                         type="text"
@@ -118,7 +129,7 @@ const Register: React.FC = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Tu nombre"
+                        placeholder={t('auth.register.placeholderName')}
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.name ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.name && <p className="mt-1 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>{errors.name}</p>}
@@ -126,7 +137,7 @@ const Register: React.FC = () => {
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-1 pl-1">
-                        Correo Electrónico
+                        {t('auth.login.email')}
                     </label>
                     <input
                         type="email"
@@ -134,7 +145,7 @@ const Register: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="tu@email.com"
+                        placeholder={t('auth.login.placeholderEmail')}
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.email ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.email && <p className="mt-1 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>{errors.email}</p>}
@@ -142,7 +153,7 @@ const Register: React.FC = () => {
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-1 pl-1">
-                        Contraseña
+                        {t('auth.login.password')}
                     </label>
                     <input
                         type="password"
@@ -150,7 +161,7 @@ const Register: React.FC = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="••••••••"
+                        placeholder={t('auth.login.placeholderPassword')}
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.password ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.password && <p className="mt-1 text-sm text-red-600 flex items-center gap-1"><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>{errors.password}</p>}
@@ -158,7 +169,7 @@ const Register: React.FC = () => {
 
                 <div>
                     <label htmlFor="password_confirmation" className="block text-sm font-bold text-gray-700 mb-1 pl-1">
-                        Confirmar Contraseña
+                        {t('auth.register.confirmPassword')}
                     </label>
                     <input
                         type="password"
@@ -166,7 +177,7 @@ const Register: React.FC = () => {
                         name="password_confirmation"
                         value={formData.password_confirmation}
                         onChange={handleChange}
-                        placeholder="••••••••"
+                        placeholder={t('auth.login.placeholderPassword')}
                         className={`auth-input focus:ring-2 focus:ring-eco-primary-500/20 ${errors.password_confirmation ? 'border-red-500 ring-2 ring-red-100' : ''}`}
                     />
                     {errors.password_confirmation && (
@@ -181,16 +192,16 @@ const Register: React.FC = () => {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Registrando...
+                            {t('auth.register.loading')}
                         </span>
-                    ) : 'Registrarse'}
+                    ) : t('auth.register.submit')}
                 </button>
             </form>
 
             <p className="text-center text-gray-600 mt-8 text-sm">
-                ¿Ya tienes cuenta?{' '}
+                {t('auth.register.hasAccount')}{' '}
                 <Link to="/login" className="auth-link font-bold hover:underline">
-                    Inicia sesión
+                    {t('auth.register.login')}
                 </Link>
             </p>
         </div>
