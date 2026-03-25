@@ -77,7 +77,7 @@ Si desea implementar esta plataforma para una nueva organización, siga estos pa
 #### 1. Preparación del Servidor (DigitalOcean)
 1. **Crear un Droplet**: Inicie un Droplet en DigitalOcean con las siguientes especificaciones mínimas:
    - **SO**: Ubuntu 22.04 LTS o superior.
-   - **Plan**: Mínimo 2GB de RAM y 1 CPU (30GB+ de disco).
+   - **Plan**: Mínimo 8GB de RAM y 2 CPU (30GB+ de disco).
 2. **Configurar Firewall**: En el panel de DigitalOcean, asegúrese de que los siguientes puertos estén **Abiertos**:
    - `80` (HTTP) y `443` (HTTPS) para el tráfico web.
    - `3000` (Temporalmente) para acceder al panel inicial de Dokploy.

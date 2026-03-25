@@ -34,9 +34,9 @@ vi.mock('../services/placesService', () => ({
     },
 }));
 
-const mockAdminUser = { id: 1, name: 'Admin', email: 'admin@test.com', role: 'admin', avatar: null };
-const mockPartnerUser = { id: 2, name: 'Partner', email: 'partner@test.com', role: 'partner', avatar: null };
-const mockNormalUser = { id: 3, name: 'User', email: 'user@test.com', role: 'user', avatar: null };
+const mockAdminUser = { id: 1, name: 'Admin', email: 'admin@test.com', role: 'admin' as const, avatar: null };
+const mockPartnerUser = { id: 2, name: 'Partner', email: 'partner@test.com', role: 'partner' as const, avatar: null };
+const mockNormalUser = { id: 3, name: 'User', email: 'user@test.com', role: 'user' as const, avatar: null };
 
 describe('Dashboard View', () => {
     beforeEach(() => {
