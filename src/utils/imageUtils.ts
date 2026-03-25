@@ -9,12 +9,13 @@ export const getOptimizedImageUrl = (path: string | undefined | null): string =>
         url = path;
     } else if (path.startsWith('assets/') || path.startsWith('/assets/')) {
         url = path.startsWith('/') ? path : `/${path}`;
+        // Only convert to .webp for local assets if they are likely to have a webp version
+        url = url.trim().replace(/\.(jpg|jpeg|png)([\?#].*)?$/i, '.webp$2');
     } else {
-        url = `${STORAGE_URL}/${path}`;
+        // For storage paths, we trust the backend provided extension
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        url = `${STORAGE_URL}/${cleanPath}`;
     }
-
-    // Convert extensions to .webp, preserving query string or hash if present
-    url = url.trim().replace(/\.(jpg|jpeg|png)([\?#].*)?$/i, '.webp$2');
 
     // Force HTTPS if it's an absolute URL and not localhost
     if (url.startsWith('http://') && !url.includes('localhost')) {

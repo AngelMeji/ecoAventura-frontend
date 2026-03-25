@@ -5,7 +5,8 @@ export interface User {
     email: string;
     role: 'admin' | 'partner' | 'user'; // Roles disponibles: admin, partner, user
     bio?: string; // Biografía opcional
-    avatar?: string; // URL del avatar
+    avatar?: string; // Ruta relativa del avatar
+    full_avatar?: string; // URL absoluta del avatar (generada por el backend)
     created_at?: string;
     updated_at?: string;
 }

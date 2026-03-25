@@ -193,15 +193,9 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, 
                                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                                             {u.avatar ? (
                                                 <img
-                                                    src={u.avatar.startsWith('http') ? u.avatar : `/upload/${u.avatar.split('/').pop()}`}
+                                                    src={u.full_avatar || (u.avatar.startsWith('http') ? u.avatar : `${STORAGE_URL}/${u.avatar}`)}
                                                     alt={u.name}
                                                     className="w-full h-full object-cover"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        if (!target.src.includes('storage')) {
-                                                            target.src = `${STORAGE_URL}/${u.avatar}`;
-                                                        }
-                                                    }}
                                                 />
                                             ) : <span className="text-gray-500 font-bold">{u.name[0]}</span>}
                                         </div>
@@ -264,15 +258,9 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, 
                                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                                     {u.avatar ? (
                                         <img
-                                            src={u.avatar.startsWith('http') ? u.avatar : `/upload/${u.avatar.split('/').pop()}`}
+                                            src={u.full_avatar || (u.avatar.startsWith('http') ? u.avatar : `${STORAGE_URL}/${u.avatar}`)}
                                             alt={u.name}
                                             className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                if (!target.src.includes('storage')) {
-                                                    target.src = `${STORAGE_URL}/${u.avatar}`;
-                                                }
-                                            }}
                                         />
                                     ) : <span className="text-gray-500 font-bold">{u.name[0]}</span>}
                                 </div>

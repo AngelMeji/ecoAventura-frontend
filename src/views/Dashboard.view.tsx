@@ -220,15 +220,9 @@ const Dashboard: React.FC = () => {
                     <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                         {user.avatar ? (
                             <img
-                                src={user.avatar.startsWith('http') ? user.avatar : `/upload/${user.avatar.split('/').pop()}`}
+                                src={user.full_avatar || (user.avatar.startsWith('http') ? user.avatar : `${STORAGE_URL}/${user.avatar}`)}
                                 alt={user.name}
                                 className="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl object-cover"
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    if (!target.src.includes('storage')) {
-                                        target.src = `${STORAGE_URL}/${user.avatar}`;
-                                    }
-                                }}
                             />
                         ) : (
                             <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-4xl font-bold border-4 border-white/10 shadow-xl">

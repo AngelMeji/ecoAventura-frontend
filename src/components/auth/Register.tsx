@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
+import { useLanguage } from '../../context/LanguageContext';
 import type { RegisterData } from '../../types/auth';
 
 const Register: React.FC = () => {
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [formData, setFormData] = useState<RegisterData>({
         name: '',
@@ -18,23 +20,34 @@ const Register: React.FC = () => {
         const newErrors: Record<string, string> = {};
 
         if (!formData.name.trim()) {
-            newErrors.name = 'El nombre es requerido';
+            newErrors.name = t('auth.register.validation.nameRequired');
         }
 
         if (!formData.email.trim()) {
-            newErrors.email = 'El correo electrónico es requerido';
+            newErrors.email = t('auth.register.validation.emailRequired');
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'El correo electrónico no es válido';
+            newErrors.email = t('auth.register.validation.emailInvalid');
         }
 
         if (!formData.password) {
-            newErrors.password = 'La contraseña es requerida';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+            newErrors.password = t('auth.register.validation.passwordRequired');
+        } else {
+            const password = formData.password;
+            if (password.length < 8 || password.length > 12) {
+                newErrors.password = t('auth.register.validation.passwordMin');
+            } else if (!/[A-Z]/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordUpper');
+            } else if (!/[a-z]/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordLower');
+            } else if (!/\d/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordNumber');
+            } else if (!/[\W_]/.test(password)) {
+                newErrors.password = t('auth.register.validation.passwordSymbol');
+            }
         }
 
         if (formData.password !== formData.password_confirmation) {
-            newErrors.password_confirmation = 'Las contraseñas no coinciden';
+            newErrors.password_confirmation = t('auth.register.validation.passwordMismatch');
         }
 
         setErrors(newErrors);
@@ -101,10 +114,10 @@ const Register: React.FC = () => {
 
             {/* Title */}
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-                Crear Cuenta
+                {t('auth.register.title')}
             </h2>
             <p className="text-center text-gray-600 mb-6">
-                Únete a la comunidad de EcoTurismo
+                {t('auth.register.subtitle')}
             </p>
 
             {/* General Error Message */}
@@ -118,7 +131,7 @@ const Register: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre Completo
+                        {t('auth.register.name')}
                     </label>
                     <input
                         type="text"
@@ -126,7 +139,7 @@ const Register: React.FC = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Tu nombre"
+                        placeholder={t('auth.register.placeholderName')}
                         required
                         className={`auth-input ${errors.name ? 'border-red-500' : ''}`}
                     />
@@ -137,7 +150,7 @@ const Register: React.FC = () => {
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Correo Electrónico
+                        {t('auth.login.email')}
                     </label>
                     <input
                         type="email"
@@ -145,7 +158,7 @@ const Register: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="tu@email.com"
+                        placeholder={t('auth.login.placeholderEmail')}
                         required
                         className={`auth-input ${errors.email ? 'border-red-500' : ''}`}
                     />
@@ -156,7 +169,7 @@ const Register: React.FC = () => {
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                        Contraseña
+                        {t('auth.login.password')}
                     </label>
                     <input
                         type="password"
@@ -164,7 +177,7 @@ const Register: React.FC = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="••••••••"
+                        placeholder={t('auth.login.placeholderPassword')}
                         required
                         className={`auth-input ${errors.password ? 'border-red-500' : ''}`}
                     />
@@ -175,7 +188,7 @@ const Register: React.FC = () => {
 
                 <div>
                     <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirmar Contraseña
+                        {t('auth.register.confirmPassword')}
                     </label>
                     <input
                         type="password"
@@ -183,7 +196,7 @@ const Register: React.FC = () => {
                         name="password_confirmation"
                         value={formData.password_confirmation}
                         onChange={handleChange}
-                        placeholder="••••••••"
+                        placeholder={t('auth.login.placeholderPassword')}
                         required
                         className={`auth-input ${errors.password_confirmation ? 'border-red-500' : ''}`}
                     />
@@ -197,15 +210,15 @@ const Register: React.FC = () => {
                     disabled={loading}
                     className="auth-button disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {loading ? 'Registrando...' : 'Registrarse'}
+                    {loading ? t('auth.register.loading') : t('auth.register.submit')}
                 </button>
             </form>
 
             {/* Login Link */}
             <p className="text-center text-gray-600 mt-6">
-                ¿Ya tienes cuenta?{' '}
+                {t('auth.register.hasAccount')}{' '}
                 <Link to="/login" className="auth-link">
-                    Inicia sesión
+                    {t('auth.register.login')}
                 </Link>
             </p>
         </div>

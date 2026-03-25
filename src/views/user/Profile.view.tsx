@@ -225,9 +225,9 @@ const Profile: React.FC = () => {
                                                 src={
                                                     profileData.avatarFile
                                                         ? URL.createObjectURL(profileData.avatarFile)
-                                                        : (profileData.avatar.startsWith('http')
+                                                        : (user.full_avatar || (profileData.avatar.startsWith('http')
                                                             ? profileData.avatar
-                                                            : `/upload/${profileData.avatar.split('/').pop()}`)
+                                                            : `${STORAGE_URL}/${profileData.avatar}`))
                                                 }
                                                 alt="Avatar"
                                                 className="w-full h-full object-cover"
