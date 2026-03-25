@@ -10,6 +10,7 @@ import Alert from '../components/common/Alert';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useLanguage } from '../context/LanguageContext';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
+import SafeImage from '../components/common/SafeImage';
 
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
@@ -217,7 +218,7 @@ const Dashboard: React.FC = () => {
 
                     <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                         {user.avatar ? (
-                            <img
+                            <SafeImage
                                 src={user.full_avatar || getOptimizedImageUrl(user.avatar)}
                                 alt={user.name}
                                 className="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl object-cover"

@@ -4,6 +4,7 @@ import { authService } from '../services/authService';
 import Header from '../components/layout/Header';
 import { useLanguage } from '../context/LanguageContext';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
+import SafeImage from '../components/common/SafeImage';
 
 const Profile: React.FC = () => {
     const { t } = useLanguage();
@@ -247,7 +248,7 @@ const Profile: React.FC = () => {
                                 >
                                     <div className="w-full h-full rounded-full overflow-hidden bg-eco-primary-50 relative group">
                                         {profileData.avatar || profileData.avatarFile ? (
-                                            <img
+                                            <SafeImage
                                                 src={
                                                     profileData.avatarFile
                                                         ? URL.createObjectURL(profileData.avatarFile)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { placesService } from '../../services/placesService';
 import { getOptimizedImageUrl } from '../../utils/imageUtils';
+import SafeImage from '../common/SafeImage';
 
 // Simple Modal Component
 const Modal = ({ isOpen, onClose, title, children }: any) => {
@@ -191,7 +192,7 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, 
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                                             {u.avatar ? (
-                                                <img
+                                                <SafeImage
                                                     src={u.full_avatar || getOptimizedImageUrl(u.avatar)}
                                                     alt={u.name}
                                                     className="w-full h-full object-cover"
@@ -256,7 +257,7 @@ const AdminUsersTable: React.FC<AdminUsersTableProps> = ({ onNotify, onConfirm, 
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                                     {u.avatar ? (
-                                        <img
+                                        <SafeImage
                                             src={u.full_avatar || getOptimizedImageUrl(u.avatar)}
                                             alt={u.name}
                                             className="w-full h-full object-cover"
