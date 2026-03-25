@@ -3,8 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Header from '../../components/layout/Header';
 import { useLanguage } from '../../context/LanguageContext';
-
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
+import { getOptimizedImageUrl } from '../../utils/imageUtils';
 
 const Profile: React.FC = () => {
     const { t } = useLanguage();
@@ -225,18 +224,10 @@ const Profile: React.FC = () => {
                                                 src={
                                                     profileData.avatarFile
                                                         ? URL.createObjectURL(profileData.avatarFile)
-                                                        : (user.full_avatar || (profileData.avatar.startsWith('http')
-                                                            ? profileData.avatar
-                                                            : `${STORAGE_URL}/${profileData.avatar}`))
+                                                        : (user.full_avatar || getOptimizedImageUrl(profileData.avatar))
                                                 }
                                                 alt="Avatar"
                                                 className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    if (!target.src.includes('storage') && !profileData.avatarFile) {
-                                                        target.src = `${STORAGE_URL}/${profileData.avatar}`;
-                                                    }
-                                                }}
                                             />
                                         ) : (
                                             <div className="flex items-center justify-center h-full text-5xl text-gray-300 font-bold bg-gray-50">

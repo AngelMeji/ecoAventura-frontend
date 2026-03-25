@@ -11,8 +11,6 @@ import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useLanguage } from '../context/LanguageContext';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
 
-const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
-
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
     const navigate = useNavigate();
@@ -220,7 +218,7 @@ const Dashboard: React.FC = () => {
                     <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                         {user.avatar ? (
                             <img
-                                src={user.full_avatar || (user.avatar.startsWith('http') ? user.avatar : `${STORAGE_URL}/${user.avatar}`)}
+                                src={user.full_avatar || getOptimizedImageUrl(user.avatar)}
                                 alt={user.name}
                                 className="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl object-cover"
                             />

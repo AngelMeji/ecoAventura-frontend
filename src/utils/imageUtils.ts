@@ -1,26 +1,27 @@
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 export const getOptimizedImageUrl = (path: string | undefined | null): string => {
-    if (!path) return '/assets/images/placeholder.jpg';
+    if (!path) return '/assets/logo_Ecoaventura_fondo.jpeg'; // Fallback to existing logo
 
-    let url = path;
-
+    // Si ya es una URL absoluta, retornar tal cual
     if (path.startsWith('http')) {
-        url = path;
-    } else if (path.startsWith('assets/') || path.startsWith('/assets/')) {
-        url = path.startsWith('/') ? path : `/${path}`;
-        // Only convert to .webp for local assets if they are likely to have a webp version
-        url = url.trim().replace(/\.(jpg|jpeg|png)([\?#].*)?$/i, '.webp$2');
-    } else {
-        // For storage paths, we trust the backend provided extension
-        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-        url = `${STORAGE_URL}/${cleanPath}`;
+        return path;
     }
 
-    // Force HTTPS if it's an absolute URL and not localhost
-    if (url.startsWith('http://') && !url.includes('localhost')) {
-        url = url.replace('http://', 'https://');
+    // Si es un asset local (ruta relativa que empieza por /assets o assets/)
+    if (path.startsWith('assets/') || path.startsWith('/assets/')) {
+        return path.startsWith('/') ? path : `/${path}`;
     }
 
-    return url;
+    // Para rutas de almacenamiento, asegurar que no haya doble prefijo 'storage'
+    // El backend suele devolver 'avatars/xxx.png' o 'places/xxx.webp'
+    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    
+    // Si la ruta ya incluye 'storage/', no la duplicamos
+    if (cleanPath.startsWith('storage/')) {
+        const pathWithoutStorage = cleanPath.replace(/^storage\//, '');
+        return `${STORAGE_URL}/${pathWithoutStorage}`;
+    }
+
+    return `${STORAGE_URL}/${cleanPath}`;
 };
