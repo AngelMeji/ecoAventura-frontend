@@ -41,8 +41,16 @@ const Login: React.FC = () => {
             // Redirect to dashboard or home
             alert(`¡Bienvenido ${response.user.name}!`);
             // navigate('/dashboard'); // Uncomment when dashboard is ready
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+        } catch (err: any) {
+            let errorMsg = err.response?.data?.message || err.message || 'Error al iniciar sesión';
+            if (err.response?.data?.errors) {
+                const validationErrors = err.response.data.errors;
+                errorMsg += '\n';
+                Object.keys(validationErrors).forEach(field => {
+                    errorMsg += `\n• ${validationErrors[field].join(' ')}`;
+                });
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }

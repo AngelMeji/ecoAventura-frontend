@@ -66,9 +66,19 @@ const Register: React.FC = () => {
 
             alert(`¡Bienvenido ${response.user.name}! Tu cuenta ha sido creada exitosamente.`);
             navigate('/login');
-        } catch (err) {
+        } catch (error: any) {
+            let errorMsg = error.response?.data?.message || error.message || 'Error al registrar';
+
+            if (error.response?.data?.errors) {
+                const validationErrors = error.response.data.errors;
+                errorMsg += '\n';
+                Object.keys(validationErrors).forEach(field => {
+                    errorMsg += `\n• ${validationErrors[field].join(' ')}`;
+                });
+            }
+
             setErrors({
-                general: err instanceof Error ? err.message : 'Error al registrar',
+                general: errorMsg,
             });
         } finally {
             setLoading(false);
