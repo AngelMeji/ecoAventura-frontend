@@ -24,6 +24,7 @@ export interface RegisterData {
     email: string;
     password: string;
     password_confirmation: string; // Confirmación de contraseña requerida por Laravel
+    acceptTerms?: boolean;
 }
 
 // Respuesta de autenticación
