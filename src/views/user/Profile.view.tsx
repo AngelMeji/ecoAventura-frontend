@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Header from '../../components/layout/Header';
-import { useLanguage } from '../../context/LanguageContext';
 
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
 const Profile: React.FC = () => {
-    const { t } = useLanguage();
     const user = authService.getCurrentUser();
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
@@ -126,22 +124,10 @@ const Profile: React.FC = () => {
             return;
         }
 
-        // Validación: Reglas de la contraseña
-        const newPassword = passwordData.password;
-        if (newPassword.length < 8 || newPassword.length > 12) {
-            setPasswordMsg({ type: 'error', text: t('auth.register.validation.passwordMin') });
-            return;
-        } else if (!/[A-Z]/.test(newPassword)) {
-            setPasswordMsg({ type: 'error', text: t('auth.register.validation.passwordUpper') });
-            return;
-        } else if (!/[a-z]/.test(newPassword)) {
-            setPasswordMsg({ type: 'error', text: t('auth.register.validation.passwordLower') });
-            return;
-        } else if (!/\d/.test(newPassword)) {
-            setPasswordMsg({ type: 'error', text: t('auth.register.validation.passwordNumber') });
-            return;
-        } else if (!/[\W_]/.test(newPassword)) {
-            setPasswordMsg({ type: 'error', text: t('auth.register.validation.passwordSymbol') });
+        // Validación: Longitud mínima
+        if (passwordData.password.length < 6) {
+            const errorMsg = 'La nueva contraseña debe tener al menos 6 caracteres';
+            setPasswordMsg({ type: 'error', text: errorMsg });
             return;
         }
 

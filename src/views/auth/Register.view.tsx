@@ -40,22 +40,14 @@ const Register: React.FC = () => {
 
         if (!formData.password) {
             newErrors.password = t('auth.register.validation.passwordRequired');
-        } else if (formData.password.length < 8) {
+        } else if (formData.password.length < 6) {
             newErrors.password = t('auth.register.validation.passwordMin');
-        } else if (formData.password.length > 12) {
-            newErrors.password = t('auth.register.validation.passwordMax');
-        } else if (!/[A-Z]/.test(formData.password)) {
-            newErrors.password = t('auth.register.validation.passwordUpper');
-        } else if (!/[a-z]/.test(formData.password)) {
-            newErrors.password = t('auth.register.validation.passwordLower');
-        } else if (!/\d/.test(formData.password)) {
-            newErrors.password = t('auth.register.validation.passwordNumber');
-        } else if (!/[\W_]/.test(formData.password)) {
-            newErrors.password = t('auth.register.validation.passwordSymbol');
         }
 
         if (formData.password !== formData.password_confirmation) {
             newErrors.password_confirmation = t('auth.register.validation.passwordMismatch');
+        } else if (formData.password.length > 12) {
+            newErrors.password = t('auth.register.validation.passwordMax');
         }
 
         setErrors(newErrors);

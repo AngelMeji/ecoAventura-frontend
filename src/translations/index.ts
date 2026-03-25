@@ -416,12 +416,8 @@ export const translations = {
                     emailRequired: 'El correo electrónico es requerido',
                     emailInvalid: 'El correo electrónico no es válido',
                     passwordRequired: 'La contraseña es requerida',
-                    passwordMin: 'La contraseña debe tener al menos 8 caracteres',
+                    passwordMin: 'La contraseña debe tener al menos 6 caracteres',
                     passwordMax: 'La contraseña no puede tener más de 12 caracteres',
-                    passwordUpper: 'La contraseña debe contener al menos una mayúscula',
-                    passwordLower: 'La contraseña debe contener al menos una minúscula',
-                    passwordNumber: 'La contraseña debe contener al menos un número',
-                    passwordSymbol: 'La contraseña debe contener al menos un carácter especial',
                     passwordMismatch: 'Las contraseñas no coinciden'
                 }
             },
@@ -769,12 +765,8 @@ export const translations = {
                     emailRequired: 'Email is required',
                     emailInvalid: 'Email is invalid',
                     passwordRequired: 'Password is required',
-                    passwordMin: 'Password must be at least 8 characters',
+                    passwordMin: 'Password must be at least 6 characters',
                     passwordMax: 'Password cannot be more than 12 characters',
-                    passwordUpper: 'Password must contain at least one uppercase letter',
-                    passwordLower: 'Password must contain at least one lowercase letter',
-                    passwordNumber: 'Password must contain at least one number',
-                    passwordSymbol: 'Password must contain at least one special character',
                     passwordMismatch: 'Passwords do not match'
                 }
             },
