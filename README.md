@@ -63,6 +63,10 @@ El proyecto sigue una arquitectura modular basada en componentes y servicios par
 
 Este proyecto está configurado para un despliegue automático y eficiente utilizando **Dockploy**.
 
+### 🏗️ Infraestructura y Dominios
+- **Dominio**: El dominio actual está gestionado en **Namecheap**. *Si la organización cuenta con un dominio diferente, debe actualizar los registros DNS correspondientes.*
+- **Hosting**: El servidor está alojado en **DigitalOcean**, el cual se conecta y gestiona íntegramente a través de **Dockploy** para simplificar la administración.
+
 ### 🔄 Flujo de CI/CD (Despliegue Automático)
 
 1. **Push a Git**: Cada vez que se realiza un `git push` a la rama `main`, Dockploy detecta el cambio.
