@@ -57,8 +57,9 @@ const PlaceDetail: React.FC = () => {
             const loadedPlace = data.data || data;
 
             // V2: El backend en rutas públicas no parsea Bearer tokens de Sanctum
-            // de forma fiable si no usa middleware. Hacemos check manual si hay usuario.
-            if (user && loadedPlace.is_favorite === undefined) {
+            // de forma fiable si no usa middleware. Siempre consultamos el estado
+            // real de favoritos cuando hay usuario logueado.
+            if (user) {
                 try {
                     const favorites = await placesService.getFavorites();
                     const isFav = favorites.some((f: Place) => f.id === loadedPlace.id);

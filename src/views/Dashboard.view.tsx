@@ -1055,14 +1055,14 @@ const Dashboard: React.FC = () => {
                                                     src={getOptimizedImageUrl(
                                                         (place.images && place.images.length > 0 && place.images[0])
                                                             ? (place.images[0].full_url || place.images[0].image_path)
-                                                            : '/assets/images/placeholder.jpg'
+                                                            : '/logo_Ecoaventura_fondo.jpeg'
                                                     )}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                     alt={place.name}
                                                     onError={(e) => {
                                                         const target = e.target as HTMLImageElement;
-                                                        if (!target.src.includes('placeholder')) {
-                                                            target.src = '/assets/images/placeholder.jpg';
+                                                        if (!target.src.includes('logo_Ecoaventura')) {
+                                                            target.src = '/logo_Ecoaventura_fondo.jpeg';
                                                         }
                                                     }}
                                                 />

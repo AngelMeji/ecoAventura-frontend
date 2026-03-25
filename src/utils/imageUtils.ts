@@ -3,8 +3,12 @@ const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage
 export const getOptimizedImageUrl = (path: string | undefined | null): string => {
     if (!path) return '/assets/logo_Ecoaventura_fondo.jpeg'; // Fallback to existing logo
 
-    // Si ya es una URL absoluta, retornar tal cual
+    // Si ya es una URL absoluta
     if (path.startsWith('http')) {
+        // Si apunta a storage/places/, también forzar .webp (el servidor las optimiza)
+        if (path.includes('/storage/places/')) {
+            return path.replace(/\.(jpe?g|png|gif)(\?.*)?$/i, '.webp');
+        }
         return path;
     }
 
@@ -16,12 +20,12 @@ export const getOptimizedImageUrl = (path: string | undefined | null): string =>
     // Para rutas de almacenamiento, asegurar que no haya doble prefijo 'storage'
     // El backend suele devolver 'avatars/xxx.png' o 'places/xxx.webp'
     let cleanPath = path.startsWith('/') ? path.substring(1) : path;
-    
+
     // Forzar extensión .webp para lugares ya que el servidor siempre los optimiza así
     if (cleanPath.startsWith('places/') || cleanPath.startsWith('storage/places/')) {
         cleanPath = cleanPath.replace(/\.(jpe?g|png|gif)$/i, '.webp');
     }
-    
+
     // Si la ruta ya incluye 'storage/', no la duplicamos
     if (cleanPath.startsWith('storage/')) {
         const pathWithoutStorage = cleanPath.replace(/^storage\//, '');
