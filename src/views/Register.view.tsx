@@ -52,7 +52,7 @@ const Register: React.FC = () => {
             alert(`¡Bienvenido ${response.user.name}! Tu cuenta ha sido creada exitosamente.`);
             navigate('/home'); // Redirigir al Home tras registro exitoso
         } catch (err: any) {
-            console.error('Register error:', err);
+            console.error('Error en el registro:', err);
             const newErrors: Record<string, string> = {};
 
             if (err.errors) {

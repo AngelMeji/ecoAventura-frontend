@@ -70,7 +70,7 @@ const PlaceForm: React.FC = () => {
             const data = await placesService.getCategories();
             setCategories(data);
         } catch (error) {
-            console.error('Error loading categories', error);
+            console.error('Error al cargar categorías', error);
             setFormMessage({ type: 'error', text: 'Error cargando categorías. Por favor recarga la página.' });
         }
     };
@@ -101,7 +101,7 @@ const PlaceForm: React.FC = () => {
                 setImagePreviews(existingImages);
             }
         } catch (error) {
-            console.error('Error loading place', error);
+            console.error('Error al cargar el lugar', error);
             setFormMessage({ type: 'error', text: 'Error cargando información del lugar.' });
             setTimeout(() => navigate('/dashboard'), 3000);
         } finally {
@@ -275,7 +275,7 @@ const PlaceForm: React.FC = () => {
                 });
             }
         } catch (error: any) {
-            console.error('Error saving place', error);
+            console.error('Error al guardar el lugar', error);
             const msg = error.response?.data?.message || error.message || 'Error desconocido';
             const errors = error.response?.data?.errors;
             let errorDetails = '';

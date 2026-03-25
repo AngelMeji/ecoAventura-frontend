@@ -63,7 +63,7 @@ const PartnerRequest: React.FC = () => {
             await partnerService.createRequest(formData);
             setStatus('success');
         } catch (error: any) {
-            console.error('Error submitting request:', error);
+            console.error('Error al enviar la solicitud:', error);
             setStatus('error');
             setErrorMessage(error.response?.data?.message || 'Ocurrió un error al enviar la solicitud.');
         }

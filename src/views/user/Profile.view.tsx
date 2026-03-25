@@ -124,10 +124,22 @@ const Profile: React.FC = () => {
             return;
         }
 
-        // Validación: Longitud mínima
-        if (passwordData.password.length < 6) {
-            const errorMsg = 'La nueva contraseña debe tener al menos 6 caracteres';
-            setPasswordMsg({ type: 'error', text: errorMsg });
+        // Validación: Reglas de la contraseña
+        const newPassword = passwordData.password;
+        if (newPassword.length < 8 || newPassword.length > 12) {
+            setPasswordMsg({ type: 'error', text: 'La contraseña debe tener entre 8 y 12 caracteres' });
+            return;
+        } else if (!/[A-Z]/.test(newPassword)) {
+            setPasswordMsg({ type: 'error', text: 'La contraseña debe contener al menos una mayúscula' });
+            return;
+        } else if (!/[a-z]/.test(newPassword)) {
+            setPasswordMsg({ type: 'error', text: 'La contraseña debe contener al menos una minúscula' });
+            return;
+        } else if (!/\d/.test(newPassword)) {
+            setPasswordMsg({ type: 'error', text: 'La contraseña debe contener al menos un número' });
+            return;
+        } else if (!/[\W_]/.test(newPassword)) {
+            setPasswordMsg({ type: 'error', text: 'La contraseña debe contener al menos un carácter especial' });
             return;
         }
 

@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
                         const allResp: any = await placesService.getAll({ user_id: user.id });
                         pPlaces = Array.isArray(allResp) ? allResp : allResp.data || [];
                     } catch (e) {
-                        console.error('❌ Fallback partner fetch failed:', e);
+                        console.error('❌ Fallo al obtener socios (fallback):', e);
                     }
                 }
                 setPartnerPlaces(pPlaces);
@@ -104,12 +104,12 @@ const Dashboard: React.FC = () => {
                 if (favsResult.status === 'fulfilled') {
                     setFavorites(favsResult.value);
                 } else {
-                    console.error('❌ Favorites fetch failed:', favsResult.reason);
+                    console.error('❌ Fallo al obtener favoritos:', favsResult.reason);
                     setFavorites([]);
                 }
             }
         } catch (error) {
-            console.error('Error loading dashboard:', error);
+            console.error('Error al cargar el panel:', error);
             setStats({});
         } finally {
             setLoading(false);
@@ -126,7 +126,7 @@ const Dashboard: React.FC = () => {
                 total: response.total
             });
         } catch (error) {
-            console.error('Error loading admin places:', error);
+            console.error('Error al cargar lugares de administrador:', error);
             setAllPlaces([]);
         }
     };
@@ -141,7 +141,7 @@ const Dashboard: React.FC = () => {
                 total: response.total
             });
         } catch (error) {
-            console.error('Error loading pending places:', error);
+            console.error('Error al cargar lugares pendientes:', error);
             setPendingPlaces([]);
         }
     };

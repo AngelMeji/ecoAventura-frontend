@@ -32,7 +32,7 @@ const AdminPartnerRequests: React.FC<AdminPartnerRequestsProps> = ({ onNotify, o
                 setTotalRequests(data.length);
             }
         } catch (error) {
-            console.error('Error fetching partner requests:', error);
+            console.error('Error al obtener solicitudes de socios:', error);
             onNotify({ type: 'error', message: 'Error cargando solicitudes de socios.' });
         } finally {
             setLoading(false);

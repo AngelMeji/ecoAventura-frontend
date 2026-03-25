@@ -55,7 +55,7 @@ const PlaceChatbot: React.FC<PlaceChatbotProps> = ({ place }) => {
             };
             setMessages(prev => [...prev, botMessage]);
         } catch (error) {
-            console.error('Error chatting with AI:', error);
+            console.error('Error al chatear con la IA:', error);
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',

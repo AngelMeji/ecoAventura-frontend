@@ -128,8 +128,8 @@ const Profile: React.FC = () => {
             }
 
         } catch (error: any) {
-            console.error('Update error:', error);
-            console.error('Error response:', error.response?.data);
+            console.error('Error al actualizar:', error);
+            console.error('Respuesta de error:', error.response?.data);
 
             // Manejo de errores de validación (422)
             if (error.response?.status === 422) {

@@ -62,7 +62,7 @@ export class DestinationController {
             }));
 
         } catch (error) {
-            console.error('Error fetching categories from backend:', error);
+            console.error('Error al obtener categorías del servidor:', error);
             return [];
         }
     }

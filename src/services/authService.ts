@@ -61,7 +61,7 @@ export const authService = {
 
             return response.data;
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Error de inicio de sesión:', error);
             if (axios.isAxiosError(error) && error.response?.data) {
                 throw error.response.data as AuthError;
             }
@@ -82,7 +82,7 @@ export const authService = {
 
             return response.data;
         } catch (error) {
-            console.error('Register error:', error);
+            console.error('Error en el registro:', error);
             if (axios.isAxiosError(error) && error.response?.data) {
                 throw error.response.data as AuthError;
             }
@@ -95,7 +95,7 @@ export const authService = {
         try {
             await api.post('/logout'); // Invalida el token en backend
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('Error al cerrar sesión:', error);
         } finally {
             // Limpia sesión local independientemente del error en backend
             localStorage.removeItem('auth_token');

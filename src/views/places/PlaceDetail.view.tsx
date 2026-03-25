@@ -252,7 +252,7 @@ const PlaceDetail: React.FC = () => {
                                             setPlace({ ...place, is_favorite: true });
                                         }
                                     } catch (error) {
-                                        console.error('Error toggling favorite', error);
+                                        console.error('Error al cambiar el estado de favorito', error);
                                     }
                                 }}
                                 className={`w-12 h-12 flex items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-110 shrink-0 ${place.is_favorite

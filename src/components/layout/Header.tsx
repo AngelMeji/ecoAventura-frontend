@@ -45,7 +45,7 @@ const Header: React.FC = () => {
             const data = await import('../../services/partnerService').then(m => m.partnerService.getNotifications());
             setNotifications(data);
         } catch (error) {
-            console.error('Error loading notifications:', error);
+            console.error('Error al cargar notificaciones:', error);
         }
     };
 
@@ -64,7 +64,7 @@ const Header: React.FC = () => {
             // Also reload in the background to ensure consistency
             loadNotifications();
         } catch (error) {
-            console.error('Error marking as read:', error);
+            console.error('Error al marcar como leída:', error);
             // If there's an error, reload to restore correct state
             loadNotifications();
         }

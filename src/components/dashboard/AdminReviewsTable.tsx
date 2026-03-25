@@ -66,7 +66,7 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
                 setReviews([]);
             }
         } catch (err) {
-            console.error('Error loading reviews:', err);
+            console.error('Error al cargar reseñas:', err);
         } finally {
             setLoading(false);
         }
@@ -92,7 +92,7 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
                 prev.map(r => (r.id === id ? { ...r, is_hidden: response.review.is_hidden } : r))
             );
         } catch (error) {
-            console.error('Error toggling review visibility:', error);
+            console.error('Error al cambiar la visibilidad de la reseña:', error);
             onNotify({ type: 'error', message: 'Error al cambiar visibilidad del comentario' });
         } finally {
             setToggling(null);

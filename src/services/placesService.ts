@@ -102,7 +102,7 @@ export const placesService = {
             console.warn('Unexpected category response structure:', data);
             return [];
         } catch (error) {
-            console.error('Error fetching categories:', error);
+            console.error('Error al obtener categorías:', error);
             return [];
         }
     },

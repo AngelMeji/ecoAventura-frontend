@@ -29,8 +29,19 @@ const Register: React.FC = () => {
 
         if (!formData.password) {
             newErrors.password = 'La contraseña es requerida';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+        } else {
+            const password = formData.password;
+            if (password.length < 8 || password.length > 12) {
+                newErrors.password = 'La contraseña debe tener entre 8 y 12 caracteres';
+            } else if (!/[A-Z]/.test(password)) {
+                newErrors.password = 'La contraseña debe contener al menos una mayúscula';
+            } else if (!/[a-z]/.test(password)) {
+                newErrors.password = 'La contraseña debe contener al menos una minúscula';
+            } else if (!/\d/.test(password)) {
+                newErrors.password = 'La contraseña debe contener al menos un número';
+            } else if (!/[\W_]/.test(password)) {
+                newErrors.password = 'La contraseña debe contener al menos un carácter especial';
+            }
         }
 
         if (formData.password !== formData.password_confirmation) {

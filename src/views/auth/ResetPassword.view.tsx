@@ -25,10 +25,26 @@ const ResetPassword: React.FC = () => {
             return;
         }
 
-        // Validación: Mínimo 8 caracteres (requisito del backend)
-        if (password.length < 8) {
+        // Validación de reglas de la contraseña
+        if (password.length < 8 || password.length > 12) {
             setStatus('error');
-            setMessage('La contraseña debe tener al menos 8 caracteres.');
+            setMessage('La contraseña debe tener entre 8 y 12 caracteres.');
+            return;
+        } else if (!/[A-Z]/.test(password)) {
+            setStatus('error');
+            setMessage('La contraseña debe contener al menos una mayúscula.');
+            return;
+        } else if (!/[a-z]/.test(password)) {
+            setStatus('error');
+            setMessage('La contraseña debe contener al menos una minúscula.');
+            return;
+        } else if (!/\d/.test(password)) {
+            setStatus('error');
+            setMessage('La contraseña debe contener al menos un número.');
+            return;
+        } else if (!/[\W_]/.test(password)) {
+            setStatus('error');
+            setMessage('La contraseña debe contener al menos un carácter especial.');
             return;
         }
 
@@ -53,8 +69,8 @@ const ResetPassword: React.FC = () => {
 
             // DEBUG: Mostrar detalles completos del error
             console.error('❌ Error completo:', error);
-            console.error('📋 Response data:', error.response?.data);
-            console.error('🚨 Validation errors:', error.response?.data?.errors);
+            console.error('📋 Datos de respuesta:', error.response?.data);
+            console.error('🚨 Errores de validación:', error.response?.data?.errors);
 
             // Construir mensaje de error detallado
             let errorMsg = error.response?.data?.message || 'Error al restablecer la contraseña.';

@@ -73,7 +73,7 @@ const MapBoundsUpdater: React.FC<{ destinations: any[]; shouldAutoFit?: boolean 
                         map.fitBounds(bounds, { padding: [50, 50] });
                     }
                 } catch (e) {
-                    console.error("Error updating map bounds:", e);
+                    console.error("Error al actualizar los límites del mapa:", e);
                 }
             }, 100); // Small delay to prevent synchronous forced reflows
 

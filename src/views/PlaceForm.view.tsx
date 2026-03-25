@@ -53,7 +53,7 @@ const PlaceForm: React.FC = () => {
             const data = await placesService.getCategories();
             setCategories(data);
         } catch (error) {
-            console.error('Error loading categories', error);
+            console.error('Error al cargar categorías', error);
         }
     };
 
@@ -72,7 +72,7 @@ const PlaceForm: React.FC = () => {
             setDuration(place.duration || '');
             setBestSeason(place.best_season || '');
         } catch (error) {
-            console.error('Error loading place', error);
+            console.error('Error al cargar el lugar', error);
             setAlert({ type: 'error', message: 'Error al cargar el lugar' });
             setTimeout(() => navigate('/dashboard'), 2000);
         } finally {
@@ -123,7 +123,7 @@ const PlaceForm: React.FC = () => {
                 });
             }
         } catch (error: any) {
-            console.error('Error saving place', error);
+            console.error('Error al guardar el lugar', error);
 
             if (error.response?.status === 422) {
                 // Errores de validación

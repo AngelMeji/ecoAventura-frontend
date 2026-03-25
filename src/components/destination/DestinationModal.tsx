@@ -93,7 +93,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                 placesService.getFavorites().then(favorites => {
                     const isFav = favorites.some((f: Place) => f.id === initialDest.id);
                     setDestination(prev => ({ ...prev, is_favorite: isFav }));
-                }).catch(e => console.error('Error fetching favorites for modal', e));
+                }).catch(e => console.error('Error al consultar favoritos para el modal', e));
             }
         }
     }, [isOpen, initialDestination, language, userId]);
@@ -177,7 +177,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setDestination(loadedPlace);
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
         } catch (error: any) {
-            console.error('Error updating review:', error);
+            console.error('Error al actualizar la reseña:', error);
             
             // Check for specific validation errors from Laravel first
             if (error.response?.status === 422) {
@@ -217,7 +217,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             }));
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
         } catch (error: any) {
-            console.error('Error deleting review:', error);
+            console.error('Error al eliminar la reseña:', error);
             const serverMsg = error.response?.data?.message || error.message;
             setMessage({ type: 'error', text: `${t('home.modal.messages.error')}: ${serverMsg}` });
         } finally {
@@ -242,7 +242,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                 setDestination({ ...destination, is_favorite: true });
             }
         } catch (error) {
-            console.error('Error toggling favorite', error);
+            console.error('Error al cambiar el estado de favorito', error);
         }
     };
 
