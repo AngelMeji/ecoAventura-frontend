@@ -4,6 +4,31 @@
 
 ---
 
+## 🛠️ Stack Tecnológico
+
+El proyecto está construido sobre un stack moderno que prioriza el rendimiento y la experiencia del desarrollador:
+
+- **Core**: [React 19](https://react.dev/) (Última versión con soporte para Concurrent Rendering).
+- **Framework de Build**: [Vite 7](https://vitejs.dev/) (Bundler ultra-rápido).
+- **Lenguaje**: [TypeScript 5.9](https://www.typescriptlang.org/) (Tipado estático para mayor seguridad).
+- **Estilos**: [Tailwind CSS 4](https://tailwindcss.com/) (Framework de CSS utility-first).
+- **Enrutamiento**: [React Router 7](https://reactrouter.com/) (Gestión de navegación integrada).
+- **Mapas**: [Leaflet 1.9](https://leafletjs.com/) + [React Leaflet 5](https://react-leaflet.js.org/).
+- **Peticiones HTTP**: [Axios](https://axios-http.com/).
+- **Pruebas**: [Vitest 4](https://vitest.dev/) + [React Testing Library 16](https://testing-library.com/).
+
+---
+
+## 🔑 Variables de Entorno
+
+Para que el frontend pueda comunicarse correctamente con el backend, es necesario configurar las siguientes variables en un archivo `.env` en la raíz del proyecto:
+
+| Variable | Descripción | Ejemplo |
+| :--- | :--- | :--- |
+| **`VITE_API_URL`** | URL base de la API Backend (debe terminar en `/api`). | `https://api.tu-proyecto.com/api` |
+
+---
+
 ## 📖 Descripción del Proyecto
 
 EcoAventura es una solución integral que conecta a amantes de la naturaleza con los tesoros ecológicos de Risaralda. La plataforma permite a los usuarios:
