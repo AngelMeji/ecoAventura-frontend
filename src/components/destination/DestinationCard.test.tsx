@@ -59,6 +59,7 @@ describe('DestinationCard', () => {
         expect(window.location.href).toBe('/place/1');
 
         // Restore window.location
+        // @ts-ignore
         window.location = originalLocation;
     });
 });
