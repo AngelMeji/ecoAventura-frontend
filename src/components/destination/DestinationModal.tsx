@@ -56,8 +56,12 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
 
     // Re-translate when language changes or destination changes
     useEffect(() => {
-        setDestination(getTranslatedPlace(getUnwrappedDestination(initialDestination), language));
-    }, [initialDestination, language]);
+        // Solo re-traducir cuando el modal está cerrado.
+        // Cuando está abierto, el useEffect de sincronización ya se encarga.
+        if (!isOpen) {
+            setDestination(getTranslatedPlace(getUnwrappedDestination(initialDestination), language));
+        }
+    }, [initialDestination, language, isOpen]);
 
     // Bloquear el scroll de fondo cuando el modal esté abierto
     useEffect(() => {
@@ -77,10 +81,15 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         }
     }, [isOpen]);
 
-    // Sincronizar estado local cuando cambia la prop inicial o se abre el modal
+    // Sincronizar estado local cuando cambia la prop inicial o se abre el modal.
+    // Cuando el usuario está autenticado, SIEMPRE consulta el estado real de favoritos
+    // desde el servidor, porque la API pública devuelve is_favorite: false sin token.
     useEffect(() => {
         if (isOpen) {
-            const initialDest = getTranslatedPlace(getUnwrappedDestination(initialDestination), language);
+            const rawDest = getUnwrappedDestination(initialDestination);
+            const initialDest = getTranslatedPlace(rawDest, language);
+
+            // Mostrar el lugar inmediatamente (puede tener is_favorite incorrecto)
             setDestination(initialDest);
             setMessage(null);
             setRating(0);
@@ -88,13 +97,18 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setActiveTab('info');
             setEditingReviewId(null);
 
-            // Fetch favorites manually since public routes miss Bearer tokens
-            // Only fetch if is_favorite is not already set (optimize)
-            if (userId && initialDest.is_favorite === undefined) {
-                placesService.getFavorites().then(favorites => {
-                    const isFav = favorites.some((f: Place) => f.id === initialDest.id);
-                    setDestination(prev => ({ ...prev, is_favorite: isFav }));
-                }).catch(e => console.error('Error al consultar favoritos para el modal', e));
+            // Consultar el estado real de favoritos desde el servidor
+            if (userId) {
+                placesService.getFavorites()
+                    .then(favorites => {
+                        const favList = Array.isArray(favorites)
+                            ? favorites
+                            : (Array.isArray((favorites as any)?.data) ? (favorites as any).data : []);
+                        const isFav = favList.some((f: Place) => f.id === rawDest?.id);
+                        // Usar functional update para no sobreescribir otros campos que ya se actualizaron
+                        setDestination(prev => prev.id === rawDest?.id ? { ...prev, is_favorite: isFav } : prev);
+                    })
+                    .catch(e => console.error('Error al consultar favoritos para el modal', e));
             }
         }
     }, [isOpen, initialDestination, language, userId]);
@@ -179,7 +193,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
             setMessage({ type: 'success', text: t('home.modal.messages.success') });
         } catch (error: any) {
             console.error('Error al actualizar la reseña:', error);
-            
+
             // Check for specific validation errors from Laravel first
             if (error.response?.status === 422) {
                 const data = error.response.data;
@@ -262,8 +276,8 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                             <button
                                 onClick={handleToggleFavorite}
                                 className={`p-2 transition-colors rounded-full hover:bg-gray-100 ${destination.is_favorite
-                                        ? 'text-red-500 hover:text-red-600'
-                                        : 'text-gray-400 hover:text-red-400'
+                                    ? 'text-red-500 hover:text-red-600'
+                                    : 'text-gray-400 hover:text-red-400'
                                     }`}
                                 title={destination.is_favorite ? t('home.modal.actions.removeFromFavorites') : t('home.modal.actions.addToFavorites')}
                             >

@@ -24,6 +24,9 @@ const Register: React.FC = () => {
         title: '',
         message: ''
     });
+    const [acceptTerms, setAcceptTerms] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
@@ -50,6 +53,10 @@ const Register: React.FC = () => {
             newErrors.password = t('auth.register.validation.passwordMax');
         }
 
+        if (!acceptTerms) {
+            newErrors.terms = t('auth.register.validation.termsRequired') || 'Debes aceptar los términos y condiciones para crear tu cuenta.';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -64,7 +71,7 @@ const Register: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await authService.register(formData);
+            const response = await authService.register({ ...formData, acceptTerms });
             setConfirmModal({
                 isOpen: true,
                 title: '¡Registro Exitoso!',
@@ -154,16 +161,35 @@ const Register: React.FC = () => {
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                         {t('auth.login.password')}
                     </label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder={t('auth.login.placeholderPassword')}
-                        required
-                        className={`auth-input ${errors.password ? 'border-red-500' : ''}`}
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder={t('auth.login.placeholderPassword')}
+                            required
+                            className={`auth-input pr-10 ${errors.password ? 'border-red-500' : ''}`}
+                        />
+                        <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-eco-primary-600 focus:outline-none"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        >
+                            {showPassword ? (
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.71-1.581c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" />
+                                </svg>
+                            ) : (
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                     {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
                 </div>
 
@@ -171,19 +197,65 @@ const Register: React.FC = () => {
                     <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-2">
                         {t('auth.register.confirmPassword')}
                     </label>
-                    <input
-                        type="password"
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        value={formData.password_confirmation}
-                        onChange={handleChange}
-                        placeholder={t('auth.login.placeholderPassword')}
-                        required
-                        className={`auth-input ${errors.password_confirmation ? 'border-red-500' : ''}`}
-                    />
+                    <div className="relative">
+                        <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            value={formData.password_confirmation}
+                            onChange={handleChange}
+                            placeholder={t('auth.login.placeholderPassword')}
+                            required
+                            className={`auth-input pr-10 ${errors.password_confirmation ? 'border-red-500' : ''}`}
+                        />
+                        <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-eco-primary-600 focus:outline-none"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        >
+                            {showConfirmPassword ? (
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.71-1.581c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" />
+                                </svg>
+                            ) : (
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                     {errors.password_confirmation && (
                         <p className="mt-1 text-sm text-red-600">{errors.password_confirmation}</p>
                     )}
+                </div>
+
+                <div className="flex items-start">
+                    <div className="flex items-center h-5">
+                        <input
+                            id="acceptTerms"
+                            name="acceptTerms"
+                            type="checkbox"
+                            checked={acceptTerms}
+                            onChange={(e) => {
+                                setAcceptTerms(e.target.checked);
+                                if (e.target.checked && errors.terms) {
+                                    setErrors({ ...errors, terms: '' });
+                                }
+                            }}
+                            className={`w-4 h-4 rounded border-gray-300 text-eco-primary-600 focus:ring-eco-primary-500 ${errors.terms ? 'border-red-500' : ''}`}
+                        />
+                    </div>
+                    <div className="ml-2 text-sm">
+                        <label htmlFor="acceptTerms" className={`font-medium ${errors.terms ? 'text-red-600' : 'text-gray-700'}`}>
+                            He leído y acepto los{' '}
+                            <Link to="/terms" target="_blank" className="text-eco-primary-600 hover:text-eco-primary-500 hover:underline">
+                                términos y condiciones
+                            </Link>
+                        </label>
+                        {errors.terms && <p className="mt-1 text-sm text-red-600">{errors.terms}</p>}
+                    </div>
                 </div>
 
                 <button type="submit" disabled={loading} className="auth-button disabled:opacity-50 disabled:cursor-not-allowed">

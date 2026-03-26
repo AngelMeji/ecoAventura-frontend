@@ -19,6 +19,12 @@ api.interceptors.request.use((config) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const lang = localStorage.getItem('accessibility_language');
+    if (lang) {
+        config.headers['Accept-Language'] = lang;
+    }
+
     return config;
 });
 

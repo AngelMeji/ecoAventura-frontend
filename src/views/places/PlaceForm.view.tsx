@@ -6,7 +6,7 @@ import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-import { getOptimizedImageUrl } from '../../utils/imageUtils';
+import { getOptimizedImageUrl, compressImage } from '../../utils/imageUtils';
 
 interface ImagePreview {
     id?: number; // Solo para imágenes existentes
@@ -109,34 +109,40 @@ const PlaceForm: React.FC = () => {
         }
     };
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
-        processFiles(files);
+        await processFiles(files);
         // Reset file input
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    const processFiles = (files: FileList) => {
+    const processFiles = async (files: FileList) => {
         setFormMessage(null);
+        setLoading(true); // Mostrar loading mientras comprime imágenes pesadas
         const newPreviews: ImagePreview[] = [];
         let errorMsg = '';
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            // Validar tipo y tamaño
-            if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
-                errorMsg = `Archivo ${file.name} no es una imagen válida. `;
-                continue;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                errorMsg = `Archivo ${file.name} excede el límite de 5MB. `;
-                continue;
-            }
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const rawFile = files[i];
+                // Validar tipo
+                if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(rawFile.type)) {
+                    errorMsg += `Archivo ${rawFile.name} no es una imagen válida. `;
+                    continue;
+                }
+                
+                // Comprimir imagen pesada localmente (evita cuellos de botella en backend con 4K)
+                const file = await compressImage(rawFile, 1200, 0.8);
 
-            newPreviews.push({
-                file,
-                url: URL.createObjectURL(file),
+                if (file.size > 5 * 1024 * 1024) {
+                    errorMsg += `Archivo ${file.name} es demasiado grande. `;
+                    continue;
+                }
+
+                newPreviews.push({
+                    file,
+                    url: URL.createObjectURL(file),
                 isPrimary: imagePreviews.length === 0 && newPreviews.length === 0, // Primera imagen es primaria por defecto
                 isExisting: false
             });
@@ -151,8 +157,11 @@ const PlaceForm: React.FC = () => {
         if (total > 10) {
             setFormMessage({ type: 'warning', text: 'Máximo 10 imágenes por lugar. Se han descartado algunas imágenes.' });
             setImagePreviews(prev => [...prev, ...newPreviews.slice(0, 10 - prev.length)]);
-        } else {
-            setImagePreviews(prev => [...prev, ...newPreviews]);
+            } else {
+                setImagePreviews(prev => [...prev, ...newPreviews]);
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -169,14 +178,14 @@ const PlaceForm: React.FC = () => {
         setIsDragging(false);
     };
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
 
         const files = e.dataTransfer.files;
         if (!files || files.length === 0) return;
-        processFiles(files);
+        await processFiles(files);
     };
 
     const handleRemoveImage = (index: number) => {
@@ -278,15 +287,19 @@ const PlaceForm: React.FC = () => {
             console.error('Error al guardar el lugar', error);
             const msg = error.response?.data?.message || error.message || 'Error desconocido';
             const errors = error.response?.data?.errors;
-            let errorDetails = '';
+            
+            let finalMessage = `Error al guardar:\n${msg}`;
 
+            // Si hay detalles de validación, usamos solo esos para evitar repetir
+            // el 'message' principal de Laravel que suele ser igual al primer error.
             if (errors) {
-                errorDetails = Object.values(errors).flat().join('\n');
+                const errorDetails = Object.values(errors).flat().join('\n');
+                finalMessage = `Error al guardar:\n${errorDetails}`;
             }
 
             setFormMessage({
                 type: 'error',
-                text: `Error al guardar:\n${msg}\n${errorDetails}`
+                text: finalMessage
             });
         } finally {
             setLoading(false);
