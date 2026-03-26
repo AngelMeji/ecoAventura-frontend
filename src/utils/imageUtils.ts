@@ -1,11 +1,19 @@
 const STORAGE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/storage') || 'http://localhost:8000/storage';
 
+// Forzar HTTPS en producción para evitar Mixed Content
+const forceHttps = (url: string): string => {
+    if (import.meta.env.PROD && url.startsWith('http://')) {
+        return url.replace('http://', 'https://');
+    }
+    return url;
+};
+
 export const getOptimizedImageUrl = (path: string | undefined | null): string => {
     if (!path) return '/assets/logo_Ecoaventura_fondo.jpeg'; // Fallback to existing logo
 
-    // Si ya es una URL absoluta, retornar tal cual
+    // Si ya es una URL absoluta, forzar HTTPS y retornar
     if (path.startsWith('http')) {
-        return path;
+        return forceHttps(path);
     }
 
     // Si es un asset local (ruta relativa que empieza por /assets o assets/)
@@ -25,8 +33,8 @@ export const getOptimizedImageUrl = (path: string | undefined | null): string =>
     // Si la ruta ya incluye 'storage/', no la duplicamos
     if (cleanPath.startsWith('storage/')) {
         const pathWithoutStorage = cleanPath.replace(/^storage\//, '');
-        return `${STORAGE_URL}/${pathWithoutStorage}`;
+        return forceHttps(`${STORAGE_URL}/${pathWithoutStorage}`);
     }
 
-    return `${STORAGE_URL}/${cleanPath}`;
+    return forceHttps(`${STORAGE_URL}/${cleanPath}`);
 };

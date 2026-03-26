@@ -20,8 +20,13 @@ const SafeImage: React.FC<SafeImageProps> = ({
             return;
         }
         
-        // Ensure src is a string
-        const srcString = String(src);
+        // Forzar HTTPS en producción
+        const sanitize = (url: string) => 
+            import.meta.env.PROD && url.startsWith('http://') 
+                ? url.replace('http://', 'https://') 
+                : url;
+        
+        const srcString = sanitize(String(src));
         const base = srcString.replace(/\.[^.]+$/, '');
         const currentExt = srcString.match(/\.[^.]+$/)?.[0]?.toLowerCase() || '';
         
